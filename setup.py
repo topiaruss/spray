@@ -8,13 +8,27 @@ setup(name='spray',
       description="A python subsystem for turning web-site or database events into",
       long_description="""\
 messaging or social actions""",
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      classifiers = [
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'License :: OSI Approved :: GNU Public License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent'],
       keywords='event-processing social-networks',
       author='Russ Ferriday',
       author_email='russf@topia.com',
       url='sponsorcraft.com',
       license='GPL',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      package_dir = {'':'src'},
+      extras_require = dict(
+        test = (
+            'zope.app.testing',
+            'zope.testing',
+            ),
+        ),      
       include_package_data=True,
       zip_safe=False,
       install_requires=[
