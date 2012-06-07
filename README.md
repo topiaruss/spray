@@ -1,4 +1,5 @@
 spray
 =====
 
-A subsystem for reacting to high speed request time or mailing list events
+A python subsystem for turning web-site or database events into 
+messaging or social actions.
