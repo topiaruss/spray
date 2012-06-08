@@ -13,14 +13,17 @@ First let's make an event, that we can fake with
 Now lookup the action(s) for the event
 
   >>> from spray import action 
-  >>> my_matrix = action.GoogleActionMatrix(keys, url)
-  >>> actions = my_matrix[fake.event_id]
-  >>> actions
-  [<Action email action>]
+  >>> creds = action.Credentials()
+  >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dENnMWQwM2dOTTNaZWo3M1JZOEtVa1E'
+  >>> my_matrix = action.GoogleActionMatrix(creds, url)
+  >>> my_matrix.update()
+  >>> actions = my_matrix.get_actions(fake)
+  >>> actions[0].action_type
+  'email'
 
 And invoke them. (We need a fakeout template for this)
 
-  >>> [a.handle(fake) for a in actions]
+  >>> [a.handle() for a in actions]
   some message ought to print here
 
 Let's make a processor and bind it to the Spreadsheet
@@ -32,7 +35,7 @@ Let's make a processor and bind it to the Spreadsheet
   >>> the_processor.step()
   some message here
 
-  
+
 
 
 
