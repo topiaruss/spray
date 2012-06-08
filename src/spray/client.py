@@ -27,4 +27,4 @@ class Source(object):
         assert type(event_id) == str
         assert type(data) == dict
 
-        # doing some cool stuff here
+        self.send_queue.inject_event(event_id, data)
