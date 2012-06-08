@@ -3,8 +3,9 @@ import re
 from zope.testing import renormalizing
 
 checker = renormalizing.RENormalizing([
-    (re.compile(r'i-[0-9a-f]*'),
-     'i-66699942'),
+  #<Event 4420398608::
+    (re.compile(r'<Event [0-9a-f]*::'),
+     '<Event 12341234::'),
     (re.compile(r'datetime.datetime(.*)'),
      'datetime.datetime(2011, 10, 1, 9, 45)'),
     (re.compile(r"ObjectId\('[0-9a-f]*'\)"),
