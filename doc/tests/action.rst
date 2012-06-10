@@ -21,10 +21,11 @@ Now lookup the action(s) for the event
   >>> actions[0].action_type
   'email'
 
-And invoke them. (We need a fakeout template for this)
+And invoke them. 
 
   >>> [a.handle() for a in actions]
-  some message ought to print here
+  action: email data: {'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}.
+  [None]
 
 Let's make a processor and bind it to the Spreadsheet
 

@@ -1,4 +1,5 @@
 import gspread
+import threading
 
 
 class Credentials(object):
@@ -45,7 +46,6 @@ class GoogleActionMatrix(object):
 
     def get_actions(self, event):
         actionrows = self.data[event.name]
-        import pdb; pdb.set_trace()
         return [ACTIONS[e['action type']](event) for e in actionrows]
 
 ACTIONS = {}
@@ -64,11 +64,35 @@ class Action(object):
     def handle(self):
         raise NotImplementedError
 
-class EmailAction(Action):
+class DummyEmailAction(Action):
 
     action_type = 'email'
 
     def handle(self):
-        print self.action_type, self.event.data
+        print 'action: %s data: %s.' %\
+            (self.action_type, self.event.data)
 
-EmailAction.register()
+DummyEmailAction.register()
+
+
+class Processor(object):
+
+    def __init__(self, queue, matrix, running=True):
+        self.tt=threading.Thread(target=self.runner)
+        if running:
+            self.start()
+
+    def runner(self):
+        while self.is_alive:
+            self.step()
+
+    def step(self):
+        pass 
+
+    def stop(self):
+        self.is_alive = False
+        self.thread.join()
+
+    def start(self):
+        raise NotImplementedError
+
