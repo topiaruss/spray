@@ -1,24 +1,19 @@
+import Queue
 from spray import event
 
+QUEUES = {}
 
-class Queue(object):
+class HQueue(Queue.Queue):
+
     def __init__(self, name):
+        Queue.Queue.__init__(self)
         self.name = name
-        self._queue = []
 
-    def append(self, event):
-        self._queue.append(event)
+    def putEvent(self, event):
+        self.put(event)
 
-    def inject_event(self, event_id, data):
-        assert type(event_id) == str
-        assert type(data) == dict
-
-        e = event.Event(event_id, data)
-        self._queue.append(e)
-
-    def get_next(self):
-        return self._queue[0]
-
+    def getEvent(self):
+        return self.get()
 
 def get_or_create(name):
-    return Queue(name)
+    return QUEUES.setdefault(name, HQueue(name))
