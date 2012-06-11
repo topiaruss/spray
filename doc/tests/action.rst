@@ -27,6 +27,11 @@ And invoke them.
   action: email data: {'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}.
   [None]
 
+Great, but we also have a CSVActionMatrix, let's test it for a moment..
+
+  >>> csv_matrix = action.CSVActionMatrix('./doc/tests/Extract of System Event-Action matrix - Matrix.csv')
+  >>> csv_matrix.update()
+
 Let's make a processor and bind it to the Spreadsheet
 
   >>> the_processor = action.Processor('send', my_matrix)

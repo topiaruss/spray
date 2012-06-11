@@ -1,5 +1,6 @@
 import gspread
 import threading
+from spray.utils import ucsv as csv
 
 
 class Credentials(object):
@@ -14,19 +15,10 @@ class Credentials(object):
         self.email, self.password = email, password
 
 
-class GoogleActionMatrix(object):
-
-    def __init__(self, credentials, url):
-        self.creds = credentials
+class ActionMatrix(object):
 
     def update(self):
-        gc = gspread.login(self.creds.email, self.creds.password)
-        url = 'https://docs.google.com/a/sponsorcraft.com/' \
-            'spreadsheet/ccc?key=' \
-            '0AgfJ64xPw-46dENnMWQwM2dOTTNaZWo3M1JZOEtVa1E'
-        ss = gc.open_by_url(url)
-        ws = ss.get_worksheet(1)
-        rows = ws.get_all_values()
+        rows = self.get_rows()
         # titles has the col name by col index
         titles = {}
         for index, key in enumerate(rows[0]):
@@ -43,6 +35,39 @@ class GoogleActionMatrix(object):
             lst = data.setdefault(eventid, [])
             lst.append(rdict)
         self.data = data
+
+    def get_rows(self, event):
+        raise NotImplementedError
+        
+    def get_actions(self, event):
+        raise NotImplementedError
+
+class CSVActionMatrix(ActionMatrix):
+
+    def __init__(self, filepath):
+        self.csvfile = open(filepath, 'r')
+
+    def get_rows(self):
+
+
+
+    def get_actions(self, event):
+        raise NotImplementedError
+
+
+
+class GoogleActionMatrix(ActionMatrix):
+
+    def __init__(self, credentials, url):
+        self.creds = credentials
+        self.url = url
+
+    def get_rows(self):
+        gc = gspread.login(self.creds.email, self.creds.password)
+        ss = gc.open_by_url(self.url)
+        ws = ss.get_worksheet(1)
+        return ws.get_all_values()
+
 
     def get_actions(self, event):
         actionrows = self.data[event.name]
