@@ -38,7 +38,7 @@ class ActionMatrix(object):
 
     def get_rows(self, event):
         raise NotImplementedError
-        
+
     def get_actions(self, event):
         raise NotImplementedError
 
@@ -48,13 +48,10 @@ class CSVActionMatrix(ActionMatrix):
         self.csvfile = open(filepath, 'r')
 
     def get_rows(self):
-
-
+        raise NotImplementedError
 
     def get_actions(self, event):
         raise NotImplementedError
-
-
 
 class GoogleActionMatrix(ActionMatrix):
 
