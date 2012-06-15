@@ -1,3 +1,4 @@
+"Various test fixures for doctests, etc."
 import doctest
 import re
 from zope.testing import renormalizing

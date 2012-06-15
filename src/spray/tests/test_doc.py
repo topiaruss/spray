@@ -1,4 +1,4 @@
-"""Doc Tests"""
+"""Runs the Doc Tests found under doc/tests in the proj root"""
 import doctest
 import itertools
 import unittest

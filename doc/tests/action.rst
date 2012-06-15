@@ -4,7 +4,7 @@ action and processing
 There will be an action matrix.  Later we may make a nice ZCA interface
 for this, but for now let's just assume we go direct to a GoogleDocSpreadsheet
 
-First let's make an event, that we can fake with
+First let's make an event to use for testing
 
   >>> from spray import event
   >>> user_data = dict(name='Kai Diefenbach', email='kai@iqpp.de')

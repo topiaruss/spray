@@ -10,7 +10,7 @@ And then put an event into it
 
   >>> from spray import event
   >>> ev = event.Event('id', dict())
-  >>> sendq.putEvent(ev)
-  >>> got = sendq.getEvent()
+  >>> sendq.put_event(ev)
+  >>> got = sendq.get_event()
   >>> ev == got
   True 
