@@ -1,7 +1,7 @@
 "Various test fixures for doctests, etc."
+from zope.testing import renormalizing
 import doctest
 import re
-from zope.testing import renormalizing
 
 checker = renormalizing.RENormalizing([
   #<Event 4420398608::

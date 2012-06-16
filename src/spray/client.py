@@ -14,7 +14,7 @@ class Source(object):
         elif isinstance(send_queue, str):
             # user wants us to make a queue with certain name
             self.send_queue = our_hub.get_or_create(send_queue)
-        else: 
+        else:
             # use queue we were handed
             self.send_queue = send_queue
 

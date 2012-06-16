@@ -1,7 +1,7 @@
-import Queue
-from spray import interface
 from spray import event
+from spray import interface
 from zope.interface import implements
+import Queue
 
 # The singleton directory of ...
 QUEUES = {}

@@ -1,5 +1,6 @@
-from zope.interface import Interface
 from zope.interface import Attribute
+from zope.interface import Interface
+
 
 class IQueue(Interface):
     """A queue object"""
@@ -18,6 +19,7 @@ class IQueue(Interface):
     def create_and_send(event_id, data={}):
         """create the type of event for this queue and send it"""
 
+
 class IAction(Interface):
     """An action object"""
 
@@ -28,3 +30,12 @@ class IAction(Interface):
 
     def handle():
         """Handle the event"""
+
+
+class IDestination(Interface):
+    """A destination object can wrap message output systems"""
+
+    destination_type = Attribute("""Type of the destination""")
+
+    def send(message):
+        """Send message to this destination"""
