@@ -40,7 +40,10 @@ class TestDummyEmailAction(unittest.TestCase):
             "'name': 'Russ Ferriday'}")
 
     def test_action_type(self):
-        pass
+        ee = event.Event('e')
+        aa = action.DummyEmailAction(ee)
+        assert aa.action_type == 'email'
+
 
 if __name__ == '__main__':
     unittest.main()
