@@ -26,5 +26,13 @@ Issue the following commands::
     $ bin/buildout 
     $ bin/test
 
+Docs
+----
+
+There's an argoUML file, spray/doc/spray.zargo, containing the 
+design that we are working to.
+
+spray/doc/tests contains python doctests that outline how to 
+use the code.
 
 
