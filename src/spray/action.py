@@ -60,7 +60,8 @@ class ActionMatrix(object):
         raise NotImplementedError
 
     def get_actions(self, event):
-        raise NotImplementedError
+        actionrows = self.data[event.name]
+        return [ACTIONS[e['action type']](event) for e in actionrows]
 
 
 class CSVActionMatrix(ActionMatrix):
@@ -78,10 +79,6 @@ class CSVActionMatrix(ActionMatrix):
         rows = [r for r in rdr]
         return rows
 
-    def get_actions(self, event):
-        actionrows = self.data[event.name]
-        return [ACTIONS[e['action type']](event) for e in actionrows]
-
 
 class GoogleActionMatrix(ActionMatrix):
 
@@ -94,10 +91,6 @@ class GoogleActionMatrix(ActionMatrix):
         ss = gc.open_by_url(self.url)
         ws = ss.get_worksheet(1)
         return ws.get_all_values()
-
-    def get_actions(self, event):
-        actionrows = self.data[event.name]
-        return [ACTIONS[e['action type']](event) for e in actionrows]
 
 ACTIONS = {}
 
