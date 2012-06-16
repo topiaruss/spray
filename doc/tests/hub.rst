@@ -4,7 +4,8 @@ hub
 Let's get or instantiate the send queue
 
   >>> from spray import hub
-  >>> sendq = hub.get_or_create('send')
+  >>> our_hub = hub.Hub()
+  >>> sendq = our_hub.get_or_create('send')
 
 And then put an event into it
 
@@ -14,3 +15,10 @@ And then put an event into it
   >>> got = sendq.get_event()
   >>> ev == got
   True 
+
+Let's try the convenience method
+
+  >>> sendq.create_and_send('some.id')
+  >>> got = sendq.get_event()
+  >>> got.name == 'some.id'
+  True

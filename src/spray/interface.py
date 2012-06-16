@@ -6,8 +6,14 @@ class IQueue(Interface):
 
     name = Attribute("""Name of the queue""")
 
-    def put_event(self, event_in):
+    def put_event(event_in):
         """queue an event"""
 
-    def get_event(self, block=True, timeout=None):
+    def get_event(block=True, timeout=None):
         """remove and return the oldest event from the queue"""
+
+    def event_factory(event_id, data={}):
+        """return an event of the right type for this queue"""
+
+    def create_and_send(event_id, data={}):
+        """create the type of event for this queue and send it"""

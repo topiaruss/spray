@@ -4,6 +4,11 @@ from spray.utils import ucsv as csv
 
 
 class Credentials(object):
+    """
+    Holds credentials. 
+    If not provided as parameters, name and password
+    will be fished out of the credentials file
+    """
 
     def __init__(self, email=None, password=None):
         if email is None:
@@ -16,6 +21,11 @@ class Credentials(object):
 
 
 class ActionMatrix(object):
+    """
+    the superclass to the ActionMatrix implementations, 
+    providing the update mechanism and booby-trapped
+    placeholder methods.
+    """
 
     def update(self):
         rows = self.get_rows()
@@ -43,15 +53,22 @@ class ActionMatrix(object):
         raise NotImplementedError
 
 class CSVActionMatrix(ActionMatrix):
+    """
+    ls doc/System\ Event-Action\ matrix\ -\ Matrix.csv
+    """
 
     def __init__(self, filepath):
-        self.csvfile = open(filepath, 'r')
+        self.filepath = filepath
 
     def get_rows(self):
-        raise NotImplementedError
+        self.csvfile = open(self.filepath, 'r')
+        rdr = csv.reader(self.csvfile)
+        rows = [ r for r in rdr ]
+        return rows
 
     def get_actions(self, event):
-        raise NotImplementedError
+        actionrows = self.data[event.name]
+        return [ACTIONS[e['action type']](event) for e in actionrows]
 
 class GoogleActionMatrix(ActionMatrix):
 
@@ -64,7 +81,6 @@ class GoogleActionMatrix(ActionMatrix):
         ss = gc.open_by_url(self.url)
         ws = ss.get_worksheet(1)
         return ws.get_all_values()
-
 
     def get_actions(self, event):
         actionrows = self.data[event.name]
@@ -109,12 +125,14 @@ class Processor(object):
             self.step()
 
     def step(self):
-        pass 
+        print 'processed step'
 
     def stop(self):
-        self.is_alive = False
-        self.thread.join()
+        if self.tt.is_alive():
+            self.is_alive = False
+            self.tt.join()
 
     def start(self):
-        raise NotImplementedError
+        self.is_alive = True
+        self.tt.start()
 

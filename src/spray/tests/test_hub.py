@@ -24,13 +24,31 @@ class TestQueue(unittest.TestCase):
         got = qq.get_event()
         assert got == ev2
 
+    def test_DummyQueue_event_factory_name(self):
+        qq = hub.DummyQueue('send')
+        ev = qq.event_factory('abc', dict(a=1))
+        assert ev.name == 'abc'
+
+    def test_DummyQueue_event_factory_data(self):
+        qq = hub.DummyQueue('send')
+        ev = qq.event_factory('abc', dict(a=1))
+        assert ev.data == {'a': 1}
+
+
+    def test_DummyQueue_create_and_send(self):
+        qq = hub.DummyQueue('send')
+        qq.create_and_send('some.id')
+        assert qq.get().name == 'some.id'
+
     def test_DummyQueue_nowait(self):
         qq = hub.DummyQueue('send')
         try:
-            _ = qq.get(False)
-            _ == _ #fake out pyflakes
-            # empty queue does not block, but throws Empty
-            # so if we get here something is broken
+            _ = qq.get(False)  # convention says that _ is throw-away
+            _ == _  # fake out pyflakes
+
+            # We told get on an empty queue not to block
+            # When an empty queue does not block, it throws Empty
+            # So if we get here something is broken
             assert False
         except:
             pass

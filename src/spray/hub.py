@@ -1,6 +1,6 @@
 import Queue
 from spray import interface
-from spray import event as event
+from spray import event
 from zope.interface import implements
 
 # The singleton directory of ...
@@ -26,7 +26,17 @@ class DummyQueue(Queue.Queue):
     def get_event(self, block=True, timeout=None):
         return self.get()
 
+    def event_factory(self, event_id, data={}):
+        return event.Event(event_id, data)
 
-def get_or_create(name):
-    """Utility to grab or create a named queue"""
-    return QUEUES.setdefault(name, DummyQueue(name))
+    def create_and_send(self, event_id, data={}):
+        ev = self.event_factory(event_id, data)
+        self.put_event(ev)
+
+
+class Hub(object):
+
+    def get_or_create(self, name):
+        """Utility to grab or create a named queue"""
+        return QUEUES.setdefault(name, DummyQueue(name))
+
