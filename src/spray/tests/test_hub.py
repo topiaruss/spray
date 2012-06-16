@@ -2,7 +2,7 @@ import unittest
 
 from spray import hub
 from spray import event
-from spray import testing
+#from spray import testing
 from spray import interface
 from zope.interface import providedBy
 

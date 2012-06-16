@@ -2,7 +2,9 @@ import gspread
 import os
 import threading
 from spray import hub
+from spray import interface
 from spray.utils import ucsv as csv
+from zope.interface import implements
 
 
 class Credentials(object):
@@ -96,6 +98,8 @@ ACTIONS = {}
 
 
 class Action(object):
+
+    implements(interface.IAction)
 
     action_type = None
 

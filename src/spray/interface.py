@@ -17,3 +17,14 @@ class IQueue(Interface):
 
     def create_and_send(event_id, data={}):
         """create the type of event for this queue and send it"""
+
+class IAction(Interface):
+    """An action object"""
+
+    action_type = Attribute("""Type of the action""")
+
+    def register():
+        """Register this action"""
+
+    def handle():
+        """Handle the event"""
