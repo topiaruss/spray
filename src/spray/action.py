@@ -1,18 +1,28 @@
 import gspread
+import os
 import threading
+from spray import hub
 from spray.utils import ucsv as csv
 
 
 class Credentials(object):
     """
-    Holds credentials. 
+    Holds credentials.
     If not provided as parameters, name and password
     will be fished out of the credentials file
     """
 
     def __init__(self, email=None, password=None):
         if email is None:
-            ff = open('credentials.txt', 'r')
+            try:
+                ff = open('credentials.txt', 'r')
+            except IOError:
+                home = os.getenv('USERPROFILE') or os.getenv('HOME')
+                home_cred = os.path.join(home, '.spray.credentials.txt')
+                try:
+                    ff = open(home_cred, 'r')
+                except IOError:
+                    raise IOError('you need a creds file here %s' % home_cred)
             lines = ff.readlines()
             lines = [l.strip() for l in lines]
             self.email, self.password = lines[0], lines[1]
@@ -22,7 +32,7 @@ class Credentials(object):
 
 class ActionMatrix(object):
     """
-    the superclass to the ActionMatrix implementations, 
+    the abstract superclass to the ActionMatrix implementations,
     providing the update mechanism and booby-trapped
     placeholder methods.
     """
@@ -52,9 +62,11 @@ class ActionMatrix(object):
     def get_actions(self, event):
         raise NotImplementedError
 
+
 class CSVActionMatrix(ActionMatrix):
     """
-    ls doc/System\ Event-Action\ matrix\ -\ Matrix.csv
+    This takes a CSV file made from the matrix tab of the
+    Google example spreadsheet.
     """
 
     def __init__(self, filepath):
@@ -63,12 +75,13 @@ class CSVActionMatrix(ActionMatrix):
     def get_rows(self):
         self.csvfile = open(self.filepath, 'r')
         rdr = csv.reader(self.csvfile)
-        rows = [ r for r in rdr ]
+        rows = [r for r in rdr]
         return rows
 
     def get_actions(self, event):
         actionrows = self.data[event.name]
         return [ACTIONS[e['action type']](event) for e in actionrows]
+
 
 class GoogleActionMatrix(ActionMatrix):
 
@@ -88,6 +101,7 @@ class GoogleActionMatrix(ActionMatrix):
 
 ACTIONS = {}
 
+
 class Action(object):
 
     action_type = None
@@ -102,21 +116,32 @@ class Action(object):
     def handle(self):
         raise NotImplementedError
 
+
 class DummyEmailAction(Action):
 
     action_type = 'email'
 
     def handle(self):
-        print 'action: %s data: %s.' %\
+        print 'action: %s, data: %s.' %\
             (self.action_type, self.event.data)
 
 DummyEmailAction.register()
 
 
 class Processor(object):
+    """
+    Does the meaty part of the syste.
+    Pulls events from its queue, looks them up, handles them.
+    """
 
     def __init__(self, queue, matrix, running=True):
-        self.tt=threading.Thread(target=self.runner)
+        if isinstance(queue, str):
+            our_hub = hub.Hub()
+            self.queue = our_hub.get_or_create(queue)
+        else:
+            self.queue = queue
+        self.matrix = matrix
+        self.tt = threading.Thread(target=self.runner)
         if running:
             self.start()
 
@@ -125,6 +150,9 @@ class Processor(object):
             self.step()
 
     def step(self):
+        event = self.queue.get_event()
+        actions = self.matrix.get_actions(event)
+        [a.handle() for a in actions]
         print 'processed step'
 
     def stop(self):

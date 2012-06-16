@@ -9,10 +9,13 @@ class Source(object):
         self.name = name
         our_hub = hub.Hub()
         if send_queue is None:
+            # just create a queue named after the source
             self.send_queue = our_hub.get_or_create(name)
         elif isinstance(send_queue, str):
+            # user wants us to make a queue with certain name
             self.send_queue = our_hub.get_or_create(send_queue)
-        else:
+        else: 
+            # use queue we were handed
             self.send_queue = send_queue
 
     def __unicode__(self):

@@ -1,75 +1,110 @@
 action and processing
 =====================
 
-There will be an action matrix.  Later we may make a nice ZCA interface
-for this, but for now let's just assume we go direct to a GoogleDocSpreadsheet
-
-
-First let's make an event to use for testing
+First let's make an event to use for testing.  We'll use the 
+kind of event generated when a user joins the site. It
+needs some additional data, so that the processor that receieves 
+the event knows what the event is referring to
 
   >>> from spray import event
   >>> user_data = dict(name='Kai Diefenbach', email='kai@iqpp.de')
   >>> fake = event.Event('user.profile.register', user_data)
 
+Before we can create a processor, we create a CSVActionMatrix which 
+the processor can use to decide what to do when an event arrives.
+For testing, we use a canned file to initialize the matrix.
 
-
-Great, but we also have a CSVActionMatrix, let's test it for a moment..
   >>> from spray import action 
   >>> matrix = action.CSVActionMatrix('./doc/tests/Extract of System Event-Action matrix - Matrix.csv')
+
+We must call update anytime the datasource may have changed.  This is the case
+irrespective which type of ActionMatrix we use.
+
   >>> matrix.update()
 
-Now use it to look up the action(s) for the event
+Just to demonstrate how the matrix works, we'll use it to look up the 
+action(s) for our fake event, and check the type of the first one
 
   >>> actions = matrix.get_actions(fake)
   >>> actions[0].action_type
   'email'
 
-
-
-
-
-  .. >>> from spray import action 
-  .. >>> creds = action.Credentials()
-  .. >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dENnMWQwM2dOTTNaZWo3M1JZOEtVa1E'
-  .. >>> my_matrix = action.GoogleActionMatrix(creds, url)
-  .. >>> my_matrix.update()
-  .. >>> actions = my_matrix.get_actions(fake)
-  .. >>> actions[0].action_type
-  .. 'email'
-
-And invoke them. 
+Now let's invoke the handler(s) for the event. The current 
+DummyEmailAction just prints some info, as you'll see below
 
   >>> [a.handle() for a in actions]
-  action: email data: {'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}.
+  action: email, data: {'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}.
   [None]
 
+What we did above, handling the lookup of action based on event, is not
+something that the users of our system will normally do. Instead, we 
+have the notion of a processor that binds to the Event Action Matrix and 
+does the lookup internally.
 
-Let's make a step-by-step processor that watches the send queue, and is 
-controlled by the Spreadsheet
+So, let's make a step-by-step processor that watches the send queue, and is 
+controlled by the Spreadsheet. A step-by-step processor is just a processor 
+that needs to be told to process a new event. This is useful for testing.
+We create this kind of processor by setting running=False on creation.
 
   >>> the_processor = action.Processor('send', matrix, running=False)
 
-Now let's create a dummy source named 'fake_events', 'cause that's what it does
+Now let's create a dummy source named 'fake_events', 'cause that's all it does.
+It will explicitly use the 'send' queue.
 
   >>> from spray import client
   >>> source = client.Source('fake_events', 'send')
 
-Let's send something using that source into the queue
+Let's send something into the queue using this source
 
   >>> source.send("user.profile.register", user_data)
 
-And do a single step on the processor to see what it does.
+And do a single step on the processor to see what it does.  
 
   >>> the_processor.step()
+  action: email, data: {'email': 'russf@topia.com', 'name': 'Russ Ferriday'}.
   processed step
 
 
 
+GoogleActionMatrix
+==================
 
+Let's show off the more exotic GoogleActionMatrix. This is like the CSV action
+matrix, but wraps an online spreadsheet that can be modified by the marketing team
+in quasi-real-time.
 
+We need the credentials for any Google Account.  You could either edit the 
+"creds =" line to add (email='<YourEmail>', password='<YourPass>'). This
+brings the risk that you will commit changes including your password.
 
+The better option is to put them in a two line file under the package directory with::
 
+  YourGoogleAccountName
+  YourGoogleAccountPass
 
+and this will be picked up automagically. There is a credentials.txt.template 
+file to make it quite clear where the credentials file needs to be installed.  You 
+can modify and rename the template file to credentials.txt as you wish.
+
+  >>> creds = action.Credentials()
+
+Now we can proceed and get the demo spreadsheet. Bear in mind this goes to Google
+for data, so it stretches your tests a bit.  If you find this block commented out
+with ".." you know why...
+
+..   >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dENnMWQwM2dOTTNaZWo3M1JZOEtVa1E'
+
+..   >>> matrix = action.GoogleActionMatrix(creds, url)
+..   >>> matrix.update()
+
+.. Now we just repeat the code above to test that the Google matrix works just the same
+.. as the CSV matrix
+
+..   >>> the_processor = action.Processor('send', matrix, running=False)
+..   >>> source = client.Source('fake_events', 'send')
+..   >>> source.send("user.profile.register", user_data)
+..   >>> the_processor.step()
+..   processed step
 
 
 
