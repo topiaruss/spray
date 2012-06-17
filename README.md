@@ -35,4 +35,15 @@ design that we are working to.
 spray/doc/tests contains python doctests that outline how to 
 use the code.
 
+TODO
+----
+
++ Wrap an easy-to-install-and-manage local-runnable messaqe queue in the Hub/Queue abstractions. RabbitMQ?
+
++ Open a path for AEMatrix templates to the templating/output module
+
++ Write the CommsLog, to ensure that no duplicates are sent
+
++ Install @yenzenz 's dummy SMTP server under a destination?
+
 
