@@ -1,10 +1,8 @@
-import sys
 import unittest
 from spray import action
 from spray import event
 from spray import interface
 from zope.interface import providedBy
-from StringIO import StringIO
 
 
 class TestAction(unittest.TestCase):
@@ -19,6 +17,8 @@ class TestDummyEmailAction(unittest.TestCase):
 
     def setUp(self):
         pass
+        #import sys
+        #from StringIO import StringIO
         #self.held, sys.stdout = sys.stdout, StringIO()
 
     def tearDown(self):
