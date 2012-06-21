@@ -34,7 +34,6 @@ class TestQueue(unittest.TestCase):
         ev = qq.event_factory('abc', dict(a=1))
         assert ev.data == {'a': 1}
 
-
     def test_DummyQueue_create_and_send(self):
         qq = hub.DummyQueue('send')
         qq.create_and_send('some.id')

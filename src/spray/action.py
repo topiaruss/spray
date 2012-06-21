@@ -63,7 +63,7 @@ class ActionMatrix(object):
 
     def get_actions(self, event):
         actionrows = self.data[event.name]
-        return [ACTIONS[e['action type']](event) for e in actionrows]
+        return [ACTIONS[row['action type']](event, row) for row in actionrows]
 
 
 class CSVActionMatrix(ActionMatrix):
@@ -103,8 +103,9 @@ class Action(object):
 
     action_type = None
 
-    def __init__(self, event):
+    def __init__(self, event, row):
         self.event = event
+        self.row = row
 
     @classmethod
     def register(cls):
@@ -121,13 +122,16 @@ class DummyEmailAction(Action):
     def handle(self):
         print 'action: %s, data: %s.' %\
             (self.action_type, self.event.data)
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(self.row)
+
 
 DummyEmailAction.register()
 
 
 class Processor(object):
     """
-    Does the meaty part of the syste.
     Pulls events from its queue, looks them up, handles them.
     """
 

@@ -34,6 +34,15 @@ DummyEmailAction just prints some info, as you'll see below
 
   >>> [a.handle() for a in actions]
   action: email, data: {'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}.
+  {   u'action type': u'email',
+      u'body_en_uk': u'',
+      u'frequency': u'',
+      u'lag_time': u'',
+      u'notes': u'',
+      u'recipient': u'crafter',
+      u'subject_en_uk': u'',
+      u'time of day': u'',
+      u'until': u''}
   [None]
 
 What we did above, handling the lookup of action based on event, is not
@@ -56,13 +65,22 @@ It will explicitly use the 'send' queue.
 
 Let's send something into the queue using this source
 
-  >>> source.send("user.profile.register", user_data)
+  >>> source.send("system.project.created", user_data)
 
 And do a single step on the processor to see what it does.  
 
   >>> the_processor.step()
   action: email, data: {'email': 'russf@topia.com', 'name': 'Russ Ferriday'}.
-  processed step
+    {   u'action type': u'email',
+        u'body_en_uk': u'Dear {crafter_first_name},\\n\\nThank you for starting a project on Sponsorcraft. You can view your project at {project_preview_url}.\\n\\nAfter submitting your project, our moderation team will review your project and reply with feedback within 1 working day.\\n\\nYour friendly Sponsorcraft website robot.\\n\\n\u2014\\nFor advice and tips on crafting an awesome project, visit http://sponsorcraft.com/college/\\n\\n [[Edit your project]]',
+        u'frequency': u'1w',
+        u'lag_time': u'1d',
+        u'notes': u'Send weekly after one week. Username if no first_name, last name.',
+        u'recipient': u'crafter',
+        u'subject_en_uk': u'Project reminder',
+        u'time of day': u'',
+        u'until': u'project submitted'}
+    processed step
 
 
 
