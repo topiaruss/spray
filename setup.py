@@ -27,6 +27,7 @@ messaging or social actions""",
         test=(
             'zope.app.testing',
             'zope.testing',
+            'lazr.smtptest',
             ),
         ),
       include_package_data=True,
