@@ -4,7 +4,6 @@ import doctest
 import re
 
 checker = renormalizing.RENormalizing([
-  #<Event 4420398608::
     (re.compile(r'<Event [0-9a-f]*::'),
      '<Event 12341234::'),
     (re.compile(r'datetime.datetime(.*)'),
@@ -17,6 +16,10 @@ checker = renormalizing.RENormalizing([
     (re.compile(r"20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])(T| )"\
                  "\d\d:\d\d\:\d\d.[0-9]*Z*"),
      "2011-12-13 07:47:51.921000"),
+    #email header
+    (re.compile(r"X-Peer: .*"),
+     "127.0.0.1:54321"),
+
     ])
 
 OPTIONFLAGS = (doctest.NORMALIZE_WHITESPACE |

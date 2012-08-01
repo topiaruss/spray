@@ -81,7 +81,8 @@ mock SMTP destination, and bring the real smtp client into the picture.
   <BLANKLINE>
   Hello John!
 
-
+Close down the mock
+-------------------
 
   >>> mocksmtp.controller.stop()
 
