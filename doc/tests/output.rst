@@ -4,18 +4,31 @@ Output
 Building a template registry as a pre-req
 -----------------------------------------
 
+** Note that we are using a very simple template for this doc. The model we
+will use  for spray messaging will have two levels of templating. One level
+where we  take the text defined in the spreadsheet as our template and insert
+data. You could  call that "content templating". And the other level which has
+more to do with graphic layout. You could call that "layout templating".  The
+templating that's happening in these docs is effectively a mixture of both.
+
   >>> from spray import output
   >>> reg = output.TemplateRegistry()
 
-Register a default template. Key is ''
+Register a default template. The key for a default template is always ''.
 
   >>> reg.register('', 'Hello {{ name }}!')
 
-We can use the registry's convenience method, so we don't need 
-to handle the template object directly
+We can use the registry's convenience method, so we don't need to access the
+template object directly
 
   >>> reg.render(dict(name='John'))
   u'Hello John!'
+
+Let's add a longer template, and test it
+
+  >>> reg.register('longer', 'Hello {{ name }}! You are a valued friend!')
+  >>> reg.render(dict(name='John'), style='longer')
+  u'Hello John! You are a valued friend!' 
 
 
 Looking up an output channel
@@ -35,15 +48,15 @@ receive a KeyError
     ...
   KeyError: 'email'
 
-Clearly, before we can lookup a channel, there has to be a channel
-of that name. So let's create a Channel, giving it a DummyDestination
-that prints to stdout.
+Clearly, before we can lookup a channel, there has to be a channel of that
+name. So let's create a Channel, giving it a DummyDestination that prints to
+stdout.
 
   >>> emailchan = output.Channel('email', reg, output.DummyDestination())
   >>> chan_reg.register(emailchan)
 
-Note, above, how we pass the whole channel, and let the
-registry access the medium and access the key (medium) for its internal indexing.
+Note, above, how we pass the whole channel, and let the registry directly
+access the medium and use the key (medium) for its  internal indexing.
 
 Now we use the medium ('email') to lookup the channel we want to send on.
 
@@ -56,6 +69,12 @@ a dict with the data.  The template details are hidden by the Channel!
 
   >>> got_chan.send(dict(name='John'))
   Hello John!
+
+And we can send using the longer template, very simply
+
+  >>> got_chan.send(dict(name='John'), style='longer')
+  Hello John! You are a valued friend!
+
 
 Moving to SMTP
 --------------
@@ -80,6 +99,19 @@ mock SMTP destination, and bring the real smtp client into the picture.
   X-RcptTo: russf@topia.com
   <BLANKLINE>
   Hello John!
+
+And let's send the same data through the same channel, with the longer template
+
+  >>> got_chan.send(data, style='longer')
+  >>> msg = mocksmtp.queue.get()
+  >>> print msg.as_string()
+  From: russf@topia.com
+  To: russf@topia.com
+  X-Peer: 127.0.0.1:51088
+  X-MailFrom: russf@topia.com
+  X-RcptTo: russf@topia.com
+  <BLANKLINE>
+  Hello John! You are a valued friend!
 
 
 Close down the mock

@@ -22,6 +22,7 @@ class TemplateRegistry(dict):
         template = self[style]
         return template.render(data)
 
+
 class Destination(object):
 
     implements(interface.IDestination)
@@ -40,12 +41,14 @@ class Destination(object):
     def send(self, body, data):
         return NotImplementedError
 
+
 class DummyDestination(object):
 
     implements(interface.IDestination)
 
     def send(self, body, data):
         print body
+
 
 class MockSmtpDestination(Destination):
 
@@ -65,7 +68,6 @@ class MockSmtpDestination(Destination):
         smtpd.sendmail(sender, recipients, message)
 
 
-
 class Channel(object):
 
     def __init__(self, medium, tempreg, destination):
@@ -79,7 +81,7 @@ class Channel(object):
         self.dest = destination
 
     def send(self, data, style=''):
-        body = self.tempreg.render(data)
+        body = self.tempreg.render(data, style)
         self.dest.send(body, data)
 
 

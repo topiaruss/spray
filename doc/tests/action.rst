@@ -3,7 +3,7 @@ action and processing
 
 First let's make an event to use for testing.  We'll use the 
 kind of event generated when a user joins the site. It
-needs some additional data, so that the processor that receieves 
+needs some additional data, so that the processor that receives 
 the event knows what the event is referring to
 
   >>> from spray import event
@@ -122,6 +122,15 @@ with ".." you know why...
 ..   >>> source = client.Source('fake_events', 'send')
 ..   >>> source.send("user.profile.register", user_data)
 ..   >>> the_processor.step()
+..   action: email, data: {'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}.
+..   {   'action type': 'email',
+..       'body_en_uk': u'Dear {crafter_first_name},\\n\\nThank you for starting a project on Sponsorcraft. You can view your project at {project_preview_url}.\\n\\nAfter submitting your project, our moderation team will review your project and reply with feedback within 1 working day.\\n\\nYour friendly Sponsorcraft website robot.\\n\\n\u2014\\nFor advice and tips on crafting an awesome project, visit http://sponsorcraft.com/college/\\n\\n [[Edit your project]]',
+..       'frequency': '1w',
+..       'lag_time': '1d',
+..       'notes': 'Send weekly after one week. Username if no first_name, last name.',
+..       'recipient': 'crafter',
+..       'subject_en_uk': 'Project reminder',
+..       'until': 'project submitted'}
 ..   processed step
 
 
