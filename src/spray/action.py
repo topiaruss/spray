@@ -62,7 +62,7 @@ class ActionMatrix(object):
         raise NotImplementedError
 
     def get_actions(self, event):
-        actionrows = self.data[event.name]
+        actionrows = self.data[event.event_id]
         return [ACTIONS[row['action type']](event, row) for row in actionrows]
 
 

@@ -20,5 +20,5 @@ Let's try the convenience method
 
   >>> sendq.create_and_send('some.id')
   >>> got = sendq.get_event()
-  >>> got.name == 'some.id'
+  >>> got.event_id == 'some.id'
   True

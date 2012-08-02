@@ -10,7 +10,7 @@ class TestEvent(unittest.TestCase):
         bob = dict(name='bob', email='bob@gmail.com')
         evid = 'user.account.created'
         ev = event.Event(evid, bob)
-        assert ev.name == evid
+        assert ev.event_id == evid
 
     def test_data_attr(self):
         bob = dict(name='bob', email='bob@gmail.com')
@@ -23,9 +23,32 @@ class TestEvent(unittest.TestCase):
         evid = 'user.account.created'
         ev = event.Event(evid, bob)
         got = repr(ev)
-        want = "<Event 12341234:: user.account.created, " +\
+        want = "<Event 12341234:: event_id user.account.created, " +\
                "datakeys ['email', 'name']>"
         assert testing.checker.check_output(want, got, 0)
+
+# class TestSQSEvent(unittest.TestCase):
+
+#     def test_name_attr(self):
+#         bob = dict(name='bob', email='bob@gmail.com')
+#         evid = 'user.account.created'
+#         ev = event.SQSEvent(evid, bob)
+#         assert ev.event_id == evid
+
+#     def test_data_attr(self):
+#         bob = dict(name='bob', email='bob@gmail.com')
+#         evid = 'user.account.created'
+#         ev = event.Event(evid, bob)
+#         assert ev.data == bob
+
+#     def test_unicode(self):
+#         bob = dict(name='bob', email='bob@gmail.com')
+#         evid = 'user.account.created'
+#         ev = event.Event(evid, bob)
+#         got = repr(ev)
+#         want = "<Event 12341234:: event_id user.account.created, " +\
+#                "datakeys ['email', 'name']>"
+#         assert testing.checker.check_output(want, got, 0)
 
 if __name__ == '__main__':
     unittest.main()
