@@ -7,7 +7,7 @@ from spray import interface
 from zope.interface import providedBy
 
 
-class TestQueue(unittest.TestCase):
+class TestDummyQueue(unittest.TestCase):
 
     def test_DummyQueue_conforms_to_interface(self):
         qq = hub.DummyQueue('send')
@@ -37,7 +37,7 @@ class TestQueue(unittest.TestCase):
     def test_DummyQueue_create_and_send(self):
         qq = hub.DummyQueue('send')
         qq.create_and_send('some.id')
-        assert qq.get().name == 'some.id'
+        assert qq.get_event().name == 'some.id'
 
     def test_DummyQueue_nowait(self):
         qq = hub.DummyQueue('send')
@@ -51,4 +51,34 @@ class TestQueue(unittest.TestCase):
             assert False
         except:
             pass
+
+class TestSQSQueue(unittest.TestCase):
+
+    qname = 'test'
+
+    def test_SQSQueue_conforms_to_interface(self):
+        qq = hub.SQSQueue(self.qname)
+        assert interface.IQueue in providedBy(qq)
+
+    def test_SQSQueue_event_factory_name(self):
+        qq = hub.SQSQueue(self.qname)
+        ev = qq.event_factory('abc', dict(a=1))
+        assert ev.name == 'abc'
+
+    def test_SQSQueue_event_factory_data(self):
+        qq = hub.SQSQueue(self.qname)
+        ev = qq.event_factory('abc', dict(a=1))
+        assert ev.data == {'a': 1}
+
+    def test_SQSQueue_create_and_send(self):
+        qq = hub.SQSQueue(self.qname)
+        qq.create_and_send('some.id')
+        assert qq.get_event().name == 'some.id'
+
+    def test_SQSQueue_check_return_type(self):
+        qq = hub.SQSQueue(self.qname)
+        qq.create_and_send('some.id')
+        ev = qq.get_event()
+        import pdb; pdb.set_trace()
+        assert type(ev) == hub.SQSEvent
 

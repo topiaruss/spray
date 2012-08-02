@@ -36,6 +36,8 @@ messaging or social actions""",
           # -*- Extra requirements: -*-
           'gspread',
           'jinja2',
+	        'boto',
+          'msgpack-python',
       ],
       entry_points="""
       # -*- Entry points: -*-
