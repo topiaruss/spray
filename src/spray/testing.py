@@ -6,6 +6,8 @@ import re
 checker = renormalizing.RENormalizing([
     (re.compile(r'<Event [0-9a-f]*::'),
      '<Event 12341234::'),
+    (re.compile(r'<SQSEvent [0-9a-f]*::'),
+     '<SQSEvent 12341234::'),
     (re.compile(r'datetime.datetime(.*)'),
      'datetime.datetime(2011, 10, 1, 9, 45)'),
     (re.compile(r"ObjectId\('[0-9a-f]*'\)"),

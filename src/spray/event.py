@@ -29,17 +29,17 @@ class SQSEvent(Message):
     """
     """
 
-    def __init__(self, queue=None, body=None, xml_attrs=None, event_id='',
-                 data={}):
+    def __init__(self, queue=None, body=None, xml_attrs=None,
+                 event_id='', data={},):
         if body == None or body == '':
             body = dict(event_id=event_id, data=data)
         Message.__init__(self, queue, body)
 
     def __unicode__(self):
-        return "<SQSEvent %s, datakeys %s>" % (self.event_id, self.data.keys())
+        return "<SQSEvent event_id %s, datakeys %s>" % (self.event_id, self.data.keys())
 
     def __repr__(self):
-        return "<SQSEvent %s:: %s, datakeys %s>" % \
+        return "<SQSEvent %s:: event_id %s, datakeys %s>" % \
                (id(self), self.event_id, self.data.keys())
 
     def __str__(self):
