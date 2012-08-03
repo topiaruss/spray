@@ -53,6 +53,3 @@ def app():
     logging.basicConfig(level=level, format=format, filename=lfile)
     signal.signal(signal.SIGINT, on_exit)
 
-    
-
-
