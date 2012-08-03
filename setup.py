@@ -41,6 +41,6 @@ messaging or social actions""",
       ],
       entry_points="""
         [console_scripts]
-        spray = spray.spray:app
+        sprayd = spray.sprayd:app
       """,
       )
