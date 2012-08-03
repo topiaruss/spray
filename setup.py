@@ -38,6 +38,7 @@ messaging or social actions""",
           'jinja2',
 	        'boto',
           'msgpack-python',
+          'zope.interface'
       ],
       entry_points="""
         [console_scripts]

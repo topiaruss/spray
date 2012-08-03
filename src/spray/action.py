@@ -65,6 +65,14 @@ class ActionMatrix(object):
         actionrows = self.data[event.event_id]
         return [ACTIONS[row['action type']](event, row) for row in actionrows]
 
+    @classmethod
+    def register(klass):
+        MATRICES[klass.__name__] = klass
+
+# used for instantiating the correct matrix type based on live or testing
+# configurations
+MATRICES = {}
+
 
 class CSVActionMatrix(ActionMatrix):
     """
@@ -81,6 +89,8 @@ class CSVActionMatrix(ActionMatrix):
         rows = [r for r in rdr]
         return rows
 
+CSVActionMatrix.register()
+
 
 class GoogleActionMatrix(ActionMatrix):
 
@@ -93,6 +103,19 @@ class GoogleActionMatrix(ActionMatrix):
         ss = gc.open_by_url(self.url)
         ws = ss.get_worksheet(1)
         return ws.get_all_values()
+
+GoogleActionMatrix.register()
+
+
+def matrixFactory(name, kwargs={}):
+    "Instantiate a class instance, and provide note in case of param err."
+    try:
+        return MATRICES[name](**kwargs)
+    except TypeError as exc:
+        print exc
+        print "***  Check __init__ params of %s ***" % name
+        raise
+
 
 ACTIONS = {}
 

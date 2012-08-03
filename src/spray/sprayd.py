@@ -1,3 +1,4 @@
+from spray import action
 import argparse
 import ConfigParser
 import logging
@@ -40,16 +41,32 @@ def on_exit(sig, frame):
     exit(1)
 
 
+def config_logging(config):
+    level = eval(config.get('Logging', 'level'))
+    format = config.get('Logging', 'format')
+    lfile = config.get('Logging', 'filename')
+    logging.basicConfig(level=level, format=format, filename=lfile)
+
+
+def config_app(config):
+    #import pdb; pdb.set_trace()
+
+    #get the matrix
+    matrix_type = config.get('ActionMatrix', 'type')
+    kwargs = dict(config.items('ActionMatrix')[1:])
+    matrix = action.matrixFactory(matrix_type, kwargs)
+
+
 def app():
     print "hi"
     #atexit.register(cleanup)
 
     arg = get_command_line_args()
     config = get_config(arg.config_file)
-
-    level = eval(config.get('Logging', 'level'))
-    format = config.get('Logging', 'format')
-    lfile = config.get('Logging', 'filename')
-    logging.basicConfig(level=level, format=format, filename=lfile)
+    config_logging(config)
     signal.signal(signal.SIGINT, on_exit)
+
+    config_app(config)
+
+
 
