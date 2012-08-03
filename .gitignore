@@ -32,3 +32,5 @@ credentials.txt
 include/
 lib/
 local/
+coverage/
+sprayd.log

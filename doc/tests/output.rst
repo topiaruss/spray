@@ -115,17 +115,19 @@ And let's send the same data through the same channel, with the longer template
 
 And shorter template, and some headers
 
-  .. >>> data['headers'] = dict(NoSuch='Header', SomeOther='NonHeader')
-  .. >>> got_chan.send(data)
-  .. >>> msg = mocksmtp.queue.get()
-  .. >>> print msg.as_string()
-  .. From: russf@topia.com
-  .. To: russf@topia.com
-  .. X-Peer: 127.0.0.1:51088
-  .. X-MailFrom: russf@topia.com
-  .. X-RcptTo: russf@topia.com
-  .. <BLANKLINE>
-  .. Hello John! You are a valued friend!
+  >>> data['headers'] = dict(NoSuch='Header', SomeOther='NonHeader')
+  >>> got_chan.send(data)
+  >>> msg = mocksmtp.queue.get()
+  >>> print msg.as_string()
+  From: russf@topia.com
+  To: russf@topia.com
+  NoSuch: Header
+  SomeOther: NonHeader
+  127.0.0.1:54321
+  X-MailFrom: russf@topia.com
+  X-RcptTo: russf@topia.com
+  <BLANKLINE>
+  Hello John!
 
 
 Close down the mock

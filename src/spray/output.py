@@ -36,7 +36,7 @@ class Destination(object):
         for rr in recipients:
             head = head + "%s %s\n" % (key, rr)
             key = ""
-        for k, v in headers:
+        for k, v in sorted(headers.items()):
             head = head + "%s: %s\n" % (k, v)
         head = head + "\n"
         return head + body
@@ -106,7 +106,9 @@ class Channel(object):
         self.dest = destination
 
     def send(self, data, style=''):
+        # This render expands the core of the body
         body = self.tempreg.render(data, style)
+        # The destination may expand the content further
         self.dest.send(body, data)
 
 
