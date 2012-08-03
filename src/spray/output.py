@@ -22,7 +22,7 @@ class TemplateRegistry(dict):
 
     def render(self, data, style=''):
         """convenience method that does the lookup and render in one step"""
-        template = self[style]
+        template = self.lookup(style)
         return template.render(data)
 
 
@@ -36,8 +36,8 @@ class Destination(object):
         for rr in recipients:
             head = head + "%s %s\n" % (key, rr)
             key = ""
-        for hh in headers:
-            head = head + "%s: %s\n"
+        for k, v in headers:
+            head = head + "%s: %s\n" % (k, v)
         head = head + "\n"
         return head + body
 
@@ -63,11 +63,13 @@ class MockSmtpDestination(Destination):
     def send(self, body, data):
         sender = data['from']
         recipients = data['to']
-        assert type(sender) == type("")
-        assert type(recipients) == type([])
+        headers = data.get('headers', {})
+        assert type(sender) == str
+        assert type(recipients) == list
+        assert type(headers) == dict
         smtpd = smtplib.SMTP()
         smtpd.connect('localhost', 9025)
-        message = self._format_message(sender, recipients, body)
+        message = self._format_message(sender, recipients, body, headers)
         smtpd.sendmail(sender, recipients, message)
 
 
