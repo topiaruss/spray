@@ -6,6 +6,8 @@ from spray.utils import awsconfig
 from spray import interface
 from zope.interface import implements
 from boto.sqs.connection import SQSConnection
+from boto.sqs import regions
+from boto import ec2
 
 
 # The singleton directory of ...
@@ -47,7 +49,10 @@ class SQSQueue(object):
         self.name = name
         if acc_sec_pair is None:
             acc_sec_pair = awsconfig.get_aws_config()
-        self.conn = SQSConnection(*acc_sec_pair)
+        self.region_name = 'eu-west-1'
+        self.region = [r for r in regions() if r.name == self.region_name][0]
+        self.conn = SQSConnection(acc_sec_pair[0], acc_sec_pair[1], 
+                                region=self.region)
         self.q = self.conn.create_queue(name, visibility_timeout)
         self.q.set_message_class(event.SQSEvent)
 

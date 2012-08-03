@@ -40,6 +40,7 @@ messaging or social actions""",
           'msgpack-python',
       ],
       entry_points="""
-      # -*- Entry points: -*-
+        [console_scripts]
+        spray = spray.spray:app
       """,
       )

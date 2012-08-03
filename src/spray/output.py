@@ -1,6 +1,9 @@
 from jinja2 import Template
 from spray import interface
+from spray.utils import awsconfig
 from zope.interface import implements
+import boto
+from boto import ses
 import smtplib
 
 
@@ -68,6 +71,27 @@ class MockSmtpDestination(Destination):
         smtpd.sendmail(sender, recipients, message)
 
 
+class AmazonSESDestination(Destination):
+
+    implements(interface.IDestination)
+
+    def __init__(self):
+        self.region = 'eu-west-1'
+        conf = awsconfig.get_aws_config()
+        region = ses.get_region(self.region)
+        self.conn = boto.connect_ses(aws_access_key_id=conf[0],
+          aws_secret_access_key=conf[1],
+          region=region)
+
+    def send(self, body, data):
+        sender = data['from']
+        recipients = data['to']
+        subject = data['subject']
+        assert type(sender) == type("")
+        assert type(recipients) == type([])
+        self.conn.send_email(sender, subject, body, recipients)
+
+
 class Channel(object):
 
     def __init__(self, medium, tempreg, destination):
@@ -75,7 +99,6 @@ class Channel(object):
         tempreg is the template registry
         destination is the implementation class, like smtp or gmail
         """
-
         self.medium = medium
         self.tempreg = tempreg
         self.dest = destination
