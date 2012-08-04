@@ -43,26 +43,26 @@ contains all the normally provided channels. See later, for that
 If you try to lookup a channel that does not exist you'll
 receive a KeyError
 
-  >>> chan = chan_reg.lookup('email')
+  >>> chan = chan_reg.lookup('dummy_email')
   Traceback (most recent call last):
     ...
-  KeyError: 'email'
+  KeyError: 'dummy_email'
 
 Clearly, before we can lookup a channel, there has to be a channel of that
 name. So let's create a Channel, giving it a DummyDestination that prints to
 stdout.
 
-  >>> emailchan = output.Channel('email', reg, output.DummyDestination())
+  >>> emailchan = output.Channel('dummy_email', reg, output.DummyDestination())
   >>> chan_reg.register(emailchan)
 
 Note, above, how we pass the whole channel, and let the registry directly
 access the medium and use the key (medium) for its  internal indexing.
 
-Now we use the medium ('email') to lookup the channel we want to send on.
+Now we use the medium ('dummy_email') to lookup the channel we want to send on.
 
-  >>> got_chan = chan_reg.lookup('email')
+  >>> got_chan = chan_reg.lookup('dummy_email')
   >>> got_chan.medium
-  'email'
+  'dummy_email'
 
 So now we can send on it, using the default style, just by passing
 a dict with the data.  The template details are hidden by the Channel!
@@ -90,6 +90,7 @@ mock SMTP destination, and bring the real smtp client into the picture.
   >>> got_chan = chan_reg.lookup('email')
   >>> data = {'name': 'John', 'from': 'russf@topia.com', 'to': ['russf@topia.com']}
   >>> got_chan.send(data)
+
   >>> msg = mocksmtp.queue.get()
   >>> print msg.as_string()
   From: russf@topia.com
