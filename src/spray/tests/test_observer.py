@@ -50,6 +50,7 @@ class TestObserverInherited(unittest.TestCase):
 class SomeSilliness(object):
 
     def __init__(self):
+        # Yes, this is required
         super(SomeSilliness, self).__init__()
         self.silly = 1
 

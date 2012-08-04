@@ -6,6 +6,7 @@ from spray import hub
 from spray import interface
 from spray import output
 from spray.utils import ucsv as csv
+from spray.utils import observer
 from zope.interface import implements
 
 LOG = logging.getLogger(__name__)
@@ -123,16 +124,17 @@ def matrixFactory(name, kwargs={}):
 ACTIONS = {}
 
 
-class Action(object):
+class Action(observer.Observable):
 
     implements(interface.IAction)
 
     action_type = None
 
-    def __init__(self, event, row):
-        self.event = event
-        self.row = row
-        self.setup_channel(row)
+    def __init__(self, **kwargs):
+        super(Action, self).__init__()
+        self.event = kwargs['event']
+        self.row = kwargs['row']
+        self.setup_channel(self.row)
 
     def setup_channel(self, channel):
         pass
@@ -142,7 +144,6 @@ class Action(object):
         ACTIONS[cls.action_type] = cls
 
     def handle(self):
-        self.notify('handle')
         raise NotImplementedError
 
     def notify(self, step, data={}):
@@ -153,10 +154,12 @@ class Action(object):
             (self.action_type, self.__class__.__name__, step, self.event.data)
 
 
-
 class DummyEmailAction(Action):
 
     action_type = 'email'
+
+    def __init__(self, **kwargs):
+        super(DummyEmailAction, self).__init__(**kwargs)
 
     def handle(self):
         self.notify('handle')
@@ -171,6 +174,9 @@ DummyEmailAction.register()
 class EmailAction(Action):
 
     action_type = 'email'
+
+    def __init__(self, event, row):
+        super(EmailAction, self).__init__(event=event, row=row)
 
     def setup_channel(self, row):
         # TODO: take the channel from the matrix, so we can switch test/prod
