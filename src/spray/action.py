@@ -3,6 +3,7 @@ import os
 import threading
 from spray import hub
 from spray import interface
+from spray import output
 from spray.utils import ucsv as csv
 from zope.interface import implements
 
@@ -129,13 +130,25 @@ class Action(object):
     def __init__(self, event, row):
         self.event = event
         self.row = row
+        self.setup_channel(row)
+
+    def setup_channel(self, channel):
+        pass
 
     @classmethod
     def register(cls):
         ACTIONS[cls.action_type] = cls
 
     def handle(self):
+        self.notify('handle')
         raise NotImplementedError
+
+    def notify(self, step):
+        "notify listeners of processing steps"
+        #later, use step to notify registered listeners
+        print 'action: %s, impl class: %s, step: %s, data: %s.' %\
+            (self.action_type, self.__class__.__name__, step, self.event.data)
+
 
 
 class DummyEmailAction(Action):
@@ -143,14 +156,31 @@ class DummyEmailAction(Action):
     action_type = 'email'
 
     def handle(self):
-        print 'action: %s, data: %s.' %\
-            (self.action_type, self.event.data)
+        self.notify('handle')
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(self.row)
 
 
 DummyEmailAction.register()
+
+
+class EmailAction(Action):
+
+    action_type = 'email'
+
+    def setup_channel(self, row):
+        # TODO: take the channel from the matrix, so we can switch test/prod
+        self.channel = output.CHAN_REG.lookup('email')
+
+    def handle(self):
+        self.notify('handle')
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(self.row)
+
+
+EmailAction.register()
 
 
 class Processor(object):

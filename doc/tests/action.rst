@@ -33,7 +33,8 @@ Now let's invoke the handler(s) for the event. The current
 DummyEmailAction just prints some info, as you'll see below
 
   >>> [a.handle() for a in actions]
-  action: email, data: {'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}.
+    action: email, impl class: EmailAction, step: handle, 
+      data: {'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}.
   {   u'action type': u'email',
       u'body_en_uk': u'',
       u'frequency': u'',
@@ -70,7 +71,8 @@ Let's send something into the queue using this source
 And do a single step on the processor to see what it does.  
 
   >>> the_processor.step()
-  action: email, data: {'email': 'russf@topia.com', 'name': 'Russ Ferriday'}.
+  action: email, impl class: EmailAction, step: handle, 
+    data: {'email': 'russf@topia.com', 'name': 'Russ Ferriday'}.
     {   u'action type': u'email',
         u'body_en_uk': u'Dear {crafter_first_name},\\n\\nThank you for starting a project on Sponsorcraft. You can view your project at {project_preview_url}.\\n\\nAfter submitting your project, our moderation team will review your project and reply with feedback within 1 working day.\\n\\nYour friendly Sponsorcraft website robot.\\n\\n\u2014\\nFor advice and tips on crafting an awesome project, visit http://sponsorcraft.com/college/\\n\\n [[Edit your project]]',
         u'frequency': u'1w',
