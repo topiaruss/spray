@@ -37,7 +37,7 @@ def cleanup():
 
 def on_exit(sig, frame):
     print "exit"
-    LOG.info("exiting Server on SIGINT")
+    LOG.info("Exiting Server on SIGINT")
     exit(1)
 
 
@@ -55,6 +55,11 @@ def config_app(config):
     matrix_type = config.get('ActionMatrix', 'type')
     kwargs = dict(config.items('ActionMatrix')[1:])
     matrix = action.matrixFactory(matrix_type, kwargs)
+
+    #the_processor = action.Processor('send', matrix, running=False)
+    #this will start running immediately
+    the_processor = action.Processor('send', matrix)
+
 
 
 def app():
