@@ -13,8 +13,9 @@ about such details for us.
 
   >>> send_queue = ourhub.get_or_create("send")
 
-Now that we have a queue we can associate it with a new source.   The source
-from then onwards is our connection to the whole messaging system.
+Now that we have a queue we can associate it with a new source.   
+The source from then onwards is our connection to the whole 
+messaging system.
 
   >>> from spray import client
   >>> my_source = client.Source("my_events", send_queue)

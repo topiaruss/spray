@@ -1,12 +1,14 @@
 import gspread
 import os
 import threading
+import logging
 from spray import hub
 from spray import interface
 from spray import output
 from spray.utils import ucsv as csv
 from zope.interface import implements
 
+LOG = logging.getLogger(__name__)
 
 class Credentials(object):
     """
@@ -143,9 +145,10 @@ class Action(object):
         self.notify('handle')
         raise NotImplementedError
 
-    def notify(self, step):
+    def notify(self, step, data={}):
         "notify listeners of processing steps"
-        #later, use step to notify registered listeners
+        # initially we use logging
+        # later, use step to notify registered listeners
         print 'action: %s, impl class: %s, step: %s, data: %s.' %\
             (self.action_type, self.__class__.__name__, step, self.event.data)
 
@@ -201,13 +204,15 @@ class Processor(object):
 
     def runner(self):
         while self.is_alive:
+            print 'step'
             self.step()
 
     def step(self):
         event = self.queue.get_event()
+        # self.notify('got event', event)
         actions = self.matrix.get_actions(event)
         [a.handle() for a in actions]
-        print 'processed step'
+        # self.notify('processed step')
 
     def stop(self):
         if self.tt.is_alive():

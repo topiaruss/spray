@@ -1,13 +1,10 @@
+from boto.sqs import regions
+from boto.sqs.connection import SQSConnection
 from spray import event
 from spray import interface
+from spray.utils import awsconfig
 from zope.interface import implements
 import Queue
-from spray.utils import awsconfig
-from spray import interface
-from zope.interface import implements
-from boto.sqs.connection import SQSConnection
-from boto.sqs import regions
-from boto import ec2
 
 
 # The singleton directory of ...
@@ -51,7 +48,7 @@ class SQSQueue(object):
             acc_sec_pair = awsconfig.get_aws_config()
         self.region_name = 'eu-west-1'
         self.region = [r for r in regions() if r.name == self.region_name][0]
-        self.conn = SQSConnection(acc_sec_pair[0], acc_sec_pair[1], 
+        self.conn = SQSConnection(acc_sec_pair[0], acc_sec_pair[1],
                                 region=self.region)
         self.q = self.conn.create_queue(name, visibility_timeout)
         self.q.set_message_class(event.SQSEvent)
@@ -71,6 +68,10 @@ class SQSQueue(object):
         ev = self.event_factory(event_id=event_id, data=data)
         self.put_event(ev)
 
+QUEUES['test'] = DummyQueue('test')
+QUEUES['send'] = DummyQueue('send')
+QUEUES['testSQS'] = SQSQueue('testSQS')
+
 
 class Hub(object):
 
@@ -78,3 +79,4 @@ class Hub(object):
         """Utility to grab or create a named queue"""
         return QUEUES.setdefault(name, DummyQueue(name))
 
+HUB = Hub()

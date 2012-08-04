@@ -43,5 +43,6 @@ messaging or social actions""",
       entry_points="""
         [console_scripts]
         sprayd = spray.sprayd:app
+        client = spray.client:app
       """,
       )

@@ -82,7 +82,6 @@ And do a single step on the processor to see what it does.
         u'subject_en_uk': u'Project reminder',
         u'time of day': u'',
         u'until': u'project submitted'}
-    processed step
 
 
 
