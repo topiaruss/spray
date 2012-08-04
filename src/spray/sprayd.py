@@ -46,10 +46,11 @@ def config_app(config):
     matrix_type = config.get('ActionMatrix', 'type')
     kwargs = dict(config.items('ActionMatrix')[1:])
     matrix = action.matrixFactory(matrix_type, kwargs)
+    matrix.update()
 
     #the_processor = action.Processor('send', matrix, running=False)
     #this will start running immediately
-    the_processor = action.Processor('send', matrix)
+    the_processor = action.Processor('testSQS', matrix)
 
 
 

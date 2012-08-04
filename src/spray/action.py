@@ -11,6 +11,7 @@ from zope.interface import implements
 
 LOG = logging.getLogger(__name__)
 
+
 class Credentials(object):
     """
     Holds credentials.
@@ -124,6 +125,16 @@ def matrixFactory(name, kwargs={}):
 ACTIONS = {}
 
 
+def __action_log_listener(e):
+    kwargs = e.__dict__
+    klass, tick = kwargs.pop('klass', None), kwargs.pop('tick', None)
+    ss = 'impl class: %s, step: %s, data: %s.' % (klass, tick, kwargs)
+    LOG.info(ss)
+
+BROADCASTER = observer.Observable()
+BROADCASTER.subscribe(__action_log_listener)
+
+
 class Action(observer.Observable):
 
     implements(interface.IAction)
@@ -146,12 +157,11 @@ class Action(observer.Observable):
     def handle(self):
         raise NotImplementedError
 
-    def notify(self, step, data={}):
+    def notify(self, tick, **kwargs):
         "notify listeners of processing steps"
-        # initially we use logging
-        # later, use step to notify registered listeners
-        print 'action: %s, impl class: %s, step: %s, data: %s.' %\
-            (self.action_type, self.__class__.__name__, step, self.event.data)
+        kwargs['klass'] = self.__class__.__name__
+        kwargs['tick'] = tick
+        BROADCASTER.notify(**kwargs)
 
 
 class DummyEmailAction(Action):
@@ -162,10 +172,11 @@ class DummyEmailAction(Action):
         super(DummyEmailAction, self).__init__(**kwargs)
 
     def handle(self):
-        self.notify('handle')
+        self.notify('start-handle')
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(self.row)
+        self.notify('end-handle')
 
 
 DummyEmailAction.register()
@@ -185,8 +196,10 @@ class EmailAction(Action):
     def handle(self):
         self.notify('handle')
         import pprint
+        print "DUMMY EMAIL >>>>>>"
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(self.row)
+        self.notify('end-handle')
 
 
 EmailAction.register()
@@ -215,10 +228,14 @@ class Processor(object):
 
     def step(self):
         event = self.queue.get_event()
-        # self.notify('got event', event)
+        if event is None:
+            self.notify('got-None-Event')
+            print 'None'
+            return
+        self.notify('got-event', event=event)
         actions = self.matrix.get_actions(event)
         [a.handle() for a in actions]
-        # self.notify('processed step')
+        self.notify('processed-event', actions=actions)
 
     def stop(self):
         if self.tt.is_alive():
@@ -228,4 +245,11 @@ class Processor(object):
     def start(self):
         self.is_alive = True
         self.tt.start()
+
+    def notify(self, tick, **kwargs):
+        "notify listeners of processing steps"
+        kwargs['klass'] = self.__class__.__name__
+        kwargs['tick'] = tick
+        BROADCASTER.notify(**kwargs)
+
 

@@ -49,7 +49,7 @@ class ClientApp():
         pp.add_argument('-c', '--config_file', metavar='file',
           type=argparse.FileType('r'), default='sprayd.cfg',
           help='a config file (defaults to sprayd.cfg)')
-        return pp.pars
+        return pp.parse_args()
 
     def config_logging(self, config):
         level = eval(config.get('Logging', 'level'))
@@ -58,11 +58,12 @@ class ClientApp():
         logging.basicConfig(level=level, format=format, filename=lfile)
 
     def config_app(self, config):
-        qq = hub.HUB.get_or_create('test')
+        qq = hub.HUB.get_or_create('testSQS')
         me = Source('me', qq)
         crafter_data = dict(name='Russ Ferriday',
           email='russf@topia.com')
         me.send("system.project.created", crafter_data)
+        print "sent"
 
     def __call__(self):
         "simple command line action"
