@@ -56,7 +56,8 @@ class TestDummyQueue(unittest.TestCase):
 
 class TestSQSQueue(unittest.TestCase):
 
-    qname = 'test'
+    qname = 'testx'
+    delay = 0.5
 
     def setUp(self):
         # Ensure the queue is clear before we start, or we'll lose more hair
@@ -87,6 +88,7 @@ class TestSQSQueue(unittest.TestCase):
     def test_SQSQueue_create_and_send(self):
         qq = hub.SQSQueue(self.qname)
         qq.create_and_send('silly.id')
+        sleep(self.delay)
         ev = qq.get_event()
         ev.delete()
         assert ev.event_id == 'silly.id'
@@ -94,6 +96,7 @@ class TestSQSQueue(unittest.TestCase):
     def test_SQSQueue_check_return_type(self):
         qq = hub.SQSQueue(self.qname)
         qq.create_and_send('some.id')
+        sleep(self.delay)
         ev = qq.get_event()
         ev.delete()
         assert ev.__class__.__name__ == 'SQSEvent'
@@ -102,17 +105,12 @@ class TestSQSQueue(unittest.TestCase):
         qq = hub.SQSQueue(self.qname)
         qq.create_and_send('some.id', data=dict(index=0))
         qq.create_and_send('some.id', data=dict(index=1))
-        sleep(1.0)
+        sleep(self.delay)
         evA = qq.get_event()
         evA.delete()
         evB = qq.get_event()
         evB.delete()
         # I'm using sets to accommodate weakly ordered responses
         indices = set([evA.data['index'], evB.data['index']])
-        assert indices == set([0,1])
+        assert indices == set([0, 1])
 
-class TestSQSEvent(unittest.TestCase):
-
-    def test_SQSEvent_str(self):
-        ev = event.SQSEvent(event_id='foo.id')
-        str(ev)
