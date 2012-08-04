@@ -13,15 +13,6 @@ def get_config(cf):
     return config
 
 
-class ForgivingFileType(argparse.FileType):
-    def __call__(self, name):
-        try:
-            super(ForgivingFileType, self).__call__(name)
-        except IOError as err:
-            print err
-            raise err
-
-
 def get_command_line_args():
     pp = argparse.ArgumentParser(
       description='Spray messaging daemon for Sponsorcraft website')
