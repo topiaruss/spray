@@ -25,24 +25,23 @@ messaging or social actions""",
       package_dir={'': 'src'},
       extras_require=dict(
         test=(
+            'lazr.smtptest',
             'zope.app.testing',
             'zope.testing',
-            'lazr.smtptest',
             ),
         ),
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-          # -*- Extra requirements: -*-
+          'boto',
           'gspread',
           'jinja2',
-	        'boto',
           'msgpack-python',
           'zope.interface'
       ],
       entry_points="""
         [console_scripts]
-        sprayd = spray.sprayd:app
         client = spray.client:app
+        sprayd = spray.sprayd:app
       """,
       )
