@@ -17,3 +17,18 @@ class TestAmazonSESDestination(unittest.TestCase):
         body = """hi russ,
         nice to see you!"""
         ses.send(body, data)
+
+class TestDefaultDestinationRegistryEntries(unittest.TestCase):
+
+    def test_dummy_destination_entry(self):
+        dest = output.DESTINATION_REGISTRY['DummyDestination']
+        assert dest
+
+    def test_mock_destination_entry(self):
+        dest = output.DESTINATION_REGISTRY['MockSmtpDestination']
+        assert dest
+
+    def test_AWS_destination_entry(self):
+        dest = output.DESTINATION_REGISTRY['AmazonSESDestination']
+        assert dest
+
