@@ -6,8 +6,7 @@ class TestAmazonSESDestination(unittest.TestCase):
 
     def test_instance(self):
         ses = output.AmazonSESDestination()
-        if ses:  #fakeout syntax checker
-            ses = ses
+        ses = ses  # fake-out syntax checker
 
     def test_send(self):
         ses = output.AmazonSESDestination()
@@ -17,6 +16,7 @@ class TestAmazonSESDestination(unittest.TestCase):
         body = """hi russ,
         nice to see you!"""
         ses.send(body, data)
+
 
 class TestDefaultDestinationRegistryEntries(unittest.TestCase):
 

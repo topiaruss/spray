@@ -11,6 +11,12 @@ from zope.interface import implements
 
 LOG = logging.getLogger(__name__)
 
+# used for instantiating the correct matrix type based on live or testing
+# configurations
+MATRICES = {}
+ACTIONS = {}
+AVAILABLE_ACTIONS = {}
+
 
 class Credentials(object):
     """
@@ -68,15 +74,12 @@ class ActionMatrix(object):
 
     def get_actions(self, event):
         actionrows = self.data[event.event_id]
-        return [ACTIONS[row['action type']](event, row) for row in actionrows]
+        return [ACTIONS[row['action type']](event=event, row=row) \
+          for row in actionrows]
 
     @classmethod
     def register(klass):
         MATRICES[klass.__name__] = klass
-
-# used for instantiating the correct matrix type based on live or testing
-# configurations
-MATRICES = {}
 
 
 class CSVActionMatrix(ActionMatrix):
@@ -122,15 +125,14 @@ def matrixFactory(name, kwargs={}):
         raise
 
 
-ACTIONS = {}
-
-
 def __action_log_listener(e):
     kwargs = e.__dict__
     klass, tick = kwargs.pop('klass', None), kwargs.pop('tick', None)
     ss = 'impl class: %s, step: %s, data: %s.' % (klass, tick, kwargs)
     LOG.info(ss)
 
+# This is a long-lived broadcaster, to which anyone can subscribe. It has a 
+#longer lifetime than the actions that use it
 BROADCASTER = observer.Observable()
 BROADCASTER.subscribe(__action_log_listener)
 
@@ -152,7 +154,8 @@ class Action(observer.Observable):
 
     @classmethod
     def register(cls):
-        ACTIONS[cls.action_type] = cls
+        assert cls.action_type is not None
+        AVAILABLE_ACTIONS[cls.action_type] = cls
 
     def handle(self):
         raise NotImplementedError
@@ -166,7 +169,7 @@ class Action(observer.Observable):
 
 class DummyEmailAction(Action):
 
-    action_type = 'email'
+    action_type = 'DummyEmailAction'
 
     def __init__(self, **kwargs):
         super(DummyEmailAction, self).__init__(**kwargs)
@@ -184,10 +187,10 @@ DummyEmailAction.register()
 
 class EmailAction(Action):
 
-    action_type = 'email'
+    action_type = 'EmailAction'
 
-    def __init__(self, event, row):
-        super(EmailAction, self).__init__(event=event, row=row)
+    def __init__(self, **kwargs):
+        super(EmailAction, self).__init__(**kwargs)
 
     def setup_channel(self, row):
         # TODO: take the channel from the matrix, so we can switch test/prod
@@ -252,4 +255,5 @@ class Processor(object):
         kwargs['tick'] = tick
         BROADCASTER.notify(**kwargs)
 
+ACTIONS['email'] = AVAILABLE_ACTIONS['EmailAction']
 

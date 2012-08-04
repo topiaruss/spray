@@ -7,18 +7,20 @@ from boto import ses
 import smtplib
 
 
-class TemplateRegistry(dict):
+class TemplateRegistry(object):
+
+    reg = {}
 
     def _process_and_store(self, style, text):
         template = Template(text)
-        self[style] = template
+        self.reg[style] = template
 
     def register(self, style, text):
         self._process_and_store(style, text)
 
     def lookup(self, style):
         """returns a processed jinja2 style Template ready for render()"""
-        return self[style]
+        return self.reg[style]
 
     def render(self, data, style=''):
         """convenience method that does the lookup and render in one step"""
@@ -28,6 +30,7 @@ class TemplateRegistry(dict):
 DEFAULT_TEMPLATE_REGISTRY = TemplateRegistry()
 
 DESTINATION_REGISTRY = {}
+
 
 class Destination(object):
 
@@ -143,6 +146,6 @@ class ChannelRegistry(object):
 CHAN_REG = ChannelRegistry()
 
 # TODO: replace hardwired channels with sprayd.cfg channels
-email_channel = Channel('email', dict(foo=1),#DEFAULT_TEMPLATE_REGISTRY,
+email_channel = Channel('email', dict(foo=1), #DEFAULT_TEMPLATE_REGISTRY,
                         DESTINATION_REGISTRY['DummyDestination']())
 CHAN_REG.register(email_channel)

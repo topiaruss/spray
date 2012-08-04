@@ -27,7 +27,18 @@ action(s) for our fake event, and check the type of the first one
 
   >>> actions = matrix.get_actions(fake)
   >>> actions[0].action_type
-  'email'
+  'EmailAction'
+
+Hmmm... That's the normal email action. Let's replace it with the 
+Dummy Handler 
+
+  >>> action.ACTIONS['email'] = action.AVAILABLE_ACTIONS['DummyEmailAction']
+
+Check
+
+  >>> actions = matrix.get_actions(fake)
+  >>> actions[0].action_type
+  'DummyEmailAction'
 
 Now let's invoke the handler(s) for the event. The current 
 DummyEmailAction just prints some info, as you'll see below

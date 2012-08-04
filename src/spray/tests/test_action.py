@@ -39,7 +39,7 @@ class TestDummyEmailAction(unittest.TestCase):
     def test_action_type(self):
         ee = event.Event('e')
         aa = action.DummyEmailAction(event=ee, row={})
-        assert aa.action_type == 'email'
+        assert aa.action_type == 'DummyEmailAction'
 
 
 if __name__ == '__main__':
