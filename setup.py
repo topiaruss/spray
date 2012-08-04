@@ -20,7 +20,7 @@ messaging or social actions""",
       author='Russ Ferriday',
       author_email='russf@topia.com',
       url='sponsorcraft.com',
-      license='GPL',
+      license='NCSA',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       package_dir={'': 'src'},
       extras_require=dict(
