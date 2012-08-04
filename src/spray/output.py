@@ -25,6 +25,9 @@ class TemplateRegistry(dict):
         template = self.lookup(style)
         return template.render(data)
 
+DEFAULT_TEMPLATE_REGISTRY = TemplateRegistry()
+
+DESTINATION_REGISTRY = {}
 
 class Destination(object):
 
@@ -44,13 +47,19 @@ class Destination(object):
     def send(self, body, data):
         return NotImplementedError
 
+    @classmethod
+    def register(klass):
+        DESTINATION_REGISTRY[klass.__name__] = klass
 
-class DummyDestination(object):
+
+class DummyDestination(Destination):
 
     implements(interface.IDestination)
 
     def send(self, body, data):
         print body
+
+DummyDestination.register()
 
 
 class MockSmtpDestination(Destination):
@@ -72,6 +81,8 @@ class MockSmtpDestination(Destination):
         message = self._format_message(sender, recipients, body, headers)
         smtpd.sendmail(sender, recipients, message)
 
+MockSmtpDestination.register()
+
 
 class AmazonSESDestination(Destination):
 
@@ -92,6 +103,8 @@ class AmazonSESDestination(Destination):
         assert type(sender) == type("")
         assert type(recipients) == type([])
         self.conn.send_email(sender, subject, body, recipients)
+
+AmazonSESDestination.register()
 
 
 class Channel(object):
@@ -129,4 +142,7 @@ class ChannelRegistry(object):
 
 CHAN_REG = ChannelRegistry()
 
-
+# TODO: replace hardwired channels with sprayd.cfg channels
+email_channel = Channel('email', dict(foo=1),#DEFAULT_TEMPLATE_REGISTRY,
+                        DESTINATION_REGISTRY['DummyDestination']())
+CHAN_REG.register(email_channel)
