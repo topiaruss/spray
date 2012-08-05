@@ -73,6 +73,6 @@ class ClientApp():
         self.config_logging(config)
         self.config_app(config)
 
-
+#This is used by setup.py and buildout.cfg to generate an app in bin/
 def app():
     ClientApp()()
