@@ -6,7 +6,7 @@ class ObsEvent(object):
 
 class Observable(object):
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         # If you think the super() line is not needed, please get wise.
         # https://fuhm.net/super-harmful/
         super(Observable, self).__init__()

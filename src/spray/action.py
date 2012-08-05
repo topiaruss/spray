@@ -131,8 +131,8 @@ def __action_log_listener(e):
     ss = 'impl class: %s, step: %s, data: %s.' % (klass, tick, kwargs)
     LOG.info(ss)
 
-# This is a long-lived broadcaster, to which anyone can subscribe. It has a 
-#longer lifetime than the actions that use it
+# This is a long-lived broadcaster, to which anyone can subscribe. It has a
+# longer lifetime than the actions that use it
 BROADCASTER = observer.Observable()
 BROADCASTER.subscribe(__action_log_listener)
 
@@ -144,7 +144,7 @@ class Action(observer.Observable):
     action_type = None
 
     def __init__(self, **kwargs):
-        super(Action, self).__init__()
+        super(Action, self).__init__(**kwargs)
         self.event = kwargs['event']
         self.row = kwargs['row']
         self.setup_channel(self.row)
@@ -198,10 +198,7 @@ class EmailAction(Action):
 
     def handle(self):
         self.notify('handle')
-        import pprint
-        print "DUMMY EMAIL >>>>>>"
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(self.row)
+        self.channel.send(data)
         self.notify('end-handle')
 
 

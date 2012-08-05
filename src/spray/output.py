@@ -111,21 +111,47 @@ AmazonSESDestination.register()
 
 
 class Channel(object):
+    """ Channel binds a template to a destination and does
+    specific processing for a medium.
+    medium could be email, or sms - it knows therefore about channel
+    limitations.
+    tempreg is the template registry
+    destination is the implementation class, like smtp or SENDGRID
+    """
 
-    def __init__(self, medium, tempreg, destination):
-        """ medium could be email.
-        tempreg is the template registry
-        destination is the implementation class, like smtp or gmail
-        """
-        self.medium = medium
-        self.tempreg = tempreg
-        self.dest = destination
+    def __init__(self, **kw):
+        # Some don't think this line is necessary. It is.
+        super(Channel, self).__init__()
+        # Note, these are all mandatory - no default values
+        self.medium = kw['medium']
+        self.tempreg = kw['tempreg']
+        self.dest = kw['destination']
+
+    def render(self, data, style=''):
+        return self.tempreg.render(data, style)
 
     def send(self, data, style=''):
-        # This render expands the core of the body
-        body = self.tempreg.render(data, style)
-        # The destination may expand the content further
+        body = self.render(data, style)
         self.dest.send(body, data)
+
+class HTMLEmailChannel(Channel):
+    """ 
+    Formats the content of the message using the row's template,
+    if it can find one. Then it uses the delivery template to wrap the
+    message. Finally it does a stoneage html pass, to check the message
+    is legal for email.
+    """
+
+    def __init__(self, **kw):
+        super(EmailChannel, self).__init__(**kw)
+
+    def render(data, style=''):
+        #first expand the content of the message using the template
+        # from the row. 
+
+        # Now render the body into the framework template
+        return self.tempreg.render(data, style)
+
 
 
 class ChannelRegistry(object):
@@ -146,6 +172,6 @@ class ChannelRegistry(object):
 CHAN_REG = ChannelRegistry()
 
 # TODO: replace hardwired channels with sprayd.cfg channels
-email_channel = Channel('email', dict(foo=1), #DEFAULT_TEMPLATE_REGISTRY,
-                        DESTINATION_REGISTRY['DummyDestination']())
+email_channel = Channel(medium='email', tempreg=dict(foo=1), #DEFAULT_TEMPLATE_REGISTRY,
+                        destination=DESTINATION_REGISTRY['DummyDestination']())
 CHAN_REG.register(email_channel)

@@ -52,7 +52,7 @@ Clearly, before we can lookup a channel, there has to be a channel of that
 name. So let's create a Channel, giving it a DummyDestination that prints to
 stdout.
 
-  >>> emailchan = output.Channel('dummy_email', reg, output.DummyDestination())
+  >>> emailchan = output.Channel(medium='dummy_email', tempreg=reg, destination=output.DummyDestination())
   >>> chan_reg.register(emailchan)
 
 Note, above, how we pass the whole channel, and let the registry directly
@@ -82,60 +82,44 @@ Moving to SMTP
 Let's take a further step. Let's rebind emailchan to the
 mock SMTP destination, and bring the real smtp client into the picture.
 
-  >>> from spray.utils import mocksmtp  # make sure the mock server is running
+  >>> from minimock import Mock
+  >>> import smtplib
+  >>> smtplib.SMTP = Mock('smtplib.SMTP')
+  >>> smtplib.SMTP.mock_returns = Mock('smtp_connection')
 
   >>> dest = output.MockSmtpDestination('127.0.0.1', 9025)
-  >>> emailchan = output.Channel('email', reg, dest)
+  >>> emailchan = output.Channel(medium='email', tempreg=reg, destination=dest)
   >>> chan_reg.register(emailchan)
   >>> got_chan = chan_reg.lookup('email')
   >>> data = {'name': 'John', 'from': 'russf@topia.com', 'to': ['russf@topia.com']}
   >>> got_chan.send(data)
-
-  >>> msg = mocksmtp.queue.get()
-  >>> print msg.as_string()
-  From: russf@topia.com
-  To: russf@topia.com
-  X-Peer: 127.0.0.1:51088
-  X-MailFrom: russf@topia.com
-  X-RcptTo: russf@topia.com
-  <BLANKLINE>
-  Hello John!
+  Called smtplib.SMTP()
+  Called smtp_connection.connect('localhost', 9025)
+  Called smtp_connection.sendmail(
+      'russf@topia.com',
+      ['russf@topia.com'],
+      u'From: russf@topia.com\nTo: russf@topia.com\n\nHello John!')
 
 And let's send the same data through the same channel, with the longer template
 
   >>> got_chan.send(data, style='longer')
-  >>> msg = mocksmtp.queue.get()
-  >>> print msg.as_string()
-  From: russf@topia.com
-  To: russf@topia.com
-  X-Peer: 127.0.0.1:51088
-  X-MailFrom: russf@topia.com
-  X-RcptTo: russf@topia.com
-  <BLANKLINE>
-  Hello John! You are a valued friend!
+  Called smtplib.SMTP()
+  Called smtp_connection.connect('localhost', 9025)
+  Called smtp_connection.sendmail(
+      'russf@topia.com',
+      ['russf@topia.com'],
+      u'From: russf@topia.com\nTo: russf@topia.com\n\nHello John! You are a valued friend!')
 
 And shorter template, and some headers
 
   >>> data['headers'] = dict(NoSuch='Header', SomeOther='NonHeader')
   >>> got_chan.send(data)
-  >>> msg = mocksmtp.queue.get()
-  >>> print msg.as_string()
-  From: russf@topia.com
-  To: russf@topia.com
-  NoSuch: Header
-  SomeOther: NonHeader
-  127.0.0.1:54321
-  X-MailFrom: russf@topia.com
-  X-RcptTo: russf@topia.com
-  <BLANKLINE>
-  Hello John!
-
-
-Close down the mock
--------------------
-
-  >>> mocksmtp.controller.stop()
-
+  Called smtplib.SMTP()
+  Called smtp_connection.connect('localhost', 9025)
+  Called smtp_connection.sendmail(
+      'russf@topia.com',
+      ['russf@topia.com'],
+      u'From: russf@topia.com\nTo: russf@topia.com\nNoSuch: Header\nSomeOther: NonHeader\n\nHello John!')
 
 
 

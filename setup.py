@@ -25,9 +25,9 @@ messaging or social actions""",
       package_dir={'': 'src'},
       extras_require=dict(
         test=(
-            'lazr.smtptest',
             'zope.app.testing',
             'zope.testing',
+	    'MiniMock',
             ),
         ),
       include_package_data=True,
