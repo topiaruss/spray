@@ -6,6 +6,7 @@ import boto
 from boto import ses
 import smtplib
 
+AVAILABLE_TEMPLATE_REGISTRIES = {}
 
 class TemplateRegistry(object):
 
@@ -172,6 +173,6 @@ class ChannelRegistry(object):
 CHAN_REG = ChannelRegistry()
 
 # TODO: replace hardwired channels with sprayd.cfg channels
-email_channel = Channel(medium='email', tempreg=dict(foo=1), #DEFAULT_TEMPLATE_REGISTRY,
+email_channel = Channel(medium='email', tempreg=DEFAULT_TEMPLATE_REGISTRY,
                         destination=DESTINATION_REGISTRY['DummyDestination']())
 CHAN_REG.register(email_channel)
