@@ -50,3 +50,25 @@ class TestTemplateRegistration(unittest.TestCase):
         assert tr_instance.__class__.__name__ == "TemplateRegistry"
 
 
+class TestChannel(unittest.TestCase):
+
+    destination=output.DESTINATION_REGISTRY['DummyDestination']()
+
+    def test_autoinit_to_email_channel_from_default_templ_reg(self):
+        ch = output.Channel(medium='email',
+          destination=self.destination)
+        assert ch.tempreg == output.AVAILABLE_TEMPLATE_REGISTRIES['email']
+
+    def test_init_to_custom_registry(self):
+        reg = output.TemplateRegistry()
+        ch = output.Channel(medium='email',  tempreg=reg,
+          destination=self.destination)
+        assert ch.tempreg == reg
+
+    def test_select_custom_from_available_registry(self):
+        class SubTemplate(output.TemplateRegistry):
+            pass
+        SubTemplate.make_available('foo')
+        ch = output.Channel(medium='email',  tempreg='foo',
+          destination=self.destination)
+        assert isinstance(ch.tempreg, SubTemplate)
