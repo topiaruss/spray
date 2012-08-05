@@ -2,12 +2,16 @@ from boto import ses
 from jinja2 import Template
 from spray import interface
 from spray.utils import awsconfig
+from spray.utils import genfind
+from spray.utils import genopen
 from zope.interface import implements
 import boto
 import os
 import smtplib
 
+
 AVAILABLE_TEMPLATE_REGISTRIES = {}
+
 
 class SimpleTemplateRegistry(object):
 
@@ -36,7 +40,14 @@ class SimpleTemplateRegistry(object):
         template = self.lookup(style)
         return template.render(data)
 
+
 class FSBasedTemplateRegistry(SimpleTemplateRegistry):
+    """Any kind of file in the template directory will be included.
+    bz2 and tgz files will be decompresses before processing.
+    The filename up to the first '.' will be used as the style
+    default.html will be registered as the default file. It will be registered
+    under the name '' (an empty string).
+    """
 
     def __init__(self, **kw):
         super(FSBasedTemplateRegistry, self).__init__(**kw)
@@ -44,15 +55,25 @@ class FSBasedTemplateRegistry(SimpleTemplateRegistry):
             self.dirpath = kw['templates_dir']
         except KeyError as e:
             import sys
-            raise type(e), type(e)("Missing parameter to Constructor %s" % e), sys.exc_info()[2]
-
+            raise type(e), type(e)("Missing parameter to Constructor %s" % e),\
+               sys.exc_info()[2]
         assert os.path.isdir(self.dirpath)
+        self.update()
 
+    def update(self):
+        templ_names = genfind.gen_find('*', self.dirpath)
+        templ_files = genopen.gen_open(templ_names)
+        for f in templ_files:
+            style = os.path.basename(f.name).split('.')[0]
+            if style == 'default':
+                style = ''
+            self._process_and_store(style, f.read())
 
 
 DEFAULT_TEMPLATE_REGISTRY = SimpleTemplateRegistry()
-SimpleTemplateRegistry.make_available('email')
-FSBasedTemplateRegistry.make_available('hemail', templates_dir='./templates/email')
+SimpleTemplateRegistry.make_available('semail')
+FSBasedTemplateRegistry.make_available('email',
+  templates_dir='./templates/email')
 
 DESTINATION_REGISTRY = {}
 

@@ -54,12 +54,16 @@ class TestFSBasedTemplateReg(unittest.TestCase):
 
     def test_instantiation_without_params(self):
         self.assertRaises(KeyError, output.FSBasedTemplateRegistry)
-        # tr = output.FSBasedTemplateRegistry()
-        # tr = tr
 
     def test_instantiation_with_default_dir(self):
-        tr = output.FSBasedTemplateRegistry(templates_dir='./templates/email')
-        tr = tr
+        tt = output.FSBasedTemplateRegistry(templates_dir='./templates/email')
+        tt = tt  # defeat editor checking
+
+    def test_lookup_default_template(self):
+        tt = output.FSBasedTemplateRegistry(templates_dir='./templates/email')
+        default = tt.lookup('')
+        from jinja2 import Template
+        assert isinstance(default, Template)
 
 
 class TestChannel(unittest.TestCase):
