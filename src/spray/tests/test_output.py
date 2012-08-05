@@ -39,7 +39,8 @@ class TestTemplateRegistration(unittest.TestCase):
         assert hasattr(output, "AVAILABLE_TEMPLATE_REGISTRIES")
 
     def test_default_template_registries(self):
-        items = [(k, v.__class__.__name__) for k, v in output.AVAILABLE_TEMPLATE_REGISTRIES.items()]
+        items = [(k, v.__class__.__name__) for k, v in\
+          output.AVAILABLE_TEMPLATE_REGISTRIES.items()]
         assert set(items) == set([('email', 'TemplateRegistry')])
 
     def test_add_a_registry(self):
