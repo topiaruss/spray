@@ -64,8 +64,7 @@ class ClientApp():
         logging.basicConfig(level=level, format=format, filename=lfile)
 
     def config_app(self, config):
-        qq = hub.HUB.get_or_create('testSQS')
-        me = Source('me', qq)
+        me = Source('me', 'testSQS')
         crafter_data = dict(name='Russ Ferriday',
           email='russf@topia.com')
         me.send("system.project.created", crafter_data)
