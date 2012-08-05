@@ -5,17 +5,20 @@ import logging
 
 
 class Source(object):
-    """Represents ...
+    """Represents the client side of an interaction.
+       Currently only worries about sending.
     """
     def __init__(self, name, send_queue=None):
         assert type(name) == str
         self.name = name
-        our_hub = hub.Hub()
         if send_queue is None:
             # just create a queue named after the source
+            our_hub = hub.HUB
             self.send_queue = our_hub.get_or_create(name)
         elif isinstance(send_queue, str):
             # user wants us to make a queue with certain name
+            # that's different from our source name
+            our_hub = hub.HUB
             self.send_queue = our_hub.get_or_create(send_queue)
         else:
             # use queue we were handed
@@ -37,6 +40,9 @@ class Source(object):
 
 
 class ClientApp():
+    """ Simple app to send a message to a queue.
+        config.app provides a usage example
+    """
 
     def get_config(self, cf):
         config = ConfigParser.RawConfigParser()
