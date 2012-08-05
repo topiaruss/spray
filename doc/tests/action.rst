@@ -53,6 +53,7 @@ DummyEmailAction just prints some info, as you'll see below
       u'subject_en_uk': u'',
       u'time of day': u'',
       u'until': u''}
+  {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}
   [None]
 
 What we did above, handling the lookup of action based on event, is not
@@ -89,7 +90,7 @@ And do a single step on the processor to see what it does.
         u'subject_en_uk': u'Project reminder',
         u'time of day': u'',
         u'until': u'project submitted'}
-
+    {   'email': 'russf@topia.com', 'name': 'Russ Ferriday'}
 
 
 GoogleActionMatrix

@@ -145,8 +145,13 @@ class Action(observer.Observable):
 
     def __init__(self, **kwargs):
         super(Action, self).__init__(**kwargs)
+
+        #these are mandatory kwargs params
         self.event = kwargs['event']
         self.row = kwargs['row']
+
+        #internal setup
+        self.data = self.event.data
         self.setup_channel(self.row)
 
     def setup_channel(self, channel):
@@ -179,6 +184,7 @@ class DummyEmailAction(Action):
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(self.row)
+        pp.pprint(self.data)
         self.notify('end-handle')
 
 
@@ -198,7 +204,7 @@ class EmailAction(Action):
 
     def handle(self):
         self.notify('handle')
-        self.channel.send(data)
+        self.channel.send(self.data)
         self.notify('end-handle')
 
 
@@ -253,4 +259,3 @@ class Processor(object):
         BROADCASTER.notify(**kwargs)
 
 ACTIONS['email'] = AVAILABLE_ACTIONS['EmailAction']
-
