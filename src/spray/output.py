@@ -8,7 +8,7 @@ import smtplib
 
 AVAILABLE_TEMPLATE_REGISTRIES = {}
 
-class TemplateRegistry(object):
+class SimpleTemplateRegistry(object):
 
     reg = {}
 
@@ -33,8 +33,8 @@ class TemplateRegistry(object):
         template = self.lookup(style)
         return template.render(data)
 
-DEFAULT_TEMPLATE_REGISTRY = TemplateRegistry()
-TemplateRegistry.make_available('email')
+DEFAULT_TEMPLATE_REGISTRY = SimpleTemplateRegistry()
+SimpleTemplateRegistry.make_available('email')
 
 DESTINATION_REGISTRY = {}
 
@@ -141,7 +141,7 @@ class Channel(object):
     def select_registry(self):
         "allow flexibility setting the reg, and default to same name as medium"
         # TODO : improve this line
-        if isinstance(self.tempreg, TemplateRegistry):
+        if isinstance(self.tempreg, SimpleTemplateRegistry):
             return  # That's OK - the caller set the registry explicitly
         regname = self.tempreg
         if self.tempreg in (None, ''):

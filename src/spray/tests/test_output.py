@@ -41,13 +41,13 @@ class TestTemplateRegistration(unittest.TestCase):
     def test_default_template_registries(self):
         items = [(k, v.__class__.__name__) for k, v in\
           output.AVAILABLE_TEMPLATE_REGISTRIES.items()]
-        assert set(items) == set([('email', 'TemplateRegistry')])
+        assert set(items) == set([('email', 'SimpleTemplateRegistry')])
 
     def test_add_a_registry(self):
         output.AVAILABLE_TEMPLATE_REGISTRIES = {}
-        output.TemplateRegistry.make_available('email')
+        output.SimpleTemplateRegistry.make_available('email')
         tr_instance = output.AVAILABLE_TEMPLATE_REGISTRIES['email']
-        assert tr_instance.__class__.__name__ == "TemplateRegistry"
+        assert tr_instance.__class__.__name__ == "SimpleTemplateRegistry"
 
 
 class TestChannel(unittest.TestCase):
@@ -60,13 +60,13 @@ class TestChannel(unittest.TestCase):
         assert ch.tempreg == output.AVAILABLE_TEMPLATE_REGISTRIES['email']
 
     def test_init_to_custom_registry(self):
-        reg = output.TemplateRegistry()
+        reg = output.SimpleTemplateRegistry()
         ch = output.Channel(medium='email',  tempreg=reg,
           destination=self.destination)
         assert ch.tempreg == reg
 
     def test_select_custom_from_available_registry(self):
-        class SubTemplate(output.TemplateRegistry):
+        class SubTemplate(output.SimpleTemplateRegistry):
             pass
         SubTemplate.make_available('foo')
         ch = output.Channel(medium='email',  tempreg='foo',

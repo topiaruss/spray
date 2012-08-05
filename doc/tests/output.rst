@@ -12,7 +12,7 @@ more to do with graphic layout. You could call that "layout templating".  The
 templating that's happening in these docs is effectively a mixture of both.
 
   >>> from spray import output
-  >>> reg = output.TemplateRegistry()
+  >>> reg = output.SimpleTemplateRegistry()
 
 Register a default template. The key for a default template is always ''.
 
