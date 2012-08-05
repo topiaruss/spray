@@ -50,9 +50,21 @@ class TestTemplateRegistration(unittest.TestCase):
         assert tr_instance.__class__.__name__ == "SimpleTemplateRegistry"
 
 
+class TestFSBasedTemplateReg(unittest.TestCase):
+
+    def test_instantiation_without_params(self):
+        self.assertRaises(KeyError, output.FSBasedTemplateRegistry)
+        # tr = output.FSBasedTemplateRegistry()
+        # tr = tr
+
+    def test_instantiation_with_default_dir(self):
+        tr = output.FSBasedTemplateRegistry(templates_dir='./templates/email')
+        tr = tr
+
+
 class TestChannel(unittest.TestCase):
 
-    destination=output.DESTINATION_REGISTRY['DummyDestination']()
+    destination = output.DESTINATION_REGISTRY['DummyDestination']()
 
     def test_autoinit_to_email_channel_from_default_templ_reg(self):
         ch = output.Channel(medium='email',
@@ -72,3 +84,5 @@ class TestChannel(unittest.TestCase):
         ch = output.Channel(medium='email',  tempreg='foo',
           destination=self.destination)
         assert isinstance(ch.tempreg, SubTemplate)
+
+

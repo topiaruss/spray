@@ -1,24 +1,27 @@
+from boto import ses
 from jinja2 import Template
 from spray import interface
 from spray.utils import awsconfig
 from zope.interface import implements
 import boto
-from boto import ses
+import os
 import smtplib
 
 AVAILABLE_TEMPLATE_REGISTRIES = {}
 
 class SimpleTemplateRegistry(object):
 
-    reg = {}
+    def __init__(self, **kw):
+        super(SimpleTemplateRegistry, self).__init__()
+        self.reg = {}
 
     def _process_and_store(self, style, text):
         template = Template(text)
         self.reg[style] = template
 
     @classmethod
-    def make_available(cls, medium):
-        AVAILABLE_TEMPLATE_REGISTRIES[medium] = cls()
+    def make_available(cls, medium, **kwargs):
+        AVAILABLE_TEMPLATE_REGISTRIES[medium] = cls(**kwargs)
 
     def register(self, style, text):
         "register a template in this registry"
@@ -33,8 +36,23 @@ class SimpleTemplateRegistry(object):
         template = self.lookup(style)
         return template.render(data)
 
+class FSBasedTemplateRegistry(SimpleTemplateRegistry):
+
+    def __init__(self, **kw):
+        super(FSBasedTemplateRegistry, self).__init__(**kw)
+        try:
+            self.dirpath = kw['templates_dir']
+        except KeyError as e:
+            import sys
+            raise type(e), type(e)("Missing parameter to Constructor %s" % e), sys.exc_info()[2]
+
+        assert os.path.isdir(self.dirpath)
+
+
+
 DEFAULT_TEMPLATE_REGISTRY = SimpleTemplateRegistry()
 SimpleTemplateRegistry.make_available('email')
+FSBasedTemplateRegistry.make_available('hemail', templates_dir='./templates/email')
 
 DESTINATION_REGISTRY = {}
 
