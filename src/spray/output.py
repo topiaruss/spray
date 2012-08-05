@@ -16,7 +16,12 @@ class TemplateRegistry(object):
         template = Template(text)
         self.reg[style] = template
 
+    @classmethod
+    def make_available(cls, medium):
+        AVAILABLE_TEMPLATE_REGISTRIES[medium] = cls()
+
     def register(self, style, text):
+        "register a template in this registry"
         self._process_and_store(style, text)
 
     def lookup(self, style):
@@ -29,6 +34,7 @@ class TemplateRegistry(object):
         return template.render(data)
 
 DEFAULT_TEMPLATE_REGISTRY = TemplateRegistry()
+TemplateRegistry.make_available('email')
 
 DESTINATION_REGISTRY = {}
 
@@ -176,3 +182,7 @@ CHAN_REG = ChannelRegistry()
 email_channel = Channel(medium='email', tempreg=DEFAULT_TEMPLATE_REGISTRY,
                         destination=DESTINATION_REGISTRY['DummyDestination']())
 CHAN_REG.register(email_channel)
+
+# TEST
+
+DEFAULT_TEMPLATE_REGISTRY.register('', 'Hello {{ name }}!')

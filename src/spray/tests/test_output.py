@@ -32,3 +32,20 @@ class TestDefaultDestinationRegistryEntries(unittest.TestCase):
         dest = output.DESTINATION_REGISTRY['AmazonSESDestination']
         assert dest
 
+
+class TestTemplateRegistration(unittest.TestCase):
+
+    def test_available_dict_present(self):
+        assert hasattr(output, "AVAILABLE_TEMPLATE_REGISTRIES")
+
+    def test_default_template_registries(self):
+        items = [(k, v.__class__.__name__) for k, v in output.AVAILABLE_TEMPLATE_REGISTRIES.items()]
+        assert set(items) == set([('email', 'TemplateRegistry')])
+
+    def test_add_a_registry(self):
+        output.AVAILABLE_TEMPLATE_REGISTRIES = {}
+        output.TemplateRegistry.make_available('email')
+        tr_instance = output.AVAILABLE_TEMPLATE_REGISTRIES['email']
+        assert tr_instance.__class__.__name__ == "TemplateRegistry"
+
+

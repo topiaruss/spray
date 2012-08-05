@@ -121,9 +121,3 @@ And shorter template, and some headers
       ['russf@topia.com'],
       u'From: russf@topia.com\nTo: russf@topia.com\nNoSuch: Header\nSomeOther: NonHeader\n\nHello John!')
 
-
-
-
-
-
-
