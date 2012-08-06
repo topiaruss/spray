@@ -2,6 +2,7 @@ import gspread
 import os
 import threading
 import logging
+import time
 from spray import hub
 from spray import interface
 from spray import output
@@ -204,8 +205,12 @@ class EmailAction(Action):
 
     def handle(self):
         self.notify('handle')
-        self.channel.send(self.row, self.data)
-        self.notify('end-handle')
+        try:
+            self.channel.send(self.row, self.data)
+        except Exception as e:
+            self.notify('handler-exception', exception=e,
+              event=self.event, data=self.data)
+        self.notify('handle-end')
 
 
 EmailAction.register()
@@ -228,21 +233,26 @@ class Processor(object):
             self.start()
 
     def runner(self):
+        print 'running...'
         while self.is_alive:
-            print 'step'
             self.step()
-
 
     def step(self):
         event = self.queue.get_event()
         if event is None:
-            self.notify('got-None-Event')
-            print 'None'
+            self.notify('event-None')
+            time.sleep(2)
             return
-        self.notify('got-event', event=event)
-        actions = self.matrix.get_actions(event)
-        [a.handle() for a in actions]
-        self.notify('processed-event', actions=actions)
+        self.notify('event-got')
+        try:
+            actions = self.matrix.get_actions(event)
+            [a.handle() for a in actions]
+        except Exception as e:
+            self.notify('event-exception', exception=e, event=event)
+        finally:
+            event.delete()
+            self.notify('event-deleted')
+        self.notify('event-processed')
 
     def stop(self):
         if self.tt.is_alive():

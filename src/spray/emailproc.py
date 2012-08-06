@@ -22,7 +22,6 @@ def build_multipart_mail(row, data, tempreg):
         params['subject'] = subject
         data['subject'] = subject
 
-        import pdb; pdb.set_trace()
         rawtext = row['body_en_uk']
         lines = rawtext.split('\\n')
 
