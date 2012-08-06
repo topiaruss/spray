@@ -9,7 +9,7 @@ Development status : Pre-Alpha - contributions welcome.
 Getting started
 ---------------
 
-We're developing on Ubuntu 11.04, but OSX and other platforms
+We're developing on Ubuntu 11.04, and OSX. Other platforms
 should be fine too, given a few tweaks.
 
 Start by forking this repository, then clone it to your development
@@ -26,6 +26,13 @@ Issue the following commands::
     $ bin/buildout 
     $ bin/test
 
+Test will probably complain due to lack of credentials files, and a few test
+areas will have hardcoded email addresses that need looking at.
+
+Once you have access to an SQS queue, and an SES account, you can start sending 
+formatted messages, by running bin/sprayd, and using bin/client to send a single
+message to the queue.
+
 Docs
 ----
 
@@ -38,12 +45,14 @@ use the code.
 TODO
 ----
 
-+ Wrap an easy-to-install-and-manage local-runnable messaqe queue in the Hub/Queue abstractions. RabbitMQ?
++ extend the client side, to make it easier to generate our 
+  events and fill them with data.
 
-+ Open a path for AEMatrix templates to the templating/output module
++ clean up our template -- looks like it was copied from somewhere
 
-+ Write the CommsLog, to ensure that no duplicates are sent
++ implement and integrate the CommsLog, to ensure that no duplicates are sent
 
-+ Install @yenzenz 's dummy SMTP server under a destination?
++ design a stats collection/presentation concept
 
++ hunt, validate, and eliminate TODOs
 
