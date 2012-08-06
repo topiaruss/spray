@@ -204,7 +204,7 @@ class EmailAction(Action):
 
     def handle(self):
         self.notify('handle')
-        self.channel.send(self.data)
+        self.channel.send(self.row, self.data)
         self.notify('end-handle')
 
 

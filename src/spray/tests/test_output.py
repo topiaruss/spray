@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+
+from spray import emailproc
 from spray import output
 import unittest
+
 
 
 class TestAmazonSESDestination(unittest.TestCase):
@@ -8,14 +12,31 @@ class TestAmazonSESDestination(unittest.TestCase):
         ses = output.AmazonSESDestination()
         ses = ses  # fake-out syntax checker
 
-    def test_send(self):
+    # def test_send(self):
+    #     ses = output.AmazonSESDestination()
+    #     #these addresses work, since I have enabled them in my AWS SES sandbox
+    #     data = {'from': 'rf@sponsorcraft.com', 'subject': 'some subject',
+    #                 'to': ['russf@topia.com']}
+    #     body = """hi russ,
+    #     nice to see you!"""
+    #     ses.send(body, data)
+
+    def _build_dummy_mpart_send_data(self):
+        row, data = {}, {}
+        row['from'] = 'rf@sponsorcraft.com'
+        row['subject_en_uk'] = 'søme silly sübject'
+        row['body_en_uk'] = 'Hello {{ first_name }} !'
+        data['first_name'] = 'Russ'
+        data['recipients'] = ('russf@topia.com',)
+        return row, data
+
+    def test_mpart_send(self):
         ses = output.AmazonSESDestination()
-        #these addresses work, since I have enabled them in my AWS SES sandbox
-        data = {'from': 'rf@sponsorcraft.com', 'subject': 'some subject',
-                    'to': ['russf@topia.com']}
-        body = """hi russ,
-        nice to see you!"""
-        ses.send(body, data)
+        tr = output.SimpleTemplateRegistry()
+        tr.register('', "<head></head><body>{{ body }}</body>")
+        row, data = self._build_dummy_mpart_send_data()
+        mpart_params = emailproc.build_multipart_mail(row, data, tr)
+        ses.mpart_send(**mpart_params)
 
 
 class TestDefaultDestinationRegistryEntries(unittest.TestCase):

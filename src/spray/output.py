@@ -9,6 +9,7 @@ import boto
 import os
 import smtplib
 
+# TODO: retrofit a zope interface for Channel hierarchy and unify formal params
 
 AVAILABLE_TEMPLATE_REGISTRIES = {}
 
@@ -153,16 +154,22 @@ class AmazonSESDestination(Destination):
         assert type(recipients) == type([])
         self.conn.send_email(sender, subject, body, recipients)
 
+    def mpart_send(self, **kw):
+        self.conn.send_email(**kw)
+
 AmazonSESDestination.register()
 
 
 class Channel(object):
-    """ Channel binds a template to a destination and does
-    specific processing for a medium.
-    medium could be email, or sms - it knows therefore about channel
+    """ 
+    Channel binds a template to a destination and does
+    specific processing for a medium.  It's a place for adapter
+    code that compensates for differences in destination types and 
+    params.
+    medium: could be email, or sms - A chan therefore knows its own
     limitations.
-    tempreg is the template registry
-    destination is the implementation class, like smtp or SENDGRID
+    tempreg: is the template registry
+    destination: is the implementation class, like smtp or SENDGRID
     """
 
     def __init__(self, **kw):
@@ -200,17 +207,22 @@ class HTMLEmailChannel(Channel):
     if it can find one. Then it uses the delivery template to wrap the
     message. Finally it does a stoneage html pass, to check the message
     is legal for email.
+    It uses the mpart_send method of dest, since
     """
 
     def __init__(self, **kw):
         super(HTMLEmailChannel, self).__init__(**kw)
 
-    def render(self, data, style=''):
-        # first expand the content of the message using the template
-        # from the row.
+    def render(self, row, data, style=''):
+        import emailproc
+        send_params = emailproc.build_multipart_mail(row, data, self.tempreg)
+        return send_params
 
-        # Now render the body into the framework template
-        return self.tempreg.render(data, style)
+    def send(self, row, data, style=''):
+        #TODO: roll this into parent class - unify params
+        send_params = self.render(row, data, style)
+        self.dest.mpart_send(**send_params)
+
 
 
 class ChannelRegistry(object):
