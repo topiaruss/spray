@@ -12,14 +12,14 @@ class TestAmazonSESDestination(unittest.TestCase):
         ses = output.AmazonSESDestination()
         ses = ses  # fake-out syntax checker
 
-    # def test_send(self):
-    #     ses = output.AmazonSESDestination()
-    #     #these addresses work, since I have enabled them in my AWS SES sandbox
-    #     data = {'from': 'rf@sponsorcraft.com', 'subject': 'some subject',
-    #                 'to': ['russf@topia.com']}
-    #     body = """hi russ,
-    #     nice to see you!"""
-    #     ses.send(body, data)
+    def test_send(self):
+        ses = output.AmazonSESDestination()
+        #these addresses work, since I have enabled them in my AWS SES sandbox
+        data = {'from': 'rf@sponsorcraft.com', 'subject': 'some subject',
+                    'to': ['russf@topia.com']}
+        body = """hi russ,
+        nice to see you!"""
+        ses.send(body, data)
 
     def _build_dummy_mpart_send_data(self):
         row, data = {}, {}
@@ -27,7 +27,7 @@ class TestAmazonSESDestination(unittest.TestCase):
         row['subject_en_uk'] = 'søme silly sübject'
         row['body_en_uk'] = 'Hello {{ first_name }} !'
         data['first_name'] = 'Russ'
-        data['recipients'] = ('russf@topia.com',)
+        data['to'] = ('russf@topia.com',)
         return row, data
 
     def test_mpart_send(self):

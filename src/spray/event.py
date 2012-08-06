@@ -2,6 +2,8 @@ from boto.sqs.message import Message
 import base64
 import msgpack
 
+# TODO: Bring the events back into a proper hierarchy and
+# conformant to a new zope interface 
 
 class Event(object):
 
@@ -19,6 +21,10 @@ class Event(object):
  
     def __str__(self):
         return unicode(self).encode('utf-8')
+
+
+    def delete(self):
+        pass
 
 
 class SQSEventDecodeError(Exception):

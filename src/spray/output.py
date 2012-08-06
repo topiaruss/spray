@@ -152,7 +152,6 @@ class AmazonSESDestination(Destination):
         recipients = data['to']
         subject = data.get('subject') or data.get('subject_en_uk')
         assert type(sender) == type("")
-        import pdb; pdb.set_trace()
         assert type(recipients) in (list, tuple)
         self.conn.send_email(sender, subject, body, recipients)
 
