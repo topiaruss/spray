@@ -15,7 +15,7 @@ the processor can use to decide what to do when an event arrives.
 For testing, we use a canned file to initialize the matrix.
 
   >>> from spray import action 
-  >>> matrix = action.CSVActionMatrix('./doc/tests/Extract of System Event-Action matrix - Matrix.csv')
+  >>> matrix = action.CSVActionMatrix('./doc/tests/System Event-Action matrix - Matrix.csv')
 
 We must call update anytime the datasource may have changed.  This is the case
 irrespective which type of ActionMatrix we use.
@@ -46,6 +46,7 @@ DummyEmailAction just prints some info, as you'll see below
   >>> [a.handle() for a in actions]
   {   u'action type': u'email',
       u'body_en_uk': u'',
+      u'body_fmt': u'',
       u'frequency': u'',
       u'lag_time': u'',
       u'notes': u'',
@@ -82,12 +83,13 @@ And do a single step on the processor to see what it does.
 
   >>> the_processor.step()
     {   u'action type': u'email',
-        u'body_en_uk': u'Dear {crafter_first_name},\\n\\nThank you for starting a project on Sponsorcraft. You can view your project at {project_preview_url}.\\n\\nAfter submitting your project, our moderation team will review your project and reply with feedback within 1 working day.\\n\\nYour friendly Sponsorcraft website robot.\\n\\n\u2014\\nFor advice and tips on crafting an awesome project, visit http://sponsorcraft.com/college/\\n\\n [[Edit your project]]',
+        u'body_en_uk': u'Dear {{crafter_first_name}},\\n\\nThank you for starting a project on Sponsorcraft. You can view your project at {{project_preview_url}}.\\n\\nAfter submitting your project, our moderation team will review your project and reply with feedback within 1 working day.\\n\\nYour friendly Sponsorcraft website robot.\\n\\n\u2014\\nFor advice and tips on crafting an awesome project, visit http://sponsorcraft.com/college/\\n\\n [[Edit your project]]',
+        u'body_fmt': u'',
         u'frequency': u'1w',
         u'lag_time': u'1d',
-        u'notes': u'Send weekly after one week. Username if no first_name, last name.',
+        u'notes': u'Only send one reminder per crafter! Username if no first_name, last name.',
         u'recipient': u'crafter',
-        u'subject_en_uk': u'Project reminder',
+        u'subject_en_uk': u'Your draft project',
         u'time of day': u'',
         u'until': u'project submitted'}
     {   'email': 'russf@topia.com', 'name': 'Russ Ferriday'}
