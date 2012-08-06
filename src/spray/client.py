@@ -65,8 +65,8 @@ class ClientApp():
 
     def config_app(self, config):
         me = Source('me', 'testSQS')
-        crafter_data = dict(name='Russ Ferriday',
-          email='russf@topia.com')
+        crafter_data = dict(crafter_first_name='Russ', name="Russ Ferriday",
+          to=('russf@topia.com',))
         me.send("system.project.created", crafter_data)
         print "sent"
 

@@ -65,14 +65,15 @@ Now we use the medium ('dummy_email') to lookup the channel we want to send on.
   'dummy_email'
 
 So now we can send on it, using the default style, just by passing
-a dict with the data.  The template details are hidden by the Channel!
+a dummy row, and a dict with the data.  The template details are hidden by the Channel!
 
-  >>> got_chan.send(dict(name='John'))
+  >>> dummy_row = {}
+  >>> got_chan.send(dummy_row, dict(name='John'))
   Hello John!
 
 And we can send using the longer template, very simply
 
-  >>> got_chan.send(dict(name='John'), style='longer')
+  >>> got_chan.send(dummy_row, dict(name='John'), style='longer')
   Hello John! You are a valued friend!
 
 
@@ -92,7 +93,7 @@ mock SMTP destination, and bring the real smtp client into the picture.
   >>> chan_reg.register(emailchan)
   >>> got_chan = chan_reg.lookup('email')
   >>> data = {'name': 'John', 'from': 'russf@topia.com', 'to': ['russf@topia.com']}
-  >>> got_chan.send(data)
+  >>> got_chan.send(dummy_row, data)
   Called smtplib.SMTP()
   Called smtp_connection.connect('localhost', 9025)
   Called smtp_connection.sendmail(
@@ -102,7 +103,7 @@ mock SMTP destination, and bring the real smtp client into the picture.
 
 And let's send the same data through the same channel, with the longer template
 
-  >>> got_chan.send(data, style='longer')
+  >>> got_chan.send(dummy_row, data, style='longer')
   Called smtplib.SMTP()
   Called smtp_connection.connect('localhost', 9025)
   Called smtp_connection.sendmail(
@@ -113,7 +114,7 @@ And let's send the same data through the same channel, with the longer template
 And shorter template, and some headers
 
   >>> data['headers'] = dict(NoSuch='Header', SomeOther='NonHeader')
-  >>> got_chan.send(data)
+  >>> got_chan.send(dummy_row, data)
   Called smtplib.SMTP()
   Called smtp_connection.connect('localhost', 9025)
   Called smtp_connection.sendmail(

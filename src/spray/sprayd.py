@@ -1,4 +1,5 @@
 from spray import action
+from spray import output
 import argparse
 import ConfigParser
 import logging
@@ -40,7 +41,6 @@ def config_logging(config):
 
 
 def config_app(config):
-    #import pdb; pdb.set_trace()
 
     #get the matrix
     matrix_type = config.get('ActionMatrix', 'type')
@@ -48,10 +48,16 @@ def config_app(config):
     matrix = action.matrixFactory(matrix_type, kwargs)
     matrix.update()
 
+    # before starting the processor, setup a real destination sink for messages
+    # this overwrites the default, which is a simple Channel()
+    email_channel = output.HTMLEmailChannel(medium='email',
+      destination=output.DESTINATION_REGISTRY['AmazonSESDestination']())
+    output.CHAN_REG.register(email_channel)
+
     #the_processor = action.Processor('send', matrix, running=False)
     #this will start running immediately
     the_processor = action.Processor('testSQS', matrix)
-
+    assert the_processor  # trick the syntax checker
 
 
 def app():

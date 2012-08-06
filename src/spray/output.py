@@ -1,5 +1,6 @@
 from boto import ses
 from jinja2 import Template
+from spray import emailproc
 from spray import interface
 from spray.utils import awsconfig
 from spray.utils import genfind
@@ -120,7 +121,7 @@ class MockSmtpDestination(Destination):
         self.host, self.port = host, port
 
     def send(self, body, data):
-        sender = data['from']
+        sender = data.get('from')
         recipients = data['to']
         headers = data.get('headers', {})
         assert type(sender) == str
@@ -147,11 +148,12 @@ class AmazonSESDestination(Destination):
           region=region)
 
     def send(self, body, data):
-        sender = data['from']
+        sender = data.get('from') or emailproc.TEMP_FROM_ADDRESS
         recipients = data['to']
-        subject = data['subject']
+        subject = data.get('subject') or data.get('subject_en_uk')
         assert type(sender) == type("")
-        assert type(recipients) == type([])
+        import pdb; pdb.set_trace()
+        assert type(recipients) in (list, tuple)
         self.conn.send_email(sender, subject, body, recipients)
 
     def mpart_send(self, **kw):
@@ -197,9 +199,12 @@ class Channel(object):
     def render(self, data, style=''):
         return self.tempreg.render(data, style)
 
-    def send(self, data, style=''):
+    def send(self, row, data, style=''):
         body = self.render(data, style)
+        # temp kludge - I don't want the row goig into the destination...
+        data['subject_en_uk'] = row.get('subject_en_uk')
         self.dest.send(body, data)
+
 
 class HTMLEmailChannel(Channel):
     """
@@ -214,7 +219,6 @@ class HTMLEmailChannel(Channel):
         super(HTMLEmailChannel, self).__init__(**kw)
 
     def render(self, row, data, style=''):
-        import emailproc
         send_params = emailproc.build_multipart_mail(row, data, self.tempreg)
         return send_params
 
@@ -243,7 +247,8 @@ class ChannelRegistry(object):
 CHAN_REG = ChannelRegistry()
 
 # TODO: replace hardwired channels with sprayd.cfg channels
-email_channel = Channel(medium='email',  # tempreg=DEFAULT_TEMPLATE_REGISTRY,
+# in the meantime, sprayd.py switches the destination to AmazonSESDestination
+email_channel = Channel(medium='email',  
                         destination=DESTINATION_REGISTRY['DummyDestination']())
 CHAN_REG.register(email_channel)
 

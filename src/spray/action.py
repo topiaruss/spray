@@ -232,6 +232,7 @@ class Processor(object):
             print 'step'
             self.step()
 
+
     def step(self):
         event = self.queue.get_event()
         if event is None:
