@@ -25,15 +25,20 @@ def build_multipart_mail(row, data, tempreg):
         import pdb; pdb.set_trace()
         rawtext = row['body_en_uk']
         lines = rawtext.split('\\n')
-        brlines = '<br/>\n'.join(lines)
-        template = jinja2.Template(brlines)  # TODO: Cache?
+
+        # create the html version
+        template = jinja2.Template('<br/>\n'.join(lines))  # TODO: Cache?
         body = template.render(data)
         data['body'] = body
-
-        params['text_body'] = '\n'.join(lines)
-        params['body'] = None  # MUST FORCE AWS TO DO MULTPPART
         style = row.get('body_fmt', '')
         params['html_body'] = tempreg.render(data, style)
+
+        # text version
+        template = jinja2.Template('\n'.join(lines))  # TODO: Cache?
+        body = template.render(data)
+        params['text_body'] = body
+        params['body'] = None  # MUST FORCE AWS TO DO MULTIPART
+
         LOG.debug('mpart data %s' % data)
         LOG.debug('mpart params %s' % params)
         return params
