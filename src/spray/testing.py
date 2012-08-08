@@ -14,6 +14,9 @@ checker = renormalizing.RENormalizing([
      "ObjectId('4e7ddf12e138237403000000')"),
     (re.compile(r"object at 0x[0-9a-f]*>"),
      "object at 0x001122>"),
+    (re.compile('at 0x[0-9a-f]+'), 
+     'at <SOME ADDRESS>'),
+
     #flexible isoformat T or space
     (re.compile(r"20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])(T| )"\
                  "\d\d:\d\d\:\d\d.[0-9]*Z*"),

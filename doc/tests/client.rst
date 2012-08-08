@@ -22,8 +22,10 @@ messaging system.
 
 We can send events and associated data using the source
 
+TODO: revisit this... out of date...
+
   >>> crafter_data = dict(name='Russ Ferriday', email='russf@topia.com')
-  >>> my_source.send("system.project.created", crafter_data)
+  >>> _=my_source.send("system.project.created", crafter_data)
 
 
 Let's make that simpler
@@ -49,12 +51,125 @@ flag this by giving the string name of the queue as the second parameter.
   'send'
 
 
+Providing Data
+--------------
+
+In our csv file we use for tests (btw, this is intended to become our production
+matrix, so we are not hiding anything...), called 
+
+ System Event-Action matrix - Matrix.csv, 
+
+there is the event id 'system.project.created'. To send that event, I need
+to provide the following data::
+
+   crafter_first_name
+   project_preview_url
+
+This is an easy case. Later, we'll need to provide perhaps eight fields, and 
+that will become quite onerous. Once an event is running and a message is
+being sent, if the marketing deparment decides to add a new field to that
+message, then the code that's generating events will be one field short
+of its data.  Two points here: 1. it is essential that the message 
+building not fail if a field is missing.  2. it would be nice if in most
+cases, adding a field did not cause any more developer work, and 
+in the extreme case, that we were told about any field that could not 
+be filled. 
+
+This Section describes how we plan to do all that.
+
+The basic notion is that we can pass a bundle of context to all top-level 
+event-sending calls. What is in this bundle will depend on the context
+of the call. If we are logged in we can pass either the user id, or
+the user object, if we have it to hand.  If we are on a project page
+we can pass in the project id, or the project object. If we are also
+logged in, we'll pass in the user. If not, we won't ;)
+
+It will be up to the top-level event to turn the information it has into
+a field value, if it can.  How can it magically do this? Easy! Read on.
 
 
+First let's see what field names are in the message for the event.  
+We won't normally use this at runtime, but it's handy for development
+and this call will be used internally by the client system.
 
+(We'll need a matrix for this...)
 
+  >>> from spray import matrix
+  >>> mm = matrix.CSVActionMatrix('./doc/tests/System Event-Action matrix - Matrix.csv')
+  >>> mm.update()
 
+  >>> src = client.Source('src', matrix=mm)
+  >>> src.get_event_field_tokens('system.project.created')
+  ['crafter_first_name', 'project_preview_url']
 
+  >>> src.get_event_field_tokens()['moderator.project.moderated']
+  ['crafter_first_name', 'moderation_table']
 
+Now let's Mock the inside of src, the bit that sends over the wire...
 
+  >>> from mock import MagicMock
+  >>> src._send = MagicMock()
+  >>> status = src.send('system.project.created')
+  >>> src._send.assert_called_once_with('system.project.created', {})
 
+No magic so far. Without the mock, we would send the event id, but nothing else.
+This is not good for the spray backend, but it will just have to take what it
+gets. 
+
+Let's see what's in status
+  
+  >>> sorted(status['unfilled'])
+  ['crafter_first_name', 'project_overview_url']
+
+So, helpfully, the send method has told us that it was unable to fill two fields.
+
+What do we need to do to help those fields get filled?
+
+  >>> def crafter_first_name_callback(crafter):
+  >>> ... crafter_first_name_callback.event_id = 'crafter_first_name'
+  >>> ... return 'crafty'
+  >>> ...
+  >>> def project_overview_url_callback(project):
+  >>> ... project_overview_url_callback.event_id = 'project_overview_url'
+  >>> ... return 'sillyproject'
+  >>> ...
+  >>> client.register_callback(crafter_first_name_callback)
+  >>> client.register_callback(project_overview_url_callback)
+
+what did we just cause to happen?
+
+  >>> client.callbacks 
+  {'crafter_first_name': (<function crafter_first_name_callback at <SOME ADDRESS>>, (crafter,)),
+   'project_overview_url': (<function project_overview_url_callback at <SOME ADDRESS>>, (project,)),
+  }
+
+(note: f.func_code.co_varnames)
+Ah. I get it.  So now, if I make the same call again, giving context...
+
+  >>> src._send = MagicMock()
+  >>> context = dict(project=object())
+  >>> status = src.send('system.project.created', context)
+  >>> expect = dict(project_overview_url='sillyproject'}
+  >>> src._send.assert_called_once_with('system.project.created', expect)  
+  >>> sorted(status['unfilled'])
+  ['crafter_first_name']
+  >>> sorted(status['no_source'])
+  ['crafter']
+
+Oh, so if sender was given a callback, but the source for that callback to do its
+job was not available, you tell me the name of the source. 
+
+My god, that's clever.  So...
+
+  >>> src._send = MagicMock()
+  >>> context = dict(project=object(), crafter=object())
+  >>> status = src.send('system.project.created', context)
+  >>> expect = dict(crafter_first_name='crafty', project_overview_url='sillyproject'}
+  >>> src._send.assert_called_once_with('system.project.created', expect)  
+  >>> sorted(status['unfilled'])
+  []
+
+  >>> sorted(status['nosource'])
+  []
+
+Cool! Ship it!

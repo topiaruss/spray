@@ -1,16 +1,33 @@
 from spray import hub
+from spray import matrix
 import argparse
 import ConfigParser
 import logging
+
+LOG = logging.getLogger(__name__)
+
+
+def get_undef(template):
+    from jinja2 import Environment, meta, TemplateSyntaxError
+    env = Environment()
+    try:
+        ast = env.parse(template)
+        return tuple(meta.find_undeclared_variables(ast))
+    except TemplateSyntaxError as e:
+        print e
+        print template
+        LOG.exception("Broken token - possibly a space in {{}}")
+        return ()
 
 
 class Source(object):
     """Represents the client side of an interaction.
        Currently only worries about sending.
     """
-    def __init__(self, name, send_queue=None):
+    def __init__(self, name, send_queue=None, matrix=None):
         assert type(name) == str
         self.name = name
+        self.matrix = matrix
         if send_queue is None:
             # just create a queue named after the source
             our_hub = hub.HUB
@@ -30,13 +47,33 @@ class Source(object):
     def __str__(self):
         return unicode(self).encode("utf-8")
 
-    def send(self, event_id, data={}):
+    def _send(self, event_id, data={}):
         """Sends the event with passed event_id and data to the queue.
         """
         assert type(event_id) == str
         assert type(data) == dict
 
         self.send_queue.create_and_send(event_id, data)
+
+    def send(self, event_id, context={}):
+        self._send(event_id, context)
+        return dict(unfilled=[], no_source=[])
+
+    def get_event_field_tokens(self, event_id=None):
+        rows = self.matrix.get_rows_for_event(event_id)
+        events = {}
+        for r in rows:
+            bfields = [v for k, v in r.items() if k.startswith('body')]
+            for f in bfields:
+                events.setdefault(r['event id'], []).extend(get_undef(f))
+        # uniquify
+        fevents = {}
+        for k, v in events.items():
+            fevents[k] = sorted(list(set(v)))
+        events = fevents
+        if len(events) == 1:
+            return events.values()[0]
+        return events
 
 
 class ClientApp():
