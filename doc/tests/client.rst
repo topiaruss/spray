@@ -172,4 +172,24 @@ My god, that's clever.  And if I do it with a full set of context?
   >>> sorted(status['no_source'])
   []
 
+Let's prove it works when the callbacks are in a separate package
+
+  >>> from spray.tests import callbacks
+  >>> src._send = MagicMock()
+  >>> context = dict(project=object(), crafter=object())
+  >>> status = src.send('system.project.created', context)
+  roger
+  kilroy
+
+  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject')
+  >>> src._send.assert_called_once_with('system.project.created', expect)  
+  >>> sorted(status['unfilled'])
+  []
+
+  >>> sorted(status['no_source'])
+  []
+
+Now we can fill out all the callbacks for the client, and ensure we pass all relevant 
+context when we send events, and we are done ;)
+
 Cool! Ship it!
