@@ -2,12 +2,20 @@ from spray import hub
 from spray import matrix
 import argparse
 import ConfigParser
+import itertools
 import logging
 
 LOG = logging.getLogger(__name__)
 
+CALLBACKS = {}
+
+def register_callback(func):
+    event_id = func.event_id
+    CALLBACKS[event_id] = func
+
 
 def get_undef(template):
+    "returns the tokens from a jinja template"
     from jinja2 import Environment, meta, TemplateSyntaxError
     env = Environment()
     try:
@@ -16,7 +24,8 @@ def get_undef(template):
     except TemplateSyntaxError as e:
         print e
         print template
-        LOG.exception("Broken token - possibly a space in {{}}")
+        LOG.exception("Broken token - possibly a space in {{}}. template: %s" %
+          template)
         return ()
 
 
@@ -55,11 +64,37 @@ class Source(object):
 
         self.send_queue.create_and_send(event_id, data)
 
+    def _do_callbacks(self, event_id, context):
+        # the tokens we need for this event
+        tokens = self.get_event_field_tokens(event_id)
+
+        # tokens we know we can't do -- no callbacks for them
+        unfilled = set(tokens).difference(set(CALLBACKS.keys()))
+
+        # the callbacks we want to try
+        cbs = set(tokens).intersection(set(CALLBACKS.keys()))
+        no_source = []
+        for c in cbs:
+            if set(context.keys()).issuperset(set(c.func_code.co_varnames)):
+                c(context[v] for v in c.func_code.co_varnames)
+            else:
+                no_source.append(set(c.func_code.co_varnames) -
+                    set(context.keys()))
+        return dict(no_source=no_source, unfilled=unfilled)
+
+   #   (note: f.func_code.co_varnames)
+      
+
+
     def send(self, event_id, context={}):
+        ret = dict(unfilled=[], no_source=[])
+        if self.matrix is not None:
+            ret = self._do_callbacks(event_id, context)
         self._send(event_id, context)
-        return dict(unfilled=[], no_source=[])
+        return ret
 
     def get_event_field_tokens(self, event_id=None):
+        "returns the tokens for ALL rows under an event"
         rows = self.matrix.get_rows_for_event(event_id)
         events = {}
         for r in rows:

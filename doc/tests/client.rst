@@ -119,37 +119,37 @@ gets.
 Let's see what's in status
   
   >>> sorted(status['unfilled'])
-  ['crafter_first_name', 'project_overview_url']
+  ['crafter_first_name', 'project_preview_url']
 
 So, helpfully, the send method has told us that it was unable to fill two fields.
 
 What do we need to do to help those fields get filled?
 
   >>> def crafter_first_name_callback(crafter):
-  >>> ... crafter_first_name_callback.event_id = 'crafter_first_name'
-  >>> ... return 'crafty'
-  >>> ...
-  >>> def project_overview_url_callback(project):
-  >>> ... project_overview_url_callback.event_id = 'project_overview_url'
-  >>> ... return 'sillyproject'
-  >>> ...
+  ...     return 'crafty'
+  ...
+  >>> crafter_first_name_callback.event_id = 'crafter_first_name'
+  ...
+  >>> def project_preview_url_callback(project):
+  ...     return 'sillyproject'
+  ...
+  >>> project_preview_url_callback.event_id = 'project_preview_url'
+
   >>> client.register_callback(crafter_first_name_callback)
-  >>> client.register_callback(project_overview_url_callback)
+  >>> client.register_callback(project_preview_url_callback)
 
 what did we just cause to happen?
 
-  >>> client.callbacks 
-  {'crafter_first_name': (<function crafter_first_name_callback at <SOME ADDRESS>>, (crafter,)),
-   'project_overview_url': (<function project_overview_url_callback at <SOME ADDRESS>>, (project,)),
-  }
+  >>> sorted(client.CALLBACKS.items()) 
+  [('crafter_first_name', <function crafter_first_name_callback at <SOME ADDRESS>>), 
+   ('project_preview_url', <function project_preview_url_callback at <SOME ADDRESS>>)]
 
-(note: f.func_code.co_varnames)
 Ah. I get it.  So now, if I make the same call again, giving context...
 
   >>> src._send = MagicMock()
   >>> context = dict(project=object())
   >>> status = src.send('system.project.created', context)
-  >>> expect = dict(project_overview_url='sillyproject'}
+  >>> expect = dict(project_preview_url='sillyproject'}
   >>> src._send.assert_called_once_with('system.project.created', expect)  
   >>> sorted(status['unfilled'])
   ['crafter_first_name']
@@ -164,7 +164,7 @@ My god, that's clever.  So...
   >>> src._send = MagicMock()
   >>> context = dict(project=object(), crafter=object())
   >>> status = src.send('system.project.created', context)
-  >>> expect = dict(crafter_first_name='crafty', project_overview_url='sillyproject'}
+  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject'}
   >>> src._send.assert_called_once_with('system.project.created', expect)  
   >>> sorted(status['unfilled'])
   []
