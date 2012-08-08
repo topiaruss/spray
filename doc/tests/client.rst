@@ -149,27 +149,27 @@ Ah. I get it.  So now, if I make the same call again, giving context...
   >>> src._send = MagicMock()
   >>> context = dict(project=object())
   >>> status = src.send('system.project.created', context)
-  >>> expect = dict(project_preview_url='sillyproject'}
+  >>> expect = dict(project_preview_url='sillyproject')
   >>> src._send.assert_called_once_with('system.project.created', expect)  
   >>> sorted(status['unfilled'])
-  ['crafter_first_name']
+  []
   >>> sorted(status['no_source'])
   ['crafter']
 
 Oh, so if sender was given a callback, but the source for that callback to do its
 job was not available, you tell me the name of the source. 
 
-My god, that's clever.  So...
+My god, that's clever.  And if I do it with a full set of context?
 
   >>> src._send = MagicMock()
   >>> context = dict(project=object(), crafter=object())
   >>> status = src.send('system.project.created', context)
-  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject'}
+  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject')
   >>> src._send.assert_called_once_with('system.project.created', expect)  
   >>> sorted(status['unfilled'])
   []
 
-  >>> sorted(status['nosource'])
+  >>> sorted(status['no_source'])
   []
 
 Cool! Ship it!
