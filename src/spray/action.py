@@ -73,10 +73,10 @@ class DummyEmailAction(Action):
         self.notify('start-handle')
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
-        thin = {}
+        selection = {}
         for k in ('action type', 'event id', 'recipient'):
-            thin[k] = self.row[k]
-        pp.pprint(thin)
+            selection[k] = self.row[k]
+        pp.pprint(selection)
         pp.pprint(self.data)
         self.notify('end-handle')
 

@@ -1,4 +1,5 @@
 from spray import action
+from spray import matrix
 from spray import output
 import argparse
 import ConfigParser
@@ -44,9 +45,9 @@ def config_app(config):
 
     #get the matrix
     matrix_type = config.get('ActionMatrix', 'type')
-    kwargs = dict(config.items('ActionMatrix')[1:])
-    matrix = action.matrixFactory(matrix_type, kwargs)
-    matrix.update()
+    kw = dict(config.items('ActionMatrix')[1:])
+    mm = matrix.matrixFactory(matrix_type, kw)
+    mm.update()
 
     # before starting the processor, setup a real destination sink for messages
     # this overwrites the default, which is a simple Channel()
@@ -56,13 +57,17 @@ def config_app(config):
 
     #the_processor = action.Processor('send', matrix, running=False)
     #this will start running immediately
-    the_processor = action.Processor('testSQS', matrix)
+    the_processor = action.Processor('testSQS', mm)
     assert the_processor  # trick the syntax checker
 
 
-def app():
+def app(testing=False):
+
+    #TODO: improve testing. Currently we only ensure that imports work
+    if testing:
+        return
+
     print "hi"
-    #atexit.register(cleanup)
 
     arg = get_command_line_args()
     config = get_config(arg.config_file)
