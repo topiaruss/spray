@@ -142,7 +142,7 @@ class ClientApp():
         me = Source('me', 'testSQS')
         crafter_data = dict(crafter_first_name='Russ', name="Russ Ferriday",
           to=('russf@topia.com',))
-        me.send("system.project.created", crafter_data)
+        me.send("system.project.drafted", crafter_data)
         print "sent"
 
     def __call__(self):

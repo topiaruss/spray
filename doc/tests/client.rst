@@ -25,7 +25,7 @@ We can send events and associated data using the source
 TODO: revisit this... out of date...
 
   >>> crafter_data = dict(name='Russ Ferriday', email='russf@topia.com')
-  >>> _=my_source.send("system.project.created", crafter_data)
+  >>> _=my_source.send("system.project.drafted", crafter_data)
 
 
 Let's make that simpler
@@ -59,7 +59,7 @@ matrix, so we are not hiding anything...), called
 
  System Event-Action matrix - Matrix.csv, 
 
-there is the event id 'system.project.created'. To send that event, I need
+there is the event id 'system.project.drafted'. To send that event, I need
 to provide the following data::
 
    crafter_first_name
@@ -99,7 +99,7 @@ and this call will be used internally by the client system.
   >>> mm.update()
 
   >>> src = client.Source('src', matrix=mm)
-  >>> src.get_event_field_tokens('system.project.created')
+  >>> src.get_event_field_tokens('system.project.drafted')
   ['crafter_first_name', 'project_preview_url']
 
   >>> src.get_event_field_tokens()['moderator.project.moderated']
@@ -109,8 +109,8 @@ Now let's Mock the inside of src, the bit that sends over the wire...
 
   >>> from mock import MagicMock
   >>> src._send = MagicMock()
-  >>> status = src.send('system.project.created')
-  >>> src._send.assert_called_once_with('system.project.created', {})
+  >>> status = src.send('system.project.drafted')
+  >>> src._send.assert_called_once_with('system.project.drafted', {})
 
 No magic so far. Without the mock, we would send the event id, but nothing else.
 This is not good for the spray backend, but it will just have to take what it
@@ -148,9 +148,9 @@ Ah. I get it.  So now, if I make the same call again, giving context...
 
   >>> src._send = MagicMock()
   >>> context = dict(project=object())
-  >>> status = src.send('system.project.created', context)
+  >>> status = src.send('system.project.drafted', context)
   >>> expect = dict(project_preview_url='sillyproject')
-  >>> src._send.assert_called_once_with('system.project.created', expect)  
+  >>> src._send.assert_called_once_with('system.project.drafted', expect)  
   >>> sorted(status['unfilled'])
   []
   >>> sorted(status['no_source'])
@@ -163,9 +163,9 @@ My god, that's clever.  And if I do it with a full set of context?
 
   >>> src._send = MagicMock()
   >>> context = dict(project=object(), crafter=object())
-  >>> status = src.send('system.project.created', context)
+  >>> status = src.send('system.project.drafted', context)
   >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject')
-  >>> src._send.assert_called_once_with('system.project.created', expect)  
+  >>> src._send.assert_called_once_with('system.project.drafted', expect)  
   >>> sorted(status['unfilled'])
   []
 
@@ -177,12 +177,12 @@ Let's prove it works when the callbacks are in a separate package
   >>> from spray.tests import callbacks
   >>> src._send = MagicMock()
   >>> context = dict(project=object(), crafter=object())
-  >>> status = src.send('system.project.created', context)
+  >>> status = src.send('system.project.drafted', context)
   roger
   kilroy
 
   >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject')
-  >>> src._send.assert_called_once_with('system.project.created', expect)  
+  >>> src._send.assert_called_once_with('system.project.drafted', expect)  
   >>> sorted(status['unfilled'])
   []
 

@@ -45,19 +45,20 @@ Now let's invoke the handler(s) for the event. The current
 DummyEmailAction just prints some info, as you'll see below
 
   >>> [a.handle() for a in actions]
-  {   u'action type': u'email',
-      u'body_en_uk': u'',
-      u'body_fmt': u'',
-      u'event id': u'user.profile.register',
-      u'frequency': u'',
-      u'lag_time': u'',
-      u'notes': u'',
-      u'recipient': u'crafter',
-      u'subject_en_uk': u'',
-      u'time of day': u'',
-      u'until': u''}
-  {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}
-  [None]
+    {   u'action type': u'email',
+        u'body_en_uk': u'Dear Sponsorcraft Admin,\\n\\nA new user has joined Sponsorcraft with email address {user_email}.\\n\\nYour friendly Sponsorcraft website robot.',
+        u'body_fmt': u'',
+        u'event id': u'user.profile.register',
+        u'frequency': u'',
+        u'lag_time': u'',
+        u'match_constant_strings_line': u'94-105',
+        u'notes': u'',
+        u'recipient': u'admins',
+        u'subject_en_uk': u'New user',
+        u'time of day': u'',
+        u'until': u''}
+    {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}
+    [None]
 
 What we did above, handling the lookup of action based on event, is not
 something that the users of our system will normally do. Instead, we 
@@ -79,17 +80,18 @@ It will explicitly use the 'send' queue.
 
 Let's send something into the queue using this source
 
-  >>> _=source.send("system.project.created", user_data)
+  >>> _=source.send("system.project.drafted", user_data)
 
 And do a single step on the processor to see what it does.  
 
   >>> the_processor.step()
     {   u'action type': u'email',
-        u'body_en_uk': u'Dear {{crafter_first_name}},\\n\\nThank you for starting a project on Sponsorcraft. You can view your project at {{project_preview_url}}.\\n\\nAfter submitting your project, our moderation team will review your project and reply with feedback within 1 working day.\\n\\nYour friendly Sponsorcraft website robot.\\n\\n\u2014\\nFor advice and tips on crafting an awesome project, visit http://sponsorcraft.com/college/\\n\\n [[Edit your project]]',
+        u'body_en_uk': u'Dear {{crafter_first_name}},\\n\\nYou have a project in draft on Sponsorcraft.\\n\\nYou can view your project at {{project_preview_url}}.\\n\\nYour friendly Sponsorcraft website robot.\\n\\n\u2014\\nFor advice and tips on crafting an awesome project, visit https://sponsorcraft.com/college/\\n\\n [[Edit your project]]',
         u'body_fmt': u'',
-        u'event id': u'system.project.created',
+        u'event id': u'system.project.drafted',
         u'frequency': u'1w',
         u'lag_time': u'1d',
+        u'match_constant_strings_line': u'',
         u'notes': u'Only send one reminder per crafter! Username if no first_name, last name.',
         u'recipient': u'crafter',
         u'subject_en_uk': u'Your draft project',
@@ -124,28 +126,34 @@ Now we can proceed and get the demo spreadsheet. Bear in mind this goes to Googl
 for data, so it stretches your tests a bit.  If you find this block commented out
 with ".." you know why...
 
-..   >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dENnMWQwM2dOTTNaZWo3M1JZOEtVa1E'
+  .. >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dENnMWQwM2dOTTNaZWo3M1JZOEtVa1E'
+  >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AoY07RiDm5HYdDR6R2hiSVE4aWI1azlMYlRnZlhSSVE#gid=0'
 
-..   >>> matrix = action.GoogleActionMatrix(creds, url)
-..   >>> matrix.update()
+  >>> mm = matrix.GoogleActionMatrix(creds, url)
+  >>> mm.update()
 
-.. Now we just repeat the code above to test that the Google matrix works just the same
-.. as the CSV matrix
+Now we just repeat the code above to test that the Google matrix works just the same
+as the CSV matrix
 
-..   >>> the_processor = action.Processor('send', matrix, running=False)
-..   >>> source = client.Source('fake_events', 'send')
-..   >>> source.send("user.profile.register", user_data)
-..   >>> the_processor.step()
-..   action: email, data: {'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}.
-..   {   'action type': 'email',
-..       'body_en_uk': u'Dear {crafter_first_name},\\n\\nThank you for starting a project on Sponsorcraft. You can view your project at {project_preview_url}.\\n\\nAfter submitting your project, our moderation team will review your project and reply with feedback within 1 working day.\\n\\nYour friendly Sponsorcraft website robot.\\n\\n\u2014\\nFor advice and tips on crafting an awesome project, visit http://sponsorcraft.com/college/\\n\\n [[Edit your project]]',
-..       'frequency': '1w',
-..       'lag_time': '1d',
-..       'notes': 'Send weekly after one week. Username if no first_name, last name.',
-..       'recipient': 'crafter',
-..       'subject_en_uk': 'Project reminder',
-..       'until': 'project submitted'}
-..   processed step
+  >>> the_processor = action.Processor('send', mm, running=False)
+  >>> source = client.Source('fake_events', 'send')
+  >>> source.send("user.profile.register", user_data)
+  {'unfilled': [], 'no_source': []}
+
+  >>> step = the_processor.step()  
+    {   'action type': 'email',
+        'body_en_uk': u'Dear {{crafter_first_name}},\\n\\nYou have a project in draft on Sponsorcraft.\\n\\nYou can view your project at {{project_preview_url}}.\\n\\nYour friendly Sponsorcraft website robot.\\n\\n\u2014\\nFor advice and tips on crafting an awesome project, visit https://sponsorcraft.com/college/\\n\\n [[Edit your project]]',
+        'body_fmt': '',
+        'event id': 'system.project.drafted',
+        'frequency': '1w',
+        'lag_time': '1d',
+        'match_constant_strings_line': '',
+        'notes': 'Only send one reminder per crafter! Username if no first_name, last name.',
+        'recipient': 'crafter',
+        'subject_en_uk': 'Your draft project',
+        'time of day': '',
+        'until': 'project submitted'}
+    {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}
 
 
 

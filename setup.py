@@ -35,7 +35,7 @@ messaging or social actions""",
       zip_safe=False,
       install_requires=[
           'boto',
-          'gspread',
+          'gspread>=0.0.13',
           'jinja2',
           'msgpack-python',
           'zope.interface'
@@ -45,4 +45,6 @@ messaging or social actions""",
         client = spray.client:app
         sprayd = spray.sprayd:app
       """,
+      dependency_links=[
+      'http://github.com/Sponsorcraft/gspread/tarball/master#egg=gspread-0.0.13'],
       )
