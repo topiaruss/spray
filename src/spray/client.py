@@ -2,12 +2,13 @@ from spray import hub
 from spray import matrix
 import argparse
 import ConfigParser
-import itertools
 import logging
+#Note : Some imports are deferred for conditional loading
 
 LOG = logging.getLogger(__name__)
 
 CALLBACKS = {}
+
 
 def register_callback(func):
     event_id = func.event_id
@@ -75,7 +76,7 @@ class Source(object):
         cbs = set(tokens).intersection(set(CALLBACKS.keys()))
 
         no_source = []
-        results = {}
+        results = context.copy()
         for k in cbs:
             c = CALLBACKS[k]
 
@@ -85,7 +86,6 @@ class Source(object):
                 no_source.extend(set(c.func_code.co_varnames) -
                     set(context.keys()))
         return dict(no_source=no_source, unfilled=unfilled, results=results)
-
 
     def send(self, event_id, context={}):
         ret = dict(unfilled=[], no_source=[])
@@ -153,6 +153,137 @@ class ClientApp():
         self.config_logging(config)
         self.config_app(config)
 
+
 #This is used by setup.py and buildout.cfg to generate an app in bin/
 def app():
     ClientApp()()
+
+import string
+template = string.Template("""
+# Used for...
+# $used
+def ${cb}_callback(crafter_user_project_system):
+    return '[${cb}]'
+
+${cb}_callback.event_id = '${cb}'
+client.register_callback(${cb}_callback)
+
+""")
+
+
+class DryRun():
+    """ Simple app to create a sample email to all event_id
+    """
+
+    def get_config(self, cf):
+        config = ConfigParser.RawConfigParser()
+        config.readfp(cf)
+        return config
+
+    def config_logging(self, config):
+        level = eval(config.get('Logging', 'level'))
+        format = config.get('Logging', 'format')
+        lfile = config.get('Logging', 'filename')
+        logging.basicConfig(level=level, format=format, filename=lfile)
+
+    def get_command_line_args(self):
+        pp = argparse.ArgumentParser(
+          description='Send all the messages on the config page')
+
+        pp.add_argument('-c', '--config_file', metavar='file',
+          type=argparse.FileType('r'), default='dryrun.cfg',
+          help='a config file (defaults to sprayd.cfg)')
+
+        pp.add_argument('-q', '--queue', default='',
+          help='the queue you want to send to (defaults to sprayd.cfg)')
+
+        pp.add_argument('-m', '--matrix', default='',
+          help='the matrix to test (defaults to our main matrix)')
+
+        pp.add_argument('-t', '--to', default='',
+          help='the delivery email address(es) (defaults to russf@topia.com)')
+
+        # pp.add_argument('-s', '--stuffing', default='',
+        #   help='the matrix to stuff from (defaults to our main matrix)')
+
+        return pp.parse_args()
+
+    def config_app(self, config, arg):
+        self.recip = arg.to.split() or config.get('Email', 'recip').split()
+        self.sender = config.get('Email', 'from')
+        self.bcc = config.get('Email', 'bcc').split()
+
+        # setup a matrix
+        url = arg.matrix or config.get('ActionMatrix', 'url')
+        if url.startswith('http'):
+            creds = matrix.Credentials()
+            self.mm = matrix.GoogleActionMatrix(creds, url)
+        else:
+            self.mm = matrix.CSVActionMatrix(url)
+        self.mm.update()
+
+        #now setup a queue, but with a custom matrix
+        queue = arg.queue or config.get('Queue', 'queue') or 'testSQS'
+        self.me = Source('me', queue, self.mm)
+
+    #TODO setup stuffing
+    # surl = arg.stuffing or config.get('Stuffing', url)
+    # surl = surl
+    def build_stuffing(self):
+        self.context = dict(project=dict(),
+                            user=dict(),
+                            system=dict())
+
+    def explore_events(self):
+        "summarizes the callbacks needed and for which events"
+        events = self.mm.data.keys()
+        needs = {}
+        for e in events:
+            tokens = self.me.get_event_field_tokens(e)
+            needs[e] = tokens
+        depends = {}
+        for k, v in needs.items():
+            for token in v:
+                depends.setdefault(token, set()).add(k)
+        # import pdb; pdb.set_trace()
+        return depends
+
+    def put_callbacks(self, depends):
+        "generates a file with all the callback stubs we know about"
+        keys = sorted(depends.keys())
+        with open('fullcallbacks.py', 'w') as ff:
+            ff.write("from spray import client\n\n")
+            for k in keys:
+                used = sorted(depends[k])
+                used = '\n# '.join(used)
+                ff.write(template.substitute({'cb': k, 'used': used}))
+
+    def blast_events(self):
+        "blast one message for each event id"
+        from spray.tests import fullcallbacks   # needed for side effects on CBACKS
+        events = self.mm.data.keys()
+        for e in events[:5]:
+            print '5 only'
+            # dummy context satisfies all stubs: crafter_user_project_system
+            # and should be dropped from here as soon as stubs are filled
+            self.me.send(e, {'to': self.recip,
+                             'bcc': self.bcc,
+                             'sender': self.sender,
+                             'crafter_user_project_system': {}})
+
+    def __call__(self):
+        "heed the call!"
+
+        arg = self.get_command_line_args()
+        config = self.get_config(arg.config_file)
+        self.config_logging(config)
+        self.config_app(config, arg)
+        self.build_stuffing()
+        #depends = self.explore_events()
+        #self.put_callbacks(depends)
+        self.blast_events()
+
+
+#This is used by setup.py and buildout.cfg to generate an app in bin/
+def dryrun():
+    DryRun()()

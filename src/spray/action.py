@@ -100,8 +100,10 @@ class EmailAction(Action):
         try:
             self.channel.send(self.row, self.data)
         except Exception as e:
+            import traceback
+            tb = traceback.format_exc(8)  # 8 lines
             self.notify('handler-exception', exception=e,
-              event=self.event, data=self.data)
+              event=self.event, data=self.data, traceback=tb)
         self.notify('handle-end')
 
 

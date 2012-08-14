@@ -4,18 +4,18 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-TEMP_FROM_ADDRESS = 'rf@sponsorcraft.com'
-TEMP_BCC_ADDRESS = 'asdf'
+FROM_ADDRESSES = 'info@sponsorcraft.com'
+BCC_ADDRESSES = 'bcc-dump@sponsorcaft.com'
 
 
 def build_multipart_mail(row, data, tempreg):
         params = {}
-
+        import pdb; pdb.set_trace()
         # get sender from data / row / constant
         params['source'] = data.get('from') or \
-                           row.get('from') or TEMP_FROM_ADDRESS
+                           row.get('from') or FROM_ADDRESSES
         params['to_addresses'] = data.get('to')
-        # params['bcc_addresses'] =
+        params['bcc_addresses'] = data.get('bcc') or BCC_ADDRESSES
 
         # subject comes from the row, not the data, so we use it two ways
         subject = row['subject_en_uk']

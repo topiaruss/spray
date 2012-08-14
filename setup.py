@@ -43,6 +43,7 @@ messaging or social actions""",
       entry_points="""
         [console_scripts]
         client = spray.client:app
+        dryrun = spray.client:dryrun
         sprayd = spray.sprayd:app
       """,
       dependency_links=[
