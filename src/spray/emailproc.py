@@ -10,7 +10,7 @@ BCC_ADDRESSES = 'bcc-dump@sponsorcaft.com'
 
 def build_multipart_mail(row, data, tempreg):
         params = {}
-        import pdb; pdb.set_trace()
+
         # get sender from data / row / constant
         params['source'] = data.get('from') or \
                            row.get('from') or FROM_ADDRESSES
