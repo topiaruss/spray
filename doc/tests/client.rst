@@ -147,9 +147,10 @@ what did we just cause to happen?
 Ah. I get it.  So now, if I make the same call again, giving context...
 
   >>> src._send = MagicMock()
-  >>> context = dict(project=object())
+  >>> project=object()
+  >>> context = dict(project=project)
   >>> status = src.send('system.project.drafted', context)
-  >>> expect = dict(project_preview_url='sillyproject')
+  >>> expect = dict(project_preview_url='sillyproject', project=project)
   >>> src._send.assert_called_once_with('system.project.drafted', expect)  
   >>> sorted(status['unfilled'])
   []
@@ -162,9 +163,11 @@ job was not available, you tell me the name of the source.
 My god, that's clever.  And if I do it with a full set of context?
 
   >>> src._send = MagicMock()
-  >>> context = dict(project=object(), crafter=object())
+  >>> project, crafter = object(), object()  
+  >>> context = dict(project=project, crafter=crafter)
   >>> status = src.send('system.project.drafted', context)
-  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject')
+  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject',
+  ...   project=project, crafter=crafter)
   >>> src._send.assert_called_once_with('system.project.drafted', expect)  
   >>> sorted(status['unfilled'])
   []
@@ -176,12 +179,13 @@ Let's prove it works when the callbacks are in a separate package
 
   >>> from spray.tests import callbacks
   >>> src._send = MagicMock()
-  >>> context = dict(project=object(), crafter=object())
+  >>> context = dict(project=project, crafter=crafter)
   >>> status = src.send('system.project.drafted', context)
   roger
   kilroy
 
-  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject')
+  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject',
+  ...   project=project, crafter=crafter)
   >>> src._send.assert_called_once_with('system.project.drafted', expect)  
   >>> sorted(status['unfilled'])
   []
