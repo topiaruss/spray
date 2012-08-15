@@ -7,8 +7,11 @@ from spray.utils import genfind
 from spray.utils import genopen
 from zope.interface import implements
 import boto
+import logging
 import os
 import smtplib
+
+LOG = logging.getLogger(__name__)
 
 # TODO: retrofit a zope interface for Channel hierarchy and unify formal params
 
@@ -39,7 +42,11 @@ class SimpleTemplateRegistry(object):
 
     def render(self, data, style=''):
         """convenience method that does the lookup and render in one step"""
-        template = self.lookup(style)
+        try:
+            template = self.lookup(style)
+        except KeyError:
+            LOG.exception("missing template. Fallback to default")
+            template = self.lookup('')
         return template.render(data)
 
 
@@ -162,10 +169,10 @@ AmazonSESDestination.register()
 
 
 class Channel(object):
-    """ 
+    """
     Channel binds a template to a destination and does
     specific processing for a medium.  It's a place for adapter
-    code that compensates for differences in destination types and 
+    code that compensates for differences in destination types and
     params.
     medium: could be email, or sms - A chan therefore knows its own
     limitations.
@@ -227,7 +234,6 @@ class HTMLEmailChannel(Channel):
         self.dest.mpart_send(**send_params)
 
 
-
 class ChannelRegistry(object):
 
     reg = {}
@@ -247,7 +253,7 @@ CHAN_REG = ChannelRegistry()
 
 # TODO: replace hardwired channels with sprayd.cfg channels
 # in the meantime, sprayd.py switches the destination to AmazonSESDestination
-email_channel = Channel(medium='email',  
+email_channel = Channel(medium='email',
                         destination=DESTINATION_REGISTRY['DummyDestination']())
 CHAN_REG.register(email_channel)
 
