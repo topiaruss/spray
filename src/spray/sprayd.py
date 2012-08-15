@@ -46,6 +46,7 @@ def config_app(config):
     #get the matrix
     matrix_type = config.get('ActionMatrix', 'type')
     kw = dict(config.items('ActionMatrix')[1:])
+    kw.update(dict(credentials=matrix.Credentials()))
     mm = matrix.matrixFactory(matrix_type, kw)
     mm.update()
 
