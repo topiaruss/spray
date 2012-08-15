@@ -1,6 +1,7 @@
 # emailproc.py - bits and pieces of email processing
 import jinja2
 import logging
+import stoneagehtml
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +31,9 @@ def build_multipart_mail(row, data, tempreg):
         body = template.render(data)
         data['body'] = body
         style = row.get('body_fmt', '')
-        params['html_body'] = tempreg.render(data, style)
+        space_age = tempreg.render(data, style)
+        stone_age = stoneagehtml.compactify(space_age)
+        params['html_body'] = stone_age
 
         # text version
         template = jinja2.Template('\n'.join(lines))  # TODO: Cache?

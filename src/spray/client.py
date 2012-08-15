@@ -75,6 +75,7 @@ class Source(object):
         # the callbacks we want to try
         cbs = set(tokens).intersection(set(CALLBACKS.keys()))
 
+        # list of required source objects not found in the context
         no_source = []
         results = context.copy()
         for k in cbs:
@@ -142,6 +143,7 @@ class ClientApp():
         me = Source('me', 'testSQS')
         crafter_data = dict(crafter_first_name='Russ', name="Russ Ferriday",
           to=('russf@topia.com',))
+        #me.send("admins.payment.processed", crafter_data)
         me.send("system.project.drafted", crafter_data)
         print "sent"
 
@@ -261,7 +263,7 @@ class DryRun():
     def blast_events(self):
         "blast one message for each event id"
         from spray.tests import fullcallbacks   # needed for side effects on CBACKS
-        events = self.mm.data.keys()
+        events = sorted(self.mm.data.keys())
         for e in events[:5]:
             print '5 only'
             # dummy context satisfies all stubs: crafter_user_project_system
