@@ -11,8 +11,8 @@ CALLBACKS = {}
 
 
 def register_callback(func):
-    event_id = func.event_id
-    CALLBACKS[event_id] = func
+    token_id = func.token_id
+    CALLBACKS[token_id] = func
 
 
 def get_undef(template):
@@ -102,7 +102,8 @@ class Source(object):
         rows = self.matrix.get_rows_for_event(event_id)
         events = {}
         for r in rows:
-            bfields = [v for k, v in r.items() if k.startswith('body')]
+            bfields = [v for k, v in r.items() if k.startswith('body')\
+                       or k.startswith('subject')]
             for f in bfields:
                 events.setdefault(r['event id'], []).extend(get_undef(f))
         # uniquify
@@ -115,7 +116,7 @@ class Source(object):
         return events
 
 
-class ClientApp():
+class ClientApp(object):
     """ Simple app to send a message to a queue.
         config.app provides a usage example
     """
@@ -143,8 +144,8 @@ class ClientApp():
         me = Source('me', 'testSQS')
         crafter_data = dict(crafter_first_name='Russ', name="Russ Ferriday",
           to=('russf@topia.com',))
-        #me.send("admins.payment.processed", crafter_data)
-        me.send("system.project.drafted", crafter_data)
+        me.send("admins.payment.processed", crafter_data)
+        #me.send("system.project.drafted", crafter_data)
         print "sent"
 
     def __call__(self):
@@ -160,6 +161,15 @@ class ClientApp():
 def app():
     ClientApp()()
 
+CALLBACK_HEADER = """# When implementing a callback, refine the context
+# name, from the bulky template, then access the data from that
+# callback. The existence of the  appropriate structure will be checked
+# during the call, and the client notified of any shortages.
+
+from spray import client
+
+"""
+
 import string
 template = string.Template("""
 # Used for...
@@ -167,13 +177,13 @@ template = string.Template("""
 def ${cb}_callback(crafter_user_project_system):
     return '[${cb}]'
 
-${cb}_callback.event_id = '${cb}'
+${cb}_callback.token_id = '${cb}'
 client.register_callback(${cb}_callback)
 
 """)
 
 
-class DryRun():
+class DryRun(object):
     """ Simple app to create a sample email to all event_id
     """
 
@@ -251,10 +261,13 @@ class DryRun():
         return depends
 
     def put_callbacks(self, depends):
-        "generates a file with all the callback stubs we know about"
+        """generates a file with all the callback stubs we know about.
+        This will be in the execution directory. It may be necessary to 
+        move it to the tests directory where we keep a fresh copy.
+        """
         keys = sorted(depends.keys())
         with open('fullcallbacks.py', 'w') as ff:
-            ff.write("from spray import client\n\n")
+            ff.write(CALLBACK_HEADER)
             for k in keys:
                 used = sorted(depends[k])
                 used = '\n# '.join(used)
@@ -262,12 +275,18 @@ class DryRun():
 
     def blast_events(self):
         "blast one message for each event id"
-        from spray.tests import fullcallbacks   # needed for side effects on CBACKS
+
+        # retain next line for registry side-effects of import
+        from spray.tests import fullcallbacks
+        if fullcallbacks:
+            pass  # defeat PEP8 checker
+
         events = sorted(self.mm.data.keys())
         for e in events[:5]:
-            print '5 only'
-            # dummy context satisfies all stubs: crafter_user_project_system
-            # and should be dropped from here as soon as stubs are filled
+            # print '5 only'
+            # crafter_user_project_system is a dummy context that 
+            # satisfies all stubs. It should be dropped as soon as all stubs
+            # are filled. 
             self.me.send(e, {'to': self.recip,
                              'bcc': self.bcc,
                              'sender': self.sender,
@@ -281,8 +300,10 @@ class DryRun():
         self.config_logging(config)
         self.config_app(config, arg)
         self.build_stuffing()
-        #depends = self.explore_events()
-        #self.put_callbacks(depends)
+        # messy, but we enable these two lines to generate a fresh callback file 
+        #    from the current data.
+        # depends = self.explore_events()
+        # self.put_callbacks(depends)
         self.blast_events()
 
 

@@ -1,3 +1,8 @@
+# When implementing a callback, refine the context
+# name, from the bulky template, then access the data from that
+# callback. The existence of the  appropriate structure will be checked
+# during the call, and the client notified of any shortages.
+
 from spray import client
 
 
@@ -7,7 +12,7 @@ from spray import client
 def comment_callback(crafter_user_project_system):
     return '[comment]'
 
-comment_callback.event_id = 'comment'
+comment_callback.token_id = 'comment'
 client.register_callback(comment_callback)
 
 
@@ -16,7 +21,7 @@ client.register_callback(comment_callback)
 def crafter_email_callback(crafter_user_project_system):
     return '[crafter_email]'
 
-crafter_email_callback.event_id = 'crafter_email'
+crafter_email_callback.token_id = 'crafter_email'
 client.register_callback(crafter_email_callback)
 
 
@@ -39,6 +44,7 @@ client.register_callback(crafter_email_callback)
 # sponsor.project.pledge
 # system.payment.processed
 # system.payment.processedwithfailures
+# system.project.completed.unsuccessful
 # system.project.completedsuccessful
 # system.project.completedunsuccessful
 # system.project.drafted
@@ -48,19 +54,29 @@ client.register_callback(crafter_email_callback)
 def crafter_first_name_callback(crafter_user_project_system):
     return '[crafter_first_name]'
 
-crafter_first_name_callback.event_id = 'crafter_first_name'
+crafter_first_name_callback.token_id = 'crafter_first_name'
 client.register_callback(crafter_first_name_callback)
 
 
 # Used for...
 # crafter.project.comment
 # crafter.project.update
+# moderator.project.published
 # sponsor.project.fundingtarget
 def crafter_last_name_callback(crafter_user_project_system):
     return '[crafter_last_name]'
 
-crafter_last_name_callback.event_id = 'crafter_last_name'
+crafter_last_name_callback.token_id = 'crafter_last_name'
 client.register_callback(crafter_last_name_callback)
+
+
+# Used for...
+# moderator.project.published
+def crafter_profile_callback(crafter_user_project_system):
+    return '[crafter_profile]'
+
+crafter_profile_callback.token_id = 'crafter_profile'
+client.register_callback(crafter_profile_callback)
 
 
 # Used for...
@@ -71,7 +87,7 @@ client.register_callback(crafter_last_name_callback)
 def crafter_twitter_tag_callback(crafter_user_project_system):
     return '[crafter_twitter_tag]'
 
-crafter_twitter_tag_callback.event_id = 'crafter_twitter_tag'
+crafter_twitter_tag_callback.token_id = 'crafter_twitter_tag'
 client.register_callback(crafter_twitter_tag_callback)
 
 
@@ -81,8 +97,17 @@ client.register_callback(crafter_twitter_tag_callback)
 def curator_callback(crafter_user_project_system):
     return '[curator]'
 
-curator_callback.event_id = 'curator'
+curator_callback.token_id = 'curator'
 client.register_callback(curator_callback)
+
+
+# Used for...
+# moderator.project.published
+def curator_first_name_callback(crafter_user_project_system):
+    return '[curator_first_name]'
+
+curator_first_name_callback.token_id = 'curator_first_name'
+client.register_callback(curator_first_name_callback)
 
 
 # Used for...
@@ -91,7 +116,7 @@ client.register_callback(curator_callback)
 def curator_url_callback(crafter_user_project_system):
     return '[curator_url]'
 
-curator_url_callback.event_id = 'curator_url'
+curator_url_callback.token_id = 'curator_url'
 client.register_callback(curator_url_callback)
 
 
@@ -102,13 +127,14 @@ client.register_callback(curator_url_callback)
 # sponsor.project.milestone2
 # system.payment.processed
 # system.payment.processedwithfailures
+# system.project.completed.unsuccessful
 # system.project.completedunsuccessful
 # system.project.paymentresolved
 # system.project.stats
 def dashboard_url_callback(crafter_user_project_system):
     return '[dashboard_url]'
 
-dashboard_url_callback.event_id = 'dashboard_url'
+dashboard_url_callback.token_id = 'dashboard_url'
 client.register_callback(dashboard_url_callback)
 
 
@@ -117,7 +143,7 @@ client.register_callback(dashboard_url_callback)
 def date_a_month_yesterday_callback(crafter_user_project_system):
     return '[date_a_month_yesterday]'
 
-date_a_month_yesterday_callback.event_id = 'date_a_month_yesterday'
+date_a_month_yesterday_callback.token_id = 'date_a_month_yesterday'
 client.register_callback(date_a_month_yesterday_callback)
 
 
@@ -127,7 +153,7 @@ client.register_callback(date_a_month_yesterday_callback)
 def date_a_week_yesterday_callback(crafter_user_project_system):
     return '[date_a_week_yesterday]'
 
-date_a_week_yesterday_callback.event_id = 'date_a_week_yesterday'
+date_a_week_yesterday_callback.token_id = 'date_a_week_yesterday'
 client.register_callback(date_a_week_yesterday_callback)
 
 
@@ -139,7 +165,7 @@ client.register_callback(date_a_week_yesterday_callback)
 def date_yesterday_callback(crafter_user_project_system):
     return '[date_yesterday]'
 
-date_yesterday_callback.event_id = 'date_yesterday'
+date_yesterday_callback.token_id = 'date_yesterday'
 client.register_callback(date_yesterday_callback)
 
 
@@ -150,7 +176,7 @@ client.register_callback(date_yesterday_callback)
 def days_remaining_callback(crafter_user_project_system):
     return '[days_remaining]'
 
-days_remaining_callback.event_id = 'days_remaining'
+days_remaining_callback.token_id = 'days_remaining'
 client.register_callback(days_remaining_callback)
 
 
@@ -162,8 +188,18 @@ client.register_callback(days_remaining_callback)
 def days_until_completion_date_callback(crafter_user_project_system):
     return '[days_until_completion_date]'
 
-days_until_completion_date_callback.event_id = 'days_until_completion_date'
+days_until_completion_date_callback.token_id = 'days_until_completion_date'
 client.register_callback(days_until_completion_date_callback)
+
+
+# Used for...
+# sponsor.project.preapproval
+# system.project.completedunsuccessful
+def discover_url_callback(crafter_user_project_system):
+    return '[discover_url]'
+
+discover_url_callback.token_id = 'discover_url'
+client.register_callback(discover_url_callback)
 
 
 # Used for...
@@ -171,7 +207,7 @@ client.register_callback(days_until_completion_date_callback)
 def email_callback(crafter_user_project_system):
     return '[email]'
 
-email_callback.event_id = 'email'
+email_callback.token_id = 'email'
 client.register_callback(email_callback)
 
 
@@ -180,7 +216,7 @@ client.register_callback(email_callback)
 def error_title_callback(crafter_user_project_system):
     return '[error_title]'
 
-error_title_callback.event_id = 'error_title'
+error_title_callback.token_id = 'error_title'
 client.register_callback(error_title_callback)
 
 
@@ -189,7 +225,7 @@ client.register_callback(error_title_callback)
 def event_id_callback(crafter_user_project_system):
     return '[event_id]'
 
-event_id_callback.event_id = 'event_id'
+event_id_callback.token_id = 'event_id'
 client.register_callback(event_id_callback)
 
 
@@ -200,7 +236,7 @@ client.register_callback(event_id_callback)
 def first_name_callback(crafter_user_project_system):
     return '[first_name]'
 
-first_name_callback.event_id = 'first_name'
+first_name_callback.token_id = 'first_name'
 client.register_callback(first_name_callback)
 
 
@@ -217,7 +253,7 @@ client.register_callback(first_name_callback)
 def follower_first_name_callback(crafter_user_project_system):
     return '[follower_first_name]'
 
-follower_first_name_callback.event_id = 'follower_first_name'
+follower_first_name_callback.token_id = 'follower_first_name'
 client.register_callback(follower_first_name_callback)
 
 
@@ -227,7 +263,7 @@ client.register_callback(follower_first_name_callback)
 def institution_callback(crafter_user_project_system):
     return '[institution]'
 
-institution_callback.event_id = 'institution'
+institution_callback.token_id = 'institution'
 client.register_callback(institution_callback)
 
 
@@ -236,7 +272,7 @@ client.register_callback(institution_callback)
 def institution_twitter_tag_callback(crafter_user_project_system):
     return '[institution_twitter_tag]'
 
-institution_twitter_tag_callback.event_id = 'institution_twitter_tag'
+institution_twitter_tag_callback.token_id = 'institution_twitter_tag'
 client.register_callback(institution_twitter_tag_callback)
 
 
@@ -245,7 +281,7 @@ client.register_callback(institution_twitter_tag_callback)
 def last_name_callback(crafter_user_project_system):
     return '[last_name]'
 
-last_name_callback.event_id = 'last_name'
+last_name_callback.token_id = 'last_name'
 client.register_callback(last_name_callback)
 
 
@@ -259,7 +295,7 @@ client.register_callback(last_name_callback)
 def message_callback(crafter_user_project_system):
     return '[message]'
 
-message_callback.event_id = 'message'
+message_callback.token_id = 'message'
 client.register_callback(message_callback)
 
 
@@ -268,7 +304,7 @@ client.register_callback(message_callback)
 def message_data_callback(crafter_user_project_system):
     return '[message_data]'
 
-message_data_callback.event_id = 'message_data'
+message_data_callback.token_id = 'message_data'
 client.register_callback(message_data_callback)
 
 
@@ -277,7 +313,7 @@ client.register_callback(message_data_callback)
 def moderation_table_callback(crafter_user_project_system):
     return '[moderation_table]'
 
-moderation_table_callback.event_id = 'moderation_table'
+moderation_table_callback.token_id = 'moderation_table'
 client.register_callback(moderation_table_callback)
 
 
@@ -286,11 +322,12 @@ client.register_callback(moderation_table_callback)
 def name_callback(crafter_user_project_system):
     return '[name]'
 
-name_callback.event_id = 'name'
+name_callback.token_id = 'name'
 client.register_callback(name_callback)
 
 
 # Used for...
+# sponsor.project.preapproval
 # system.payment.failed
 # system.payment.successful
 # system.project.completedsuccessful
@@ -298,7 +335,7 @@ client.register_callback(name_callback)
 def next_milestone_callback(crafter_user_project_system):
     return '[next_milestone]'
 
-next_milestone_callback.event_id = 'next_milestone'
+next_milestone_callback.token_id = 'next_milestone'
 client.register_callback(next_milestone_callback)
 
 
@@ -307,7 +344,7 @@ client.register_callback(next_milestone_callback)
 def node_id_callback(crafter_user_project_system):
     return '[node_id]'
 
-node_id_callback.event_id = 'node_id'
+node_id_callback.token_id = 'node_id'
 client.register_callback(node_id_callback)
 
 
@@ -316,7 +353,7 @@ client.register_callback(node_id_callback)
 def page_views_callback(crafter_user_project_system):
     return '[page_views]'
 
-page_views_callback.event_id = 'page_views'
+page_views_callback.token_id = 'page_views'
 client.register_callback(page_views_callback)
 
 
@@ -326,7 +363,7 @@ client.register_callback(page_views_callback)
 def payment_name_callback(crafter_user_project_system):
     return '[payment_name]'
 
-payment_name_callback.event_id = 'payment_name'
+payment_name_callback.token_id = 'payment_name'
 client.register_callback(payment_name_callback)
 
 
@@ -336,7 +373,7 @@ client.register_callback(payment_name_callback)
 def payment_url_callback(crafter_user_project_system):
     return '[payment_url]'
 
-payment_url_callback.event_id = 'payment_url'
+payment_url_callback.token_id = 'payment_url'
 client.register_callback(payment_url_callback)
 
 
@@ -345,7 +382,7 @@ client.register_callback(payment_url_callback)
 def percentage_raised_last_week_callback(crafter_user_project_system):
     return '[percentage_raised_last_week]'
 
-percentage_raised_last_week_callback.event_id = 'percentage_raised_last_week'
+percentage_raised_last_week_callback.token_id = 'percentage_raised_last_week'
 client.register_callback(percentage_raised_last_week_callback)
 
 
@@ -358,7 +395,7 @@ client.register_callback(percentage_raised_last_week_callback)
 def pledge_amount_callback(crafter_user_project_system):
     return '[pledge_amount]'
 
-pledge_amount_callback.event_id = 'pledge_amount'
+pledge_amount_callback.token_id = 'pledge_amount'
 client.register_callback(pledge_amount_callback)
 
 
@@ -367,7 +404,7 @@ client.register_callback(pledge_amount_callback)
 def pledged_last_week_callback(crafter_user_project_system):
     return '[pledged_last_week]'
 
-pledged_last_week_callback.event_id = 'pledged_last_week'
+pledged_last_week_callback.token_id = 'pledged_last_week'
 client.register_callback(pledged_last_week_callback)
 
 
@@ -376,7 +413,7 @@ client.register_callback(pledged_last_week_callback)
 def pledges_callback(crafter_user_project_system):
     return '[pledges]'
 
-pledges_callback.event_id = 'pledges'
+pledges_callback.token_id = 'pledges'
 client.register_callback(pledges_callback)
 
 
@@ -386,7 +423,7 @@ client.register_callback(pledges_callback)
 def pledges_failed_callback(crafter_user_project_system):
     return '[pledges_failed]'
 
-pledges_failed_callback.event_id = 'pledges_failed'
+pledges_failed_callback.token_id = 'pledges_failed'
 client.register_callback(pledges_failed_callback)
 
 
@@ -395,7 +432,7 @@ client.register_callback(pledges_failed_callback)
 def pledges_last_week_callback(crafter_user_project_system):
     return '[pledges_last_week]'
 
-pledges_last_week_callback.event_id = 'pledges_last_week'
+pledges_last_week_callback.token_id = 'pledges_last_week'
 client.register_callback(pledges_last_week_callback)
 
 
@@ -404,7 +441,7 @@ client.register_callback(pledges_last_week_callback)
 def pledges_resolved_callback(crafter_user_project_system):
     return '[pledges_resolved]'
 
-pledges_resolved_callback.event_id = 'pledges_resolved'
+pledges_resolved_callback.token_id = 'pledges_resolved'
 client.register_callback(pledges_resolved_callback)
 
 
@@ -413,7 +450,7 @@ client.register_callback(pledges_resolved_callback)
 def pledges_successful_callback(crafter_user_project_system):
     return '[pledges_successful]'
 
-pledges_successful_callback.event_id = 'pledges_successful'
+pledges_successful_callback.token_id = 'pledges_successful'
 client.register_callback(pledges_successful_callback)
 
 
@@ -422,7 +459,7 @@ client.register_callback(pledges_successful_callback)
 def primary_category_callback(crafter_user_project_system):
     return '[primary_category]'
 
-primary_category_callback.event_id = 'primary_category'
+primary_category_callback.token_id = 'primary_category'
 client.register_callback(primary_category_callback)
 
 
@@ -432,7 +469,7 @@ client.register_callback(primary_category_callback)
 def project_comment_url_callback(crafter_user_project_system):
     return '[project_comment_url]'
 
-project_comment_url_callback.event_id = 'project_comment_url'
+project_comment_url_callback.token_id = 'project_comment_url'
 client.register_callback(project_comment_url_callback)
 
 
@@ -442,7 +479,7 @@ client.register_callback(project_comment_url_callback)
 def project_comments_url_callback(crafter_user_project_system):
     return '[project_comments_url]'
 
-project_comments_url_callback.event_id = 'project_comments_url'
+project_comments_url_callback.token_id = 'project_comments_url'
 client.register_callback(project_comments_url_callback)
 
 
@@ -460,8 +497,10 @@ client.register_callback(project_comments_url_callback)
 # sponsor.project.milestone1
 # sponsor.project.milestone2
 # sponsor.project.pledge
+# sponsor.project.preapproval
 # system.payment.failed
 # system.payment.successful
+# system.project.completed.unsuccessful
 # system.project.completedsuccessful
 # system.project.completedsuccessfulbutnoreward
 # system.project.completedunsuccessful
@@ -469,7 +508,7 @@ client.register_callback(project_comments_url_callback)
 def project_name_callback(crafter_user_project_system):
     return '[project_name]'
 
-project_name_callback.event_id = 'project_name'
+project_name_callback.token_id = 'project_name'
 client.register_callback(project_name_callback)
 
 
@@ -480,7 +519,7 @@ client.register_callback(project_name_callback)
 def project_preview_url_callback(crafter_user_project_system):
     return '[project_preview_url]'
 
-project_preview_url_callback.event_id = 'project_preview_url'
+project_preview_url_callback.token_id = 'project_preview_url'
 client.register_callback(project_preview_url_callback)
 
 
@@ -489,7 +528,7 @@ client.register_callback(project_preview_url_callback)
 def project_update_url_callback(crafter_user_project_system):
     return '[project_update_url]'
 
-project_update_url_callback.event_id = 'project_update_url'
+project_update_url_callback.token_id = 'project_update_url'
 client.register_callback(project_update_url_callback)
 
 
@@ -509,7 +548,7 @@ client.register_callback(project_update_url_callback)
 def project_url_callback(crafter_user_project_system):
     return '[project_url]'
 
-project_url_callback.event_id = 'project_url'
+project_url_callback.token_id = 'project_url'
 client.register_callback(project_url_callback)
 
 
@@ -518,7 +557,7 @@ client.register_callback(project_url_callback)
 def project_vanity_callback(crafter_user_project_system):
     return '[project_vanity]'
 
-project_vanity_callback.event_id = 'project_vanity'
+project_vanity_callback.token_id = 'project_vanity'
 client.register_callback(project_vanity_callback)
 
 
@@ -527,7 +566,7 @@ client.register_callback(project_vanity_callback)
 def projects_failed_last_month_callback(crafter_user_project_system):
     return '[projects_failed_last_month]'
 
-projects_failed_last_month_callback.event_id = 'projects_failed_last_month'
+projects_failed_last_month_callback.token_id = 'projects_failed_last_month'
 client.register_callback(projects_failed_last_month_callback)
 
 
@@ -536,7 +575,7 @@ client.register_callback(projects_failed_last_month_callback)
 def projects_failed_last_week_callback(crafter_user_project_system):
     return '[projects_failed_last_week]'
 
-projects_failed_last_week_callback.event_id = 'projects_failed_last_week'
+projects_failed_last_week_callback.token_id = 'projects_failed_last_week'
 client.register_callback(projects_failed_last_week_callback)
 
 
@@ -545,7 +584,7 @@ client.register_callback(projects_failed_last_week_callback)
 def projects_failed_yesterday_callback(crafter_user_project_system):
     return '[projects_failed_yesterday]'
 
-projects_failed_yesterday_callback.event_id = 'projects_failed_yesterday'
+projects_failed_yesterday_callback.token_id = 'projects_failed_yesterday'
 client.register_callback(projects_failed_yesterday_callback)
 
 
@@ -554,7 +593,7 @@ client.register_callback(projects_failed_yesterday_callback)
 def projects_funding_target_last_month_callback(crafter_user_project_system):
     return '[projects_funding_target_last_month]'
 
-projects_funding_target_last_month_callback.event_id = 'projects_funding_target_last_month'
+projects_funding_target_last_month_callback.token_id = 'projects_funding_target_last_month'
 client.register_callback(projects_funding_target_last_month_callback)
 
 
@@ -563,7 +602,7 @@ client.register_callback(projects_funding_target_last_month_callback)
 def projects_funding_target_last_week_callback(crafter_user_project_system):
     return '[projects_funding_target_last_week]'
 
-projects_funding_target_last_week_callback.event_id = 'projects_funding_target_last_week'
+projects_funding_target_last_week_callback.token_id = 'projects_funding_target_last_week'
 client.register_callback(projects_funding_target_last_week_callback)
 
 
@@ -572,7 +611,7 @@ client.register_callback(projects_funding_target_last_week_callback)
 def projects_funding_target_yesterday_callback(crafter_user_project_system):
     return '[projects_funding_target_yesterday]'
 
-projects_funding_target_yesterday_callback.event_id = 'projects_funding_target_yesterday'
+projects_funding_target_yesterday_callback.token_id = 'projects_funding_target_yesterday'
 client.register_callback(projects_funding_target_yesterday_callback)
 
 
@@ -581,7 +620,7 @@ client.register_callback(projects_funding_target_yesterday_callback)
 def projects_milestone1_last_month_callback(crafter_user_project_system):
     return '[projects_milestone1_last_month]'
 
-projects_milestone1_last_month_callback.event_id = 'projects_milestone1_last_month'
+projects_milestone1_last_month_callback.token_id = 'projects_milestone1_last_month'
 client.register_callback(projects_milestone1_last_month_callback)
 
 
@@ -590,7 +629,7 @@ client.register_callback(projects_milestone1_last_month_callback)
 def projects_milestone1_last_week_callback(crafter_user_project_system):
     return '[projects_milestone1_last_week]'
 
-projects_milestone1_last_week_callback.event_id = 'projects_milestone1_last_week'
+projects_milestone1_last_week_callback.token_id = 'projects_milestone1_last_week'
 client.register_callback(projects_milestone1_last_week_callback)
 
 
@@ -599,7 +638,7 @@ client.register_callback(projects_milestone1_last_week_callback)
 def projects_milestone1_yesterday_callback(crafter_user_project_system):
     return '[projects_milestone1_yesterday]'
 
-projects_milestone1_yesterday_callback.event_id = 'projects_milestone1_yesterday'
+projects_milestone1_yesterday_callback.token_id = 'projects_milestone1_yesterday'
 client.register_callback(projects_milestone1_yesterday_callback)
 
 
@@ -608,7 +647,7 @@ client.register_callback(projects_milestone1_yesterday_callback)
 def projects_milestone2_last_month_callback(crafter_user_project_system):
     return '[projects_milestone2_last_month]'
 
-projects_milestone2_last_month_callback.event_id = 'projects_milestone2_last_month'
+projects_milestone2_last_month_callback.token_id = 'projects_milestone2_last_month'
 client.register_callback(projects_milestone2_last_month_callback)
 
 
@@ -617,7 +656,7 @@ client.register_callback(projects_milestone2_last_month_callback)
 def projects_milestone2_last_week_callback(crafter_user_project_system):
     return '[projects_milestone2_last_week]'
 
-projects_milestone2_last_week_callback.event_id = 'projects_milestone2_last_week'
+projects_milestone2_last_week_callback.token_id = 'projects_milestone2_last_week'
 client.register_callback(projects_milestone2_last_week_callback)
 
 
@@ -626,7 +665,7 @@ client.register_callback(projects_milestone2_last_week_callback)
 def projects_milestone2_yesterday_callback(crafter_user_project_system):
     return '[projects_milestone2_yesterday]'
 
-projects_milestone2_yesterday_callback.event_id = 'projects_milestone2_yesterday'
+projects_milestone2_yesterday_callback.token_id = 'projects_milestone2_yesterday'
 client.register_callback(projects_milestone2_yesterday_callback)
 
 
@@ -635,7 +674,7 @@ client.register_callback(projects_milestone2_yesterday_callback)
 def projects_published_last_month_callback(crafter_user_project_system):
     return '[projects_published_last_month]'
 
-projects_published_last_month_callback.event_id = 'projects_published_last_month'
+projects_published_last_month_callback.token_id = 'projects_published_last_month'
 client.register_callback(projects_published_last_month_callback)
 
 
@@ -644,7 +683,7 @@ client.register_callback(projects_published_last_month_callback)
 def projects_published_last_week_callback(crafter_user_project_system):
     return '[projects_published_last_week]'
 
-projects_published_last_week_callback.event_id = 'projects_published_last_week'
+projects_published_last_week_callback.token_id = 'projects_published_last_week'
 client.register_callback(projects_published_last_week_callback)
 
 
@@ -653,7 +692,7 @@ client.register_callback(projects_published_last_week_callback)
 def projects_published_yesterday_callback(crafter_user_project_system):
     return '[projects_published_yesterday]'
 
-projects_published_yesterday_callback.event_id = 'projects_published_yesterday'
+projects_published_yesterday_callback.token_id = 'projects_published_yesterday'
 client.register_callback(projects_published_yesterday_callback)
 
 
@@ -662,7 +701,7 @@ client.register_callback(projects_published_yesterday_callback)
 def projects_submitted_last_month_callback(crafter_user_project_system):
     return '[projects_submitted_last_month]'
 
-projects_submitted_last_month_callback.event_id = 'projects_submitted_last_month'
+projects_submitted_last_month_callback.token_id = 'projects_submitted_last_month'
 client.register_callback(projects_submitted_last_month_callback)
 
 
@@ -671,7 +710,7 @@ client.register_callback(projects_submitted_last_month_callback)
 def projects_submitted_last_week_callback(crafter_user_project_system):
     return '[projects_submitted_last_week]'
 
-projects_submitted_last_week_callback.event_id = 'projects_submitted_last_week'
+projects_submitted_last_week_callback.token_id = 'projects_submitted_last_week'
 client.register_callback(projects_submitted_last_week_callback)
 
 
@@ -680,7 +719,7 @@ client.register_callback(projects_submitted_last_week_callback)
 def projects_submitted_yesterday_callback(crafter_user_project_system):
     return '[projects_submitted_yesterday]'
 
-projects_submitted_yesterday_callback.event_id = 'projects_submitted_yesterday'
+projects_submitted_yesterday_callback.token_id = 'projects_submitted_yesterday'
 client.register_callback(projects_submitted_yesterday_callback)
 
 
@@ -689,17 +728,18 @@ client.register_callback(projects_submitted_yesterday_callback)
 def promotion_checklist_url_callback(crafter_user_project_system):
     return '[promotion_checklist_url]'
 
-promotion_checklist_url_callback.event_id = 'promotion_checklist_url'
+promotion_checklist_url_callback.token_id = 'promotion_checklist_url'
 client.register_callback(promotion_checklist_url_callback)
 
 
 # Used for...
+# system.project.completed.unsuccessful
 # system.project.completedsuccessful
 # system.project.completedunsuccessful
 def questionnaire_url_callback(crafter_user_project_system):
     return '[questionnaire_url]'
 
-questionnaire_url_callback.event_id = 'questionnaire_url'
+questionnaire_url_callback.token_id = 'questionnaire_url'
 client.register_callback(questionnaire_url_callback)
 
 
@@ -708,7 +748,7 @@ client.register_callback(questionnaire_url_callback)
 def reported_url_callback(crafter_user_project_system):
     return '[reported_url]'
 
-reported_url_callback.event_id = 'reported_url'
+reported_url_callback.token_id = 'reported_url'
 client.register_callback(reported_url_callback)
 
 
@@ -718,7 +758,7 @@ client.register_callback(reported_url_callback)
 def rewards_unlocked_callback(crafter_user_project_system):
     return '[rewards_unlocked]'
 
-rewards_unlocked_callback.event_id = 'rewards_unlocked'
+rewards_unlocked_callback.token_id = 'rewards_unlocked'
 client.register_callback(rewards_unlocked_callback)
 
 
@@ -729,9 +769,11 @@ client.register_callback(rewards_unlocked_callback)
 # follower.project.comment
 # moderator.project.cancelled
 # sponsor.project.comment
+# sponsor.project.fundingtarget
 # sponsor.project.milestone1
 # sponsor.project.milestone2
 # sponsor.project.pledge
+# sponsor.project.preapproval
 # system.payment.failed
 # system.payment.successful
 # system.project.completedsuccessfulbutnoreward
@@ -739,7 +781,7 @@ client.register_callback(rewards_unlocked_callback)
 def sponsor_first_name_callback(crafter_user_project_system):
     return '[sponsor_first_name]'
 
-sponsor_first_name_callback.event_id = 'sponsor_first_name'
+sponsor_first_name_callback.token_id = 'sponsor_first_name'
 client.register_callback(sponsor_first_name_callback)
 
 
@@ -749,7 +791,7 @@ client.register_callback(sponsor_first_name_callback)
 def sponsor_last_name_callback(crafter_user_project_system):
     return '[sponsor_last_name]'
 
-sponsor_last_name_callback.event_id = 'sponsor_last_name'
+sponsor_last_name_callback.token_id = 'sponsor_last_name'
 client.register_callback(sponsor_last_name_callback)
 
 
@@ -758,7 +800,7 @@ client.register_callback(sponsor_last_name_callback)
 def subject_callback(crafter_user_project_system):
     return '[subject]'
 
-subject_callback.event_id = 'subject'
+subject_callback.token_id = 'subject'
 client.register_callback(subject_callback)
 
 
@@ -767,7 +809,7 @@ client.register_callback(subject_callback)
 def total_pledged_last_month_callback(crafter_user_project_system):
     return '[total_pledged_last_month]'
 
-total_pledged_last_month_callback.event_id = 'total_pledged_last_month'
+total_pledged_last_month_callback.token_id = 'total_pledged_last_month'
 client.register_callback(total_pledged_last_month_callback)
 
 
@@ -776,7 +818,7 @@ client.register_callback(total_pledged_last_month_callback)
 def total_pledged_last_week_callback(crafter_user_project_system):
     return '[total_pledged_last_week]'
 
-total_pledged_last_week_callback.event_id = 'total_pledged_last_week'
+total_pledged_last_week_callback.token_id = 'total_pledged_last_week'
 client.register_callback(total_pledged_last_week_callback)
 
 
@@ -785,7 +827,7 @@ client.register_callback(total_pledged_last_week_callback)
 def total_pledged_yesterday_callback(crafter_user_project_system):
     return '[total_pledged_yesterday]'
 
-total_pledged_yesterday_callback.event_id = 'total_pledged_yesterday'
+total_pledged_yesterday_callback.token_id = 'total_pledged_yesterday'
 client.register_callback(total_pledged_yesterday_callback)
 
 
@@ -794,7 +836,7 @@ client.register_callback(total_pledged_yesterday_callback)
 def total_pledges_last_month_callback(crafter_user_project_system):
     return '[total_pledges_last_month]'
 
-total_pledges_last_month_callback.event_id = 'total_pledges_last_month'
+total_pledges_last_month_callback.token_id = 'total_pledges_last_month'
 client.register_callback(total_pledges_last_month_callback)
 
 
@@ -803,7 +845,7 @@ client.register_callback(total_pledges_last_month_callback)
 def total_pledges_last_week_callback(crafter_user_project_system):
     return '[total_pledges_last_week]'
 
-total_pledges_last_week_callback.event_id = 'total_pledges_last_week'
+total_pledges_last_week_callback.token_id = 'total_pledges_last_week'
 client.register_callback(total_pledges_last_week_callback)
 
 
@@ -812,7 +854,7 @@ client.register_callback(total_pledges_last_week_callback)
 def total_pledges_yesterday_callback(crafter_user_project_system):
     return '[total_pledges_yesterday]'
 
-total_pledges_yesterday_callback.event_id = 'total_pledges_yesterday'
+total_pledges_yesterday_callback.token_id = 'total_pledges_yesterday'
 client.register_callback(total_pledges_yesterday_callback)
 
 
@@ -821,7 +863,7 @@ client.register_callback(total_pledges_yesterday_callback)
 def traceback_callback(crafter_user_project_system):
     return '[traceback]'
 
-traceback_callback.event_id = 'traceback'
+traceback_callback.token_id = 'traceback'
 client.register_callback(traceback_callback)
 
 
@@ -834,7 +876,7 @@ client.register_callback(traceback_callback)
 def user_email_callback(crafter_user_project_system):
     return '[user_email]'
 
-user_email_callback.event_id = 'user_email'
+user_email_callback.token_id = 'user_email'
 client.register_callback(user_email_callback)
 
 
@@ -846,13 +888,14 @@ client.register_callback(user_email_callback)
 def user_name_callback(crafter_user_project_system):
     return '[user_name]'
 
-user_name_callback.event_id = 'user_name'
+user_name_callback.token_id = 'user_name'
 client.register_callback(user_name_callback)
 
 
 # Used for...
 # crafter.message.sent
 # sponsor.message.sent
+# user.contactus.sent
 # user.countryrequest.sent
 # user.message.sent
 # user.question.sent
@@ -860,7 +903,7 @@ client.register_callback(user_name_callback)
 def username_callback(crafter_user_project_system):
     return '[username]'
 
-username_callback.event_id = 'username'
+username_callback.token_id = 'username'
 client.register_callback(username_callback)
 
 
@@ -869,7 +912,7 @@ client.register_callback(username_callback)
 def website_page_views_last_month_callback(crafter_user_project_system):
     return '[website_page_views_last_month]'
 
-website_page_views_last_month_callback.event_id = 'website_page_views_last_month'
+website_page_views_last_month_callback.token_id = 'website_page_views_last_month'
 client.register_callback(website_page_views_last_month_callback)
 
 
@@ -878,7 +921,7 @@ client.register_callback(website_page_views_last_month_callback)
 def website_page_views_last_week_callback(crafter_user_project_system):
     return '[website_page_views_last_week]'
 
-website_page_views_last_week_callback.event_id = 'website_page_views_last_week'
+website_page_views_last_week_callback.token_id = 'website_page_views_last_week'
 client.register_callback(website_page_views_last_week_callback)
 
 
@@ -887,6 +930,6 @@ client.register_callback(website_page_views_last_week_callback)
 def website_page_views_yesterday_callback(crafter_user_project_system):
     return '[website_page_views_yesterday]'
 
-website_page_views_yesterday_callback.event_id = 'website_page_views_yesterday'
+website_page_views_yesterday_callback.token_id = 'website_page_views_yesterday'
 client.register_callback(website_page_views_yesterday_callback)
 

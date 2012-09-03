@@ -128,12 +128,12 @@ What do we need to do to help those fields get filled?
   >>> def crafter_first_name_callback(crafter):
   ...     return 'crafty'
   ...
-  >>> crafter_first_name_callback.event_id = 'crafter_first_name'
+  >>> crafter_first_name_callback.token_id = 'crafter_first_name'
   ...
   >>> def project_preview_url_callback(project):
   ...     return 'sillyproject'
   ...
-  >>> project_preview_url_callback.event_id = 'project_preview_url'
+  >>> project_preview_url_callback.token_id = 'project_preview_url'
 
   >>> client.register_callback(crafter_first_name_callback)
   >>> client.register_callback(project_preview_url_callback)
@@ -175,7 +175,8 @@ My god, that's clever.  And if I do it with a full set of context?
   >>> sorted(status['no_source'])
   []
 
-Let's prove it works when the callbacks are in a separate package
+Let's prove it works when the callbacks are in a separate package. (roger and
+kilroy are just printed as evidence that the calls were made.)
 
   >>> from spray.tests import callbacks
   >>> src._send = MagicMock()
