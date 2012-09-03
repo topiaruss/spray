@@ -17,6 +17,6 @@ def get_aws_config():
         sec = config.get('default', 'secret_key')
         return (acc, sec)
     except:
-        print "You are probably missing the .s3cfg file - Russ can help."
+        print "You are probably missing a .s3cfg file - Russ can help."
         import sys
         sys.exit(1)
