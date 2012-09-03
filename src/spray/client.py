@@ -282,7 +282,7 @@ class DryRun(object):
             pass  # defeat PEP8 checker
 
         events = sorted(self.mm.data.keys())
-        for e in events[:5]:
+        for e in events:  # [:5]:
             # print '5 only'
             # crafter_user_project_system is a dummy context that 
             # satisfies all stubs. It should be dropped as soon as all stubs

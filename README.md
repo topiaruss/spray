@@ -31,13 +31,16 @@ development, then a folder whose job is is to provide the virtualenv::
     $ cd spray
     $ source bin/activate
 
-If all that has worked, you should see (spray) at the start of the command prompt:
+If all that has worked, you should see "(spray)" at the start of the command prompt:
 Now you should proceeed by forking this repository at github, using your browser,
 then clone it into the current directory on your development machine - something like this::
 
     $ git clone https://github.com/Sponsorcraft/spray.git
 
-Assuming that works, issue the following commands::
+In case you are confused, there will now be ANOTHER directory called spray, in 
+the current directory that is ALSO called spray. 
+
+Assuming the clone worked, issue the following commands::
 
     $ cd spray
     $ python bootstrap.py 
@@ -59,7 +62,7 @@ to send a single message to the queue.
 
 If sprayd has trouble finding a queue, try running the client first, and then
 bin/sprayd in the background.  This will make sure the queue is present
-before sprayd tries to attach to it.
+in your account before sprayd tries to attach to it.
 
 
 Docs
