@@ -36,6 +36,12 @@ class ActionMatrix(object):
     providing the update mechanism and booby-trapped
     placeholder methods.
     """
+    def __init__(self):
+        self.data = None
+
+    def _ensure_updated(self):
+        if self.data is None:
+            raise UserWarning('Have you called ActionMatrix.upate()?')
 
     def update(self):
         rows = self.get_rows()
@@ -61,6 +67,7 @@ class ActionMatrix(object):
 
     def get_actions(self, event):
         # late import to reduce dependencies for use of this module in client
+        self._ensure_updated()
         from spray import action
         ACTIONS = action.ACTIONS
         actionrows = self.data[event.event_id]
@@ -68,9 +75,12 @@ class ActionMatrix(object):
           for row in actionrows]
 
     def get_rows_for_event(self, eid=None):
-        # returns a couple of rows for one event, or all rows
+        "returns a couple of rows for one event, or all rows"
+        self._ensure_updated()
         if eid is not None:
+            # this is a potentially multi-row response
             return self.data[eid]
+        # we must agglomerate the many multi-row sequences
         rows = []
         for k, v in self.data.items():
             rows.extend(v)

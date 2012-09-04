@@ -9,6 +9,13 @@ def test_suite():
 
     tests = (
         doctest.DocFileSuite(
+            '../../../doc/tests/scheduler.rst',
+    #        setUp=testing.setUp, tearDown=testing.tearDown,
+            checker=testing.checker,
+            optionflags=testing.OPTIONFLAGS
+            ),
+
+        doctest.DocFileSuite(
             '../../../doc/tests/output.rst',
     #        setUp=testing.setUp, tearDown=testing.tearDown,
             checker=testing.checker,
