@@ -1,4 +1,5 @@
 from datetime import timedelta
+from spray.utils import ourtime
 import datetime
 import string
 
@@ -41,8 +42,8 @@ class PeriodicEvent(object):
             self.next_occurrence = None
             return None
         # see if a pre-ordained expiry has elapsed
-        nn = datetime.datetime.now()
-        if self.expiry_date and nn > self.expiry_date:
+        nn = ourtime.now()
+        if self.expiry_date and nn >= self.expiry_date:
             self.next_occurrence = None
             return None
         # compute the next time, or None
@@ -52,11 +53,12 @@ class PeriodicEvent(object):
             # negative means counting to end
             pp = abs(pp)
             dm = divmod((tp - nn).total_seconds(), pp.total_seconds())
-            self.next_occurrence = dm[0] and (nn + pp) or None
+            self.next_occurrence = dm[0] and (tp - (pp * int(dm[0]))) or None
         else:
             # pos is counting from a start time
             dm = divmod((nn - tp).total_seconds(), pp.total_seconds())
-            self.next_occurrence = nn + datetime.timedelta(seconds=dm[1])
+            periods_elapsed = int(dm[0])
+            self.next_occurrence = tp + ((periods_elapsed + 1) * pp)
         return self.next_occurrence
 
     def _get_timepoint(self):
@@ -75,5 +77,6 @@ class PeriodicEvent(object):
         return _to_interval(p)
 
     def is_expired(self):
+        "updates next_occurence and checks if it's expired"
         self.schedule_next()
         return self.next_occurrence is not None
