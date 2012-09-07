@@ -17,6 +17,12 @@ def _to_interval(stringint):
     return timedelta(**arg)
 
 
+class PeriodicEventQ(object):
+
+    def __init__(self):
+        pass
+
+
 class PeriodicEvent(object):
 
     def __init__(self, id, gov_class, gov_id, gov_field,
