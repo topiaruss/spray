@@ -20,7 +20,7 @@ messaging or social actions""",
       author_email='russf@topia.com',
       url='sponsorcraft.com',
       license='NCSA',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      packages=find_packages('src', exclude=['ez_setup', 'examples', 'tests']),
       package_dir={'': 'src'},
       extras_require=dict(
         test=(
