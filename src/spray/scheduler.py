@@ -25,23 +25,22 @@ class PeriodicEventQ(object):
 
 class PeriodicEvent(object):
 
-    def __init__(self, id, gov_class, gov_id, gov_field,
+    def __init__(self, eid, gov_class, gov_id, gov_field,
       expiry_date=None, mm=None, accessor=None, external_nix=None):
-        self.id = id
+        self.eid = eid
         self.gov_class = gov_class
         self.gov_id = gov_id
         self.gov_field = gov_field
         self.expiry_date = expiry_date
-        self.mm = mm
         self.accessor = accessor
         self.external_nix = external_nix
-        self.schedule_next()
+        self.schedule_next(mm)
 
     def __repr__(self):
         return 'PeriodicEvent id:%r gov_class:%r gov_id:%r gov_field:%r' % (
-          self.id, self.gov_class, self.gov_id, self.gov_field)
+          self.eid, self.gov_class, self.gov_id, self.gov_field)
 
-    def schedule_next(self):
+    def schedule_next(self, mm):
         "sets the next_occurrence or None if expired"
         # see if the external method wants to stop the event
         if self.external_nix and self.external_nix(self):
@@ -53,7 +52,7 @@ class PeriodicEvent(object):
             self.next_occurrence = None
             return None
         # compute the next time, or None
-        pp = self.period()
+        pp = self.period(mm)
         tp = self._get_timepoint()
         if pp.total_seconds() < 0:
             # negative means counting to end
@@ -72,9 +71,9 @@ class PeriodicEvent(object):
         acc = self.accessor
         return acc(self.gov_class, self.gov_id, self.gov_field)
 
-    def period(self):
+    def period(self, mm):
         "ask the mm for the period for this event type - negative if countdown"
-        rr = self.mm.get_rows_for_event(self.id)
+        rr = mm.get_rows_for_event(self.eid)
         p = rr[0]['period']
         for r in rr[1:]:
             assert p == r['period']
