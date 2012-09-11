@@ -19,7 +19,7 @@ implementation in SQL is obvious.
 Working Data
 ------------
 
-Build a mock database based on our Project requirements that can be accessed 
+Build a mock database based on our Project requirements that can be accessed
 by the accessor we provide, below. This could be an other runtime datasource.
 
     >>> import datetime
@@ -42,7 +42,8 @@ Action Matrix
 -------------
 
   >>> from spray import matrix 
-  >>> mm = matrix.CSVActionMatrix('./doc/tests/System Event-Action matrix - Matrix.csv')
+  >>> mm = matrix.CSVActionMatrix(
+  ...   './doc/tests/System Event-Action matrix - Matrix.csv')
   >>> mm.update()
 
 
@@ -54,17 +55,19 @@ its type and its running schedule. It does not contain all the usual context
 information, since that is likely to change over time, and storing it 
 for three months in the db is silly. 
 
-Since this event processing will have access to the Event Matrix, we also do not need
-to store the period for the event in the event itself. This way, if the period 
-changes, spray can adjust on-the-fly.
+Since this event processing will have access to the Event Matrix, we also do
+not need to store the period for the event in the event itself. This way, if
+the period  changes, spray can adjust on-the-fly.
 
 Let's build an event that is scheduled around the END of the project, and test
 the next_occurrence calculation
 
     >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.stats', 'Project', 1, 'deadline', mm=mm, accessor=dummy_db_access)
+    >>> ev = PeriodicEvent('system.project.stats', 'Project', 1, 
+    ...   'deadline', mm=mm, accessor=dummy_db_access)
     >>> ev
-    PeriodicEvent id:'system.project.stats' gov_class:'Project' gov_id:1 gov_field:'deadline'
+    PeriodicEvent id:'system.project.stats' gov_class:'Project' 
+      gov_id:1 gov_field:'deadline'
     
     >>> ev.period(mm)
     datetime.timedelta(-7)
@@ -106,14 +109,14 @@ The response to schedule_next() is None, because the event has elapsed.
     >>> ourtime.reset()
 
 Now let's start again, with an event that is based on a START time. This time
-we'll set the time before creating the event, to prove that the next_occurrence
-is updated on creation.
+we'll set the time before creating the event, to prove that the
+next_occurrence is updated on creation.
 
     >>> ourtime.setnow(datetime.datetime(2012, 1, 1, 0, 0))
 
     >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 'project_submitted',
-    ...   mm=mm, accessor=dummy_db_access)
+    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 
+    ... 'project_submitted', mm=mm, accessor=dummy_db_access)
     >>> ev
     PeriodicEvent id:'system.project.drafted' gov_class:'Project' 
       gov_id:1 gov_field:'project_submitted'
@@ -124,19 +127,19 @@ is updated on creation.
     >>> ev.next_occurrence
     datetime.datetime(2012, 1, 8, 0, 0)
 
-You can see that even at the same time as the start of the period, the next occurrence is a 
-week later, as expected.  You can also see that the next occurrence was update at 
-event creation.
+You can see that even at the same time as the start of the period, the next
+occurrence is a  week later, as expected.  You can also see that the next
+occurrence was update at  event creation.
 
-If we update the clock to the 7th of January, just before midnight, the next occurrence 
-remains the same 
+If we update the clock to the 7th of January, just before midnight, the next
+occurrence  remains the same
 
     >>> ourtime.setnow(datetime.datetime(2012, 1, 7, 23, 59, 59))
     >>> ev.schedule_next(mm)
     datetime.datetime(2012, 1, 8, 0, 0)
 
-but one second later, the next occurrence has been updated to the following weekly
-period.
+but one second later, the next occurrence has been updated to the following
+weekly period.
 
     >>> ourtime.setnow(datetime.datetime(2012, 1, 8, 0, 0))
     >>> ev.schedule_next(mm)
@@ -146,8 +149,8 @@ External_nix
 ------------
 
 Our scheduler does not want to know about the many reasons that an event might
-be cancelled, so we pass in a callback, called external_nix.  It is called 
-at the start of the schedule_next, with one parameter, the event. If it returns 
+be cancelled, so we pass in a callback, called external_nix.  It is called  at
+the start of the schedule_next, with one parameter, the event. If it returns
 anything evaluating to True, the next_occurrence is set to None.
 
 Let's try it with a duplicate of the event above, and give it a nix
@@ -160,34 +163,39 @@ function that kills the event when the deadline is exceeded.
 
     >>> ourtime.setnow(datetime.datetime(2012, 12, 31, 23, 59, 59))
     >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 'project_submitted',
-    ...   mm=mm, accessor=dummy_db_access, external_nix=project_nix)
+    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 
+    ...   'project_submitted', mm=mm, accessor=dummy_db_access,
+    ...    external_nix=project_nix)
     >>> ev.next_occurrence
     datetime.datetime(2013, 1, 6, 0, 0)
 
 
-This makes sense. If not for the project_nix, the event would recur on the 6th of
-January 2013, which is a Sunday, like all other intervals for that event.
+This makes sense. If not for the project_nix, the event would recur on the 6th
+of January 2013, which is a Sunday, like all other intervals for that event.
 
-So now let's advance time one second, so that we meet the project_nix condition.
+So now let's advance time one second, so that we meet the project_nix
+condition.
 
     >>> ourtime.fast_forward(seconds=1)
     >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 'project_submitted',
-    ...   mm=mm, accessor=dummy_db_access, external_nix=project_nix)
+    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 
+    ... 'project_submitted', mm=mm, accessor=dummy_db_access,
+    ... external_nix=project_nix)
     >>> ev.next_occurrence
 
-So that explores both ends of the interval scheduling, the external_nix method.
+So that explores both ends of the interval scheduling, the external_nix
+method.
 
 Let's check one more thing -- the expiry_date option. For that, we'll use the
-same event as before, but adding an expiry date of the first of March, 2012.  
+same event as before, but adding an expiry date of the first of March, 2012.
 We'll look at the next occurrence before and after expiry.
 
     >>> ourtime.setnow(datetime.datetime(2012, 2, 29, 23, 59, 59))
     >>> expdate = datetime.datetime(2012, 3, 1, 0, 0)
     >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 'project_submitted',
-    ...   mm=mm, accessor=dummy_db_access, expiry_date=expdate)
+    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1,
+    ...    'project_submitted', mm=mm, accessor=dummy_db_access,
+    ...    expiry_date=expdate)
     >>> ev.next_occurrence
     datetime.datetime(2012, 3, 4, 0, 0)
 
