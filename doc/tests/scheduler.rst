@@ -86,7 +86,7 @@ schedule_next() updates the internal quantity next_occurence, and
 returns that value, for convenience. The value can be re-read without
 it changing.
 
-    >>> ev.schedule_next(mm)
+    >>> ev.schedule_next(mm, dummy_db_access)
     datetime.datetime(2012, 12, 18, 0, 0)
 
 You can see the internal value is accessible, and is the same
@@ -97,14 +97,14 @@ You can see the internal value is accessible, and is the same
 Move the clock to just over a week before the end of the project
 
     >>> ourtime.setnow(datetime.datetime(2012, 12, 19, 0, 0))
-    >>> ev.schedule_next(mm)
+    >>> ev.schedule_next(mm, dummy_db_access)
     datetime.datetime(2012, 12, 25, 0, 0)
 
 Finally, set clock to less than a week to the end of the period.
 The response to schedule_next() is None, because the event has elapsed.
 
     >>> ourtime.setnow(datetime.datetime(2012, 12, 26, 0, 0))
-    >>> ev.schedule_next(mm)
+    >>> ev.schedule_next(mm, dummy_db_access)
 
     >>> ourtime.reset()
 
@@ -135,14 +135,14 @@ If we update the clock to the 7th of January, just before midnight, the next
 occurrence  remains the same
 
     >>> ourtime.setnow(datetime.datetime(2012, 1, 7, 23, 59, 59))
-    >>> ev.schedule_next(mm)
+    >>> ev.schedule_next(mm, dummy_db_access)
     datetime.datetime(2012, 1, 8, 0, 0)
 
 but one second later, the next occurrence has been updated to the following
 weekly period.
 
     >>> ourtime.setnow(datetime.datetime(2012, 1, 8, 0, 0))
-    >>> ev.schedule_next(mm)
+    >>> ev.schedule_next(mm, dummy_db_access)
     datetime.datetime(2012, 1, 15, 0, 0)
 
 External_nix
@@ -202,7 +202,7 @@ We'll look at the next occurrence before and after expiry.
 Creep forward one second
 
     >>> ourtime.fast_forward(seconds=1)
-    >>> ev.schedule_next(mm)
+    >>> ev.schedule_next(mm, dummy_db_access)
     >>> ev.next_occurrence
 
 Here's the calender for 2012::

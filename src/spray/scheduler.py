@@ -32,18 +32,16 @@ class PeriodicEvent(object):
         self.gov_id = gov_id
         self.gov_field = gov_field
         self.expiry_date = expiry_date
-        self.accessor = accessor
-        self.external_nix = external_nix
-        self.schedule_next(mm)
+        self.schedule_next(mm, accessor, external_nix)
 
     def __repr__(self):
         return 'PeriodicEvent id:%r gov_class:%r gov_id:%r gov_field:%r' % (
           self.eid, self.gov_class, self.gov_id, self.gov_field)
 
-    def schedule_next(self, mm):
+    def schedule_next(self, mm, accessor, external_nix=None):
         "sets the next_occurrence or None if expired"
         # see if the external method wants to stop the event
-        if self.external_nix and self.external_nix(self):
+        if external_nix and external_nix(self):
             self.next_occurrence = None
             return None
         # see if a pre-ordained expiry has elapsed
@@ -53,7 +51,7 @@ class PeriodicEvent(object):
             return None
         # compute the next time, or None
         pp = self.period(mm)
-        tp = self._get_timepoint()
+        tp = self._get_timepoint(accessor)
         if pp.total_seconds() < 0:
             # negative means counting to end
             pp = abs(pp)
@@ -66,10 +64,9 @@ class PeriodicEvent(object):
             self.next_occurrence = tp + ((periods_elapsed + 1) * pp)
         return self.next_occurrence
 
-    def _get_timepoint(self):
+    def _get_timepoint(self, accessor):
         "returns value provided by the plugable accessor"
-        acc = self.accessor
-        return acc(self.gov_class, self.gov_id, self.gov_field)
+        return accessor(self.gov_class, self.gov_id, self.gov_field)
 
     def period(self, mm):
         "ask the mm for the period for this event type - negative if countdown"
