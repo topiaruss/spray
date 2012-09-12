@@ -63,8 +63,11 @@ Let's build an event that is scheduled around the END of the project, and test
 the next_occurrence calculation
 
     >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.stats', 'Project', 1, 
-    ...   'deadline', mm=mm, accessor=dummy_db_access)
+    >>> ev = PeriodicEvent(eid='system.project.stats', 
+    ...   gov_class='Project', 
+    ...   gov_id=1, 
+    ...   gov_field='deadline', 
+    ...   mm=mm, accessor=dummy_db_access)
     >>> ev
     PeriodicEvent id:'system.project.stats' gov_class:'Project' 
       gov_id:1 gov_field:'deadline'
@@ -113,10 +116,12 @@ we'll set the time before creating the event, to prove that the
 next_occurrence is updated on creation.
 
     >>> ourtime.setnow(datetime.datetime(2012, 1, 1, 0, 0))
+    >>> ev = PeriodicEvent(eid='system.project.drafted', 
+    ...   gov_class='Project', 
+    ...   gov_id=1, 
+    ...   gov_field='project_submitted', 
+    ...   mm=mm, accessor=dummy_db_access)
 
-    >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 
-    ... 'project_submitted', mm=mm, accessor=dummy_db_access)
     >>> ev
     PeriodicEvent id:'system.project.drafted' gov_class:'Project' 
       gov_id:1 gov_field:'project_submitted'
@@ -163,8 +168,11 @@ function that kills the event when the deadline is exceeded.
 
     >>> ourtime.setnow(datetime.datetime(2012, 12, 31, 23, 59, 59))
     >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 
-    ...   'project_submitted', mm=mm, accessor=dummy_db_access,
+    >>> ev = PeriodicEvent(eid='system.project.drafted', 
+    ...   gov_class='Project', 
+    ...   gov_id=1, 
+    ...   gov_field='project_submitted', 
+    ...   mm=mm, accessor=dummy_db_access,
     ...    external_nix=project_nix)
     >>> ev.next_occurrence
     datetime.datetime(2013, 1, 6, 0, 0)
@@ -178,9 +186,12 @@ condition.
 
     >>> ourtime.fast_forward(seconds=1)
     >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1, 
-    ... 'project_submitted', mm=mm, accessor=dummy_db_access,
-    ... external_nix=project_nix)
+    >>> ev = PeriodicEvent(eid='system.project.drafted', 
+    ...   gov_class='Project', 
+    ...   gov_id=1, 
+    ...   gov_field='project_submitted', 
+    ...   mm=mm, accessor=dummy_db_access,
+    ...    external_nix=project_nix)
     >>> ev.next_occurrence
 
 So that explores both ends of the interval scheduling, the external_nix
@@ -193,9 +204,13 @@ We'll look at the next occurrence before and after expiry.
     >>> ourtime.setnow(datetime.datetime(2012, 2, 29, 23, 59, 59))
     >>> expdate = datetime.datetime(2012, 3, 1, 0, 0)
     >>> from spray.scheduler import PeriodicEvent
-    >>> ev = PeriodicEvent('system.project.drafted', 'Project', 1,
-    ...    'project_submitted', mm=mm, accessor=dummy_db_access,
+    >>> ev = PeriodicEvent(eid='system.project.drafted', 
+    ...   gov_class='Project', 
+    ...   gov_id=1, 
+    ...   gov_field='project_submitted', 
+    ...   mm=mm, accessor=dummy_db_access,
     ...    expiry_date=expdate)
+
     >>> ev.next_occurrence
     datetime.datetime(2012, 3, 4, 0, 0)
 

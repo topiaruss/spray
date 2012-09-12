@@ -1,6 +1,6 @@
 from datetime import timedelta
 from spray.utils import ourtime
-import datetime
+import spray
 import string
 
 UNITS = dict(d='days', w='weeks', m='months', y='years')
@@ -25,13 +25,19 @@ class PeriodicEventQ(object):
 
 class PeriodicEvent(object):
 
-    def __init__(self, eid, gov_class, gov_id, gov_field,
-      expiry_date=None, mm=None, accessor=None, external_nix=None):
-        self.eid = eid
-        self.gov_class = gov_class
-        self.gov_id = gov_id
-        self.gov_field = gov_field
-        self.expiry_date = expiry_date
+    def __init__(self, *args, **kwargs):
+        # flexible args in case used as mixed-in
+        if isinstance(self, spray.scheduler.PeriodicEvent):
+            # only if we are a standalone, not mixin
+            self.eid = kwargs.get('eid')
+            self.gov_class = kwargs.get('gov_class')
+            self.gov_id = kwargs.get('gov_id')
+            self.gov_field = kwargs.get('gov_field')
+            self.expiry_date = kwargs.get('expiry_date')
+            assert all((self.eid, self.gov_class, self.gov_id, self.gov_field))
+        mm = kwargs.get('mm')
+        accessor = kwargs.get('accessor')
+        external_nix = kwargs.get('external_nix')
         self.schedule_next(mm, accessor, external_nix)
 
     def __repr__(self):
