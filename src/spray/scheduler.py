@@ -35,10 +35,11 @@ class PeriodicEvent(object):
             self.gov_field = kwargs.get('gov_field')
             self.expiry_date = kwargs.get('expiry_date')
             assert all((self.eid, self.gov_class, self.gov_id, self.gov_field))
-        mm = kwargs.get('mm')
-        accessor = kwargs.get('accessor')
-        external_nix = kwargs.get('external_nix')
-        self.schedule_next(mm, accessor, external_nix)
+            # we don't automatically schedule_next in a django mix-in
+            mm = kwargs.get('mm')
+            accessor = kwargs.get('accessor')
+            external_nix = kwargs.get('external_nix')
+            self.schedule_next(mm, accessor, external_nix)
 
     def __repr__(self):
         return 'PeriodicEvent id:%r gov_class:%r gov_id:%r gov_field:%r' % (
