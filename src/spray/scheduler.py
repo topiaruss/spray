@@ -27,7 +27,8 @@ class PeriodicEvent(object):
 
     def __init__(self, *args, **kwargs):
         # flexible args in case used as mixed-in
-        if isinstance(self, spray.scheduler.PeriodicEvent):
+#       if isinstance(self, isinstance(self, spray.scheduler.PeriodicEvent)):
+        if self.__class__ == spray.scheduler.PeriodicEvent:
             # only if we are a standalone, not mixin
             self.eid = kwargs.get('eid')
             self.gov_class = kwargs.get('gov_class')
