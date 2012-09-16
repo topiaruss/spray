@@ -20,7 +20,7 @@ Working Data
 ------------
 
 Build a mock database based on our Project requirements that can be accessed
-by the accessor we provide, below. This could be an other runtime datasource.
+by the accessor we provide, below. This could be another runtime datasource.
 
     >>> import datetime
     >>> cd = datetime.datetime(2012, 1, 1, 0, 0)
@@ -214,7 +214,7 @@ We'll look at the next occurrence before and after expiry.
     >>> ev.next_occurrence
     datetime.datetime(2012, 3, 4, 0, 0)
 
-Creep forward one second
+Creep forward one second, and the event will have a None next_occurence
 
     >>> ourtime.fast_forward(seconds=1)
     >>> ev.schedule_next(mm, dummy_db_access)

@@ -80,9 +80,8 @@ class Source(object):
         results = context.copy()
         for k in cbs:
             c = CALLBACKS[k]
-
             if set(context.keys()).issuperset(set(c.func_code.co_varnames)):
-                results[k] = c(context[v] for v in c.func_code.co_varnames)
+                results[k] = c(*[context[v] for v in c.func_code.co_varnames])
             else:
                 no_source.extend(set(c.func_code.co_varnames) -
                     set(context.keys()))

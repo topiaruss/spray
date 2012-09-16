@@ -2,6 +2,7 @@ from spray import client
 
 
 def crafter_first_name_callback(crafter):
+    print type(crafter)
     print 'kilroy'
     return 'crafty'
 
@@ -9,6 +10,7 @@ crafter_first_name_callback.token_id = 'crafter_first_name'
 
 
 def project_preview_url_callback(project):
+    print type(project)
     print 'roger'
     return 'sillyproject'
 

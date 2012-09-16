@@ -182,7 +182,9 @@ kilroy are just printed as evidence that the calls were made.)
   >>> src._send = MagicMock()
   >>> context = dict(project=project, crafter=crafter)
   >>> status = src.send('system.project.drafted', context)
+  <type 'object'>
   roger
+  <type 'object'>
   kilroy
 
   >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject',
