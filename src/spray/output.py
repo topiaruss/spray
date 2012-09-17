@@ -2,7 +2,8 @@ from boto import ses
 from jinja2 import Template
 from spray import emailproc
 from spray import interface
-from spray.utils import awsconfig
+from spray.tests import TEST_CREDENTIALS_FILENAME
+from spray.utils import aws_credentials
 from spray.utils import genfind
 from spray.utils import genopen
 from zope.interface import implements
@@ -148,7 +149,7 @@ class AmazonSESDestination(Destination):
 
     def __init__(self):
         self.region = 'eu-west-1'
-        conf = awsconfig.get_aws_config()
+        conf = aws_credentials.get_credentials(TEST_CREDENTIALS_FILENAME)
         region = ses.get_region(self.region)
         self.conn = boto.connect_ses(aws_access_key_id=conf[0],
           aws_secret_access_key=conf[1],

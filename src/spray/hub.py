@@ -2,9 +2,10 @@ from boto.sqs import regions
 from boto.sqs.connection import SQSConnection
 from spray import event
 from spray import interface
-from spray.utils import awsconfig
+from spray.utils import aws_credentials
 from zope.interface import implements
 import Queue
+from spray.tests import TEST_CREDENTIALS_FILENAME
 
 
 # The singleton directory of ...
@@ -45,11 +46,13 @@ class SQSQueue(object):
     def __init__(self, name, acc_sec_pair=None, visibility_timeout=30):
         self.name = name
         if acc_sec_pair is None:
-            acc_sec_pair = awsconfig.get_aws_config()
+            acc_sec_pair = aws_credentials.get_credentials(
+              TEST_CREDENTIALS_FILENAME)
         self.region_name = 'eu-west-1'
         self.region = [r for r in regions() if r.name == self.region_name][0]
-        self.conn = SQSConnection(acc_sec_pair[0], acc_sec_pair[1],
-                                region=self.region)
+        self.conn = SQSConnection(aws_access_key_id=acc_sec_pair[0],
+          aws_secret_access_key=acc_sec_pair[1],
+          region=self.region)
         self.q = self.conn.create_queue(name, visibility_timeout)
         self.q.set_message_class(event.SQSEvent)
 

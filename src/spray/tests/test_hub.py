@@ -1,8 +1,10 @@
 from boto.sqs.connection import SQSConnection
+from boto.sqs import regions
 from spray import event
 from spray import hub
 from spray import interface
-from spray.utils import awsconfig
+from spray.tests import TEST_CREDENTIALS_FILENAME
+from spray.utils import aws_credentials
 from time import sleep
 from zope.interface import providedBy
 import unittest
@@ -61,9 +63,14 @@ class TestSQSQueue(unittest.TestCase):
 
     def setUp(self):
         # Ensure the queue is clear before we start, or we'll lose more hair
-        acc_sec_pair = awsconfig.get_aws_config()
-        conn = SQSConnection(*acc_sec_pair)
-        q = conn.create_queue(self.qname)
+        creds = aws_credentials.get_credentials(
+          TEST_CREDENTIALS_FILENAME)
+        region_name = 'eu-west-1'
+        region = [r for r in regions() if r.name == region_name][0]
+        conn = SQSConnection(aws_access_key_id=creds[0],
+          aws_secret_access_key=creds[1],
+          region=region)
+        q = conn.create_queue(self.qname, 30)
         cruft = q.get_messages(10)
         while cruft:
             for c in cruft:
