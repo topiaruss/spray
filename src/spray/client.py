@@ -260,8 +260,8 @@ class DryRun(object):
         return depends
 
     def put_callbacks(self, depends):
-        """generates a file with all the callback stubs we know about.
-        This will be in the execution directory. It may be necessary to 
+        """Generates a file with all the callback stubs we know about.
+        This will be in the execution directory. It may be necessary to
         move it to the tests directory where we keep a fresh copy.
         """
         keys = sorted(depends.keys())
@@ -283,9 +283,9 @@ class DryRun(object):
         events = sorted(self.mm.data.keys())
         for e in events:  # [:5]:
             # print '5 only'
-            # crafter_user_project_system is a dummy context that 
+            # crafter_user_project_system is a dummy context that
             # satisfies all stubs. It should be dropped as soon as all stubs
-            # are filled. 
+            # are filled.
             self.me.send(e, {'to': self.recip,
                              'bcc': self.bcc,
                              'sender': self.sender,
@@ -299,13 +299,16 @@ class DryRun(object):
         self.config_logging(config)
         self.config_app(config, arg)
         self.build_stuffing()
-        # messy, but we enable these two lines to generate a fresh callback file 
+        #  messy, but we enable these two lines to generate a fresh callback
         #    from the current data.
-        # depends = self.explore_events()
-        # self.put_callbacks(depends)
+        #  depends = self.explore_events()
+        #  self.put_callbacks(depends)
         self.blast_events()
 
 
 #This is used by setup.py and buildout.cfg to generate an app in bin/
 def dryrun():
     DryRun()()
+
+#  what remains relates to test configuration
+
