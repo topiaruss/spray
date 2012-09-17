@@ -5,7 +5,7 @@ from spray import interface
 from spray.utils import aws_credentials
 from zope.interface import implements
 import Queue
-from spray.tests import TEST_CREDENTIALS_FILENAME
+from spray.settings import CREDENTIALS_FILENAME
 
 
 # The singleton directory of ...
@@ -47,7 +47,7 @@ class SQSQueue(object):
         self.name = name
         if acc_sec_pair is None:
             acc_sec_pair = aws_credentials.get_credentials(
-              TEST_CREDENTIALS_FILENAME)
+              CREDENTIALS_FILENAME)
         self.region_name = 'eu-west-1'
         self.region = [r for r in regions() if r.name == self.region_name][0]
         self.conn = SQSConnection(aws_access_key_id=acc_sec_pair[0],
