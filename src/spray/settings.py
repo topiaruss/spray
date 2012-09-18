@@ -1,5 +1,5 @@
 try:
-    from django.conf import djsettings
+    from django.conf import settings as djsettings
     assert djsettings  # bypass the syntax checker
 except:
     djsettings = {}
