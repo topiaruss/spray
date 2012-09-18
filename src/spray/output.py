@@ -1,7 +1,8 @@
 from boto import ses
-from jinja2 import Template
+from jinja2 import Environment
 from spray import emailproc
 from spray import interface
+from spray import templating
 from spray.settings import CREDENTIALS_FILENAME
 from spray.utils import aws_credentials
 from spray.utils import genfind
@@ -16,6 +17,14 @@ LOG = logging.getLogger(__name__)
 
 # TODO: retrofit a zope interface for Channel hierarchy and unify formal params
 
+# To setup custom filters, we need to establish an environment
+env = Environment()
+
+# Add the custom filters
+env.filters['urlformat'] = templating.urlformat
+env.filters['buttonformat'] = templating.buttonformat
+
+# == Template registries == #
 AVAILABLE_TEMPLATE_REGISTRIES = {}
 
 
@@ -26,7 +35,7 @@ class SimpleTemplateRegistry(object):
         self.reg = {}
 
     def _process_and_store(self, style, text):
-        template = Template(text)
+        template = env.from_string(text)
         self.reg[style] = template
 
     @classmethod
@@ -84,6 +93,9 @@ DEFAULT_TEMPLATE_REGISTRY = SimpleTemplateRegistry()
 SimpleTemplateRegistry.make_available('semail')
 FSBasedTemplateRegistry.make_available('email',
   templates_dir='./templates/email')
+
+
+# == Destination registries == #
 
 DESTINATION_REGISTRY = {}
 
@@ -167,6 +179,9 @@ class AmazonSESDestination(Destination):
         self.conn.send_email(**kw)
 
 AmazonSESDestination.register()
+
+
+# == Channels == #
 
 
 class Channel(object):

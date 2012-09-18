@@ -111,3 +111,47 @@ class TestChannel(unittest.TestCase):
         assert isinstance(ch.tempreg, SubTemplate)
 
 
+class TestJinjaUrlFilter(unittest.TestCase):
+
+    def setUp(self):
+        from jinja2 import Environment
+        from spray import templating
+        self.env = env = Environment()
+        env.filters['urlformat'] = templating.urlformat
+
+    def test_bare_url_filter(self):
+        test_bareurl = self.env.from_string("blah {{ u1|urlformat }} de blah")
+        result = test_bareurl.render(u1='https://sc.com')
+        expect = u'blah <a href="https://sc.com">https://sc.com</a> de blah'
+        assert result == expect
+
+    def test_url_with_text_filter(self):
+        test_bareurl = self.env.from_string(
+          "blah {{ u1|urlformat('click') }} de blah")
+        result = test_bareurl.render(u1='https://sc.com')
+        expect = u'blah <a href="https://sc.com">click</a> de blah'
+        assert result == expect
+
+
+class TestJinjaButtonFilter(unittest.TestCase):
+
+    def setUp(self):
+        from jinja2 import Environment
+        from spray import templating
+        self.env = env = Environment()
+        env.filters['buttonformat'] = templating.buttonformat
+
+    def test_bare_url_filter(self):
+        test_bareurl = self.env.from_string("{{ u1|buttonformat }}")
+        result = test_bareurl.render(u1='https://sc.com')
+        assert 'sc.com' in result
+
+    def test_url_with_text_filter(self):
+        test_url = self.env.from_string(
+          """{{ u1|buttonformat(fcolour=fcolour,
+            bcolour=bcolour, text=text, font=font) }}""")
+        kw = dict(u1='https://sc.com',
+          bcolour='BCOL', fcolour='FCOL', text='TXT', font='FFONT')
+        result = test_url.render(**kw)
+        for v in kw.values():
+            assert v in result
