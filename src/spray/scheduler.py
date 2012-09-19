@@ -86,7 +86,7 @@ class PeriodicEvent(object):
             return None
         return _to_interval(p)
 
-    def is_expired(self):
+    def is_expired(self, external_nix=None):
         "updates next_occurence and checks if it's expired"
-        self.schedule_next()
-        return self.next_occurrence is not None
+        return (self.next_occurrence is None) or\
+          (external_nix and external_nix(self))

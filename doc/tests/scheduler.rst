@@ -25,10 +25,10 @@ by the accessor we provide, below. This could be another runtime datasource.
     >>> import datetime
     >>> cd = datetime.datetime(2012, 1, 1, 0, 0)
     >>> dl = datetime.datetime(2013, 1, 1, 0, 0)
-    >>> Projects = [dict(id=1, project_submitted=cd, deadline=dl)]
+    >>> Projects = [dict(id=1, project_submitted=cd, deadline=dl, pub=True)]
     >>> cd = datetime.datetime(2012, 5, 20, 12, 15)
     >>> dl = datetime.datetime(2012, 8, 20, 12, 15)
-    >>> Projects += [dict(id=2, project_submitted=cd, deadline=dl)]
+    >>> Projects += [dict(id=2, project_submitted=cd, deadline=dl, pub=True)]
 
 And then the accessor
     >>> def dummy_db_access(table, index, field):
@@ -177,6 +177,9 @@ function that kills the event when the deadline is exceeded.
     >>> ev.next_occurrence
     datetime.datetime(2013, 1, 6, 0, 0)
 
+    >>> ev.is_expired(external_nix=project_nix)
+    False
+
 
 This makes sense. If not for the project_nix, the event would recur on the 6th
 of January 2013, which is a Sunday, like all other intervals for that event.
@@ -194,12 +197,52 @@ condition.
     ...    external_nix=project_nix)
     >>> ev.next_occurrence
 
-So that explores both ends of the interval scheduling, the external_nix
-method.
+So that explores both ends of the interval scheduling, and one use of
+the external_nix method.
+
+There is another use for that method. first we redefine project_nix::
+
+    >>> def project_nix(event):
+    ...     "adds a dependency on project published"
+    ...     index = event.gov_id
+    ...     proj = [p for p in Projects if p['id'] == index][0]
+    ...     deadline = proj['deadline']
+    ...     return (not proj['pub']) or (ourtime.now() >= deadline)
+
+    >>> ourtime.setnow(datetime.datetime(2012, 12, 31, 23, 59, 59))
+    >>> from spray.scheduler import PeriodicEvent
+    >>> ev = PeriodicEvent(eid='system.project.drafted', 
+    ...   gov_class='Project', 
+    ...   gov_id=1, 
+    ...   gov_field='project_submitted', 
+    ...   mm=mm, accessor=dummy_db_access,
+    ...    external_nix=project_nix)
+    >>> ev.next_occurrence
+    datetime.datetime(2013, 1, 6, 0, 0)
+    >>> ev.is_expired(external_nix=project_nix)
+    False
+
+but now let's cancel the project (all of them, by clearing the pub attribute)
+
+    >>> for p in Projects:
+    ...     p['pub'] = False
+
+and ask if the project has expired. It has, even though it had been scheduled
+for another occurence.
+
+    >>> ev.is_expired(external_nix=project_nix)
+    True
+
+    >>> ev.next_occurrence
+    datetime.datetime(2013, 1, 6, 0, 0)
+
+Normally this would be reason to delete the event in the handler.
+
 
 Let's check one more thing -- the expiry_date option. For that, we'll use the
 same event as before, but adding an expiry date of the first of March, 2012.
-We'll look at the next occurrence before and after expiry.
+We'll look at the next occurrence before and after expiry.  We won't be
+using a nix, so we don't bother to set the pub entry on the Projects.
 
     >>> ourtime.setnow(datetime.datetime(2012, 2, 29, 23, 59, 59))
     >>> expdate = datetime.datetime(2012, 3, 1, 0, 0)
