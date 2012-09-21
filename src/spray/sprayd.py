@@ -9,10 +9,24 @@ import signal
 LOG = logging.getLogger(__name__)
 
 
+class ConfWrap(object):
+
+    def __init__(self, cf):
+        self.config = config = ConfigParser.RawConfigParser()
+        config.readfp(cf)
+
+    def get(self, section, option):
+        try:
+            return self.config.get(section, option)
+        except ConfigParser.NoOptionError:
+            return None
+
+    def items(self, section):
+        return self.config.items(section)
+
+
 def get_config(cf):
-    config = ConfigParser.RawConfigParser()
-    config.readfp(cf)
-    return config
+    return ConfWrap(cf)
 
 
 def get_command_line_args():
@@ -50,13 +64,23 @@ def config_app(config):
     mm = matrix.matrixFactory(matrix_type, kw)
     mm.update()
 
-    # before starting the processor, setup a real destination sink for messages
+    def get_override(config, k):
+        v = config.get('RecipientOverride', k)
+        return v and v.split() or ()
+
+    overrides = dict(
+        to_addresses=get_override(config, 'to_addresses'),
+        cc_addresses=get_override(config, 'cc_addresses'),
+        bcc_addresses=get_override(config, 'bcc_addresses'),
+    )
+
+    dest = output.DESTINATION_REGISTRY['AmazonSESDestination'](
+      overrides=overrides)
+
     # this overwrites the default, which is a simple Channel()
-    email_channel = output.HTMLEmailChannel(medium='email',
-      destination=output.DESTINATION_REGISTRY['AmazonSESDestination']())
+    email_channel = output.HTMLEmailChannel(medium='email', destination=dest)
     output.CHAN_REG.register(email_channel)
 
-    #the_processor = action.Processor('send', matrix, running=False)
     #this will start running immediately
     the_processor = action.Processor('testSQS', mm)
     assert the_processor  # trick the syntax checker

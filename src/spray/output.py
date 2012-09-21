@@ -159,8 +159,9 @@ class AmazonSESDestination(Destination):
 
     implements(interface.IDestination)
 
-    def __init__(self):
+    def __init__(self, overrides=None):
         self.region = 'eu-west-1'
+        self.overrides = overrides
         conf = aws_credentials.get_credentials(CREDENTIALS_FILENAME)
         region = ses.get_region(self.region)
         self.conn = boto.connect_ses(aws_access_key_id=conf[0],
@@ -169,13 +170,15 @@ class AmazonSESDestination(Destination):
 
     def send(self, body, data):
         sender = data.get('from') or emailproc.TEMP_FROM_ADDRESS
-        recipients = data['to']
+        or_to = self.overrides and self.overrides['to_addresses'] or ''
+        recipients = or_to or data['to']
         subject = data.get('subject') or data.get('subject_en_uk')
         assert type(sender) == type("")
         assert type(recipients) in (list, tuple)
         self.conn.send_email(sender, subject, body, recipients)
 
     def mpart_send(self, **kw):
+        kw.update(self.overrides or {})
         self.conn.send_email(**kw)
 
 AmazonSESDestination.register()
@@ -234,7 +237,7 @@ class HTMLEmailChannel(Channel):
     if it can find one. Then it uses the delivery template to wrap the
     message. Finally it does a stoneage html pass, to check the message
     is legal for email.
-    It uses the mpart_send method of dest, since
+    It uses the mpart_send method of dest. Easiest route to MIME.
     """
 
     def __init__(self, **kw):
