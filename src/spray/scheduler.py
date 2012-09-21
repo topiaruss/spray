@@ -63,8 +63,9 @@ class PeriodicEvent(object):
         if pp.total_seconds() < 0:
             # negative means counting to end
             pp = abs(pp)
-            dm = divmod((tp - nn).total_seconds(), pp.total_seconds())
-            self.next_occurrence = dm[0] and (tp - (pp * int(dm[0]))) or None
+            dm = divmod((tp - nn).total_seconds() - 1, pp.total_seconds())
+            units = int(dm[0])
+            self.next_occurrence = units and (tp - (pp * units)) or None
         else:
             # pos is counting from a start time
             dm = divmod((nn - tp).total_seconds(), pp.total_seconds())
