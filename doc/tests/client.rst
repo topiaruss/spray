@@ -64,6 +64,7 @@ to provide the following data::
 
    crafter_first_name
    project_preview_url
+   crafter_email_address
 
 This is an easy case. Later, we'll need to provide perhaps eight fields, and 
 that will become quite onerous. Once an event is running and a message is
@@ -100,10 +101,10 @@ and this call will be used internally by the client system.
 
   >>> src = client.Source('src', matrix=mm)
   >>> src.get_event_field_tokens('system.project.drafted')
-  ['crafter_first_name', 'project_preview_url']
+  ['crafter_email_address', 'crafter_first_name', 'project_preview_url']
 
   >>> src.get_event_field_tokens()['moderator.project.moderated']
-  ['crafter_first_name', 'moderation_table']
+  ['crafter_email_address', 'crafter_first_name', 'moderation_table']
 
 Now let's Mock the inside of src, the bit that sends over the wire...
 
@@ -119,12 +120,19 @@ gets.
 Let's see what's in status
   
   >>> sorted(status['unfilled'])
-  ['crafter_first_name', 'project_preview_url']
+  ['crafter_email_address', 'crafter_first_name', 'project_preview_url']
 
-So, helpfully, the send method has told us that it was unable to fill two fields.
+So, helpfully, the send method has told us that it was unable to fill three fields.
 
-What do we need to do to help those fields get filled?
+What do we need to do to help those fields get filled? 
 
+Define Callbacks!!::
+
+  >>> def crafter_email_address_callback(crafter):
+  ...     return 'crafty@nevernever.never'
+  ...
+  >>> crafter_email_address_callback.token_id = 'crafter_email_address'
+  ...
   >>> def crafter_first_name_callback(crafter):
   ...     return 'crafty'
   ...
@@ -135,30 +143,34 @@ What do we need to do to help those fields get filled?
   ...
   >>> project_preview_url_callback.token_id = 'project_preview_url'
 
+  >>> client.register_callback(crafter_email_address_callback)
   >>> client.register_callback(crafter_first_name_callback)
   >>> client.register_callback(project_preview_url_callback)
 
 what did we just cause to happen?
 
   >>> sorted(client.CALLBACKS.items()) 
-  [('crafter_first_name', <function crafter_first_name_callback at <SOME ADDRESS>>), 
+  [('crafter_email_address', <function crafter_email_address_callback at <SOME ADDRESS>>), 
+   ('crafter_first_name', <function crafter_first_name_callback at <SOME ADDRESS>>), 
    ('project_preview_url', <function project_preview_url_callback at <SOME ADDRESS>>)]
 
-Ah. I get it.  So now, if I make the same call again, giving context...
+Ah. I get it.  So now, if I make the same call again, giving some context...
 
   >>> src._send = MagicMock()
   >>> project=object()
   >>> context = dict(project=project)
   >>> status = src.send('system.project.drafted', context)
-  >>> expect = dict(project_preview_url='sillyproject', project=project)
+  >>> expect = dict(project_preview_url='sillyproject')
   >>> src._send.assert_called_once_with('system.project.drafted', expect)  
   >>> sorted(status['unfilled'])
   []
   >>> sorted(status['no_source'])
   ['crafter']
 
-Oh, so if sender was given a callback, but the source for that callback to do its
-job was not available, you tell me the name of the source. 
+Status is telling me that it had no source for the crafter.
+
+Oh, so if sender is given a callback, but the source for that callback to do its
+job is not available, you tell me the name of the source. 
 
 My god, that's clever.  And if I do it with a full set of context?
 
@@ -166,8 +178,8 @@ My god, that's clever.  And if I do it with a full set of context?
   >>> project, crafter = object(), object()  
   >>> context = dict(project=project, crafter=crafter)
   >>> status = src.send('system.project.drafted', context)
-  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject',
-  ...   project=project, crafter=crafter)
+  >>> expect = dict(crafter_email_address='crafty@nevernever.never',
+  ... crafter_first_name='crafty', project_preview_url='sillyproject')
   >>> src._send.assert_called_once_with('system.project.drafted', expect)  
   >>> sorted(status['unfilled'])
   []
@@ -187,8 +199,8 @@ kilroy are just printed as evidence that the calls were made.)
   <type 'object'>
   kilroy
 
-  >>> expect = dict(crafter_first_name='crafty', project_preview_url='sillyproject',
-  ...   project=project, crafter=crafter)
+  >>> expect = dict(crafter_email_address='crafty@nevernever.never',
+  ... crafter_first_name='crafty', project_preview_url='sillyproject')
   >>> src._send.assert_called_once_with('system.project.drafted', expect)  
   >>> sorted(status['unfilled'])
   []

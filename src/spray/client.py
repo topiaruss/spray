@@ -15,7 +15,7 @@ def register_callback(func):
     CALLBACKS[token_id] = func
 
 
-def get_undef(template):
+def get_undef_body_fields(template):
     "returns the tokens from a jinja template"
     from jinja2 import Environment, meta, TemplateSyntaxError
     env = Environment()
@@ -27,6 +27,21 @@ def get_undef(template):
         print template
         LOG.exception("Broken token - possibly a space in {{}}. template: %s" %
           template)
+        return ()
+
+
+def get_undef_addr_fields(event_id, act_type, recipient_cell):
+    "parse the recipient cell from the spreadsheet, ret a list of addrs or ()"
+    try:
+        recipients = [r.strip() for r in recipient_cell.split(',')]
+        ignores = ('bcc:admins',)
+        pat = '%s_%s_address'
+        ret = [(pat % (r, act_type)) for r in recipients if r not in ignores]
+        return [str(r) for r in ret]
+    except Exception as e:
+        print e
+        LOG.exception("Prob in recip field: eid: %s, actn: %s, recpcell: %s" %
+          (event_id, act_type, recipient_cell))
         return ()
 
 
@@ -76,7 +91,7 @@ class Source(object):
         cbs = set(tokens).intersection(set(CALLBACKS.keys()))
 
         # list of required source objects not found in the context
-        no_source = []
+        no_source = set()
         #results = context.copy()  #  < -- was !
         results = {}
         for k in cbs:
@@ -84,7 +99,7 @@ class Source(object):
             if set(context.keys()).issuperset(set(c.func_code.co_varnames)):
                 results[k] = c(*[context[v] for v in c.func_code.co_varnames])
             else:
-                no_source.extend(set(c.func_code.co_varnames) -
+                no_source = no_source.union(set(c.func_code.co_varnames) -
                     set(context.keys()))
         return dict(no_source=no_source, unfilled=unfilled, results=results)
 
@@ -102,10 +117,16 @@ class Source(object):
         rows = self.matrix.get_rows_for_event(event_id)
         events = {}
         for r in rows:
+            eid = r['event id']
+            # get the tokens needed for the body fields
             bfields = [v for k, v in r.items() if k.startswith('body')\
                        or k.startswith('subject')]
             for f in bfields:
-                events.setdefault(r['event id'], []).extend(get_undef(f))
+                events.setdefault(eid, []).extend(
+                  get_undef_body_fields(f))
+            # get the tokens needed for the recipient field
+            events.setdefault(eid, []).extend(get_undef_addr_fields(
+              eid, r['action type'], r['recipient']))
         # uniquify
         fevents = {}
         for k, v in events.items():
@@ -312,4 +333,3 @@ def dryrun():
     DryRun()()
 
 #  what remains relates to test configuration
-
