@@ -178,6 +178,19 @@ class AmazonSESDestination(Destination):
         self.conn.send_email(sender, subject, body, recipients)
 
     def mpart_send(self, **kw):
+        if self.overrides:
+            hdr = """
+            [[  ** JUST FOR DEBUG **
+            Some of the original addresses were overridden. Original values:
+            to: %s
+            cc: %s
+            bcc: %s
+            Original Text message starts on the next line]]
+            %s""" % (kw.get('to_addresses', ''),
+              kw.get('cc_addresses', ''),
+              kw.get('bcc_addresses', ''),
+              kw.get('text_body', ''))
+            kw['text_body'] = hdr
         kw.update(self.overrides or {})
         self.conn.send_email(**kw)
 
@@ -226,7 +239,7 @@ class Channel(object):
 
     def send(self, row, data, style=''):
         body = self.render(data, style)
-        # temp kludge - I don't want the row goig into the destination...
+        # temp kludge - I don't want the row going into the destination...
         data['subject_en_uk'] = row.get('subject_en_uk')
         self.dest.send(body, data)
 

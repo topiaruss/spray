@@ -18,7 +18,7 @@ def build_multipart_mail(row, data, tempreg):
     params['source'] = data.get('from') or \
                        row.get('from') or FROM_ADDRESS
 
-    toa = set(data.get('to'))
+    toa = set(data.get('to', tuple()))
 
     # accumulate all the recip types, if present
     for recip in 'crafter sponsor follower'.split():
@@ -30,7 +30,7 @@ def build_multipart_mail(row, data, tempreg):
 
     # add admins to BCC if 'bcc_admin' is in matrix.recipient
     direct_bcc = data.get('bcc') or BCC_ADDRESSES
-    matrix_bcc = 'bcc:admin' in row['recipient'] and ADMIN_ADDRESSES
+    matrix_bcc = 'bcc:admin' in row['recipient'] and ADMIN_ADDRESSES or set([])
     params['bcc_addresses'] = list(direct_bcc.union(matrix_bcc))
 
     # subject comes from the row, not the data, so we use it two ways
