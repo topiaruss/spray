@@ -134,7 +134,7 @@ class Processor(object):
     def step(self):
         event = self.queue.get_event()
         if event is None:
-            self.notify('event-None')
+            #self.notify('event-None')
             time.sleep(2)
             return
         self.notify('event-got')
