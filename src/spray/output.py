@@ -257,7 +257,7 @@ class HTMLEmailChannel(Channel):
         super(HTMLEmailChannel, self).__init__(**kw)
 
     def render(self, row, data, style=''):
-        send_params = emailproc.build_multipart_mail(row, data, self.tempreg)
+        send_params = emailproc.build_multipart_mail(env, row, data, self.tempreg)
         return send_params
 
     def send(self, row, data, style=''):

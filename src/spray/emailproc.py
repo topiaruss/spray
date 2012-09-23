@@ -1,5 +1,4 @@
 # emailproc.py - bits and pieces of email processing
-import jinja2
 import logging
 import stoneagehtml
 
@@ -11,7 +10,7 @@ ADMIN_ADDRESSES = set('rf@sponsorcraft.com jm@sponsorcraft.com '
   'dk@sponsorcraft.com'.split())
 
 
-def build_multipart_mail(row, data, tempreg):
+def build_multipart_mail(env, row, data, tempreg):
     params = {}
 
     # get sender from data / row / constant
@@ -42,7 +41,7 @@ def build_multipart_mail(row, data, tempreg):
     lines = rawtext.split('\\n')
 
     # create the html version
-    template = jinja2.Template('<br/>\n'.join(lines))  # TODO: Cache?
+    template = env.from_string('<br/>\n'.join(lines))  # TODO: Cache?
     body = template.render(data)
     data['body'] = body
     style = row.get('body_fmt', '')
@@ -51,7 +50,7 @@ def build_multipart_mail(row, data, tempreg):
     params['html_body'] = stone_age
 
     # text version
-    template = jinja2.Template('\n'.join(lines))  # TODO: Cache?
+    template = env.from_string('\n'.join(lines))  # TODO: Cache?
     body = template.render(data)
     params['text_body'] = body
     params['body'] = None  # MUST FORCE AWS TO DO MULTIPART
