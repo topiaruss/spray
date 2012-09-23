@@ -77,7 +77,8 @@ class Source(object):
 
         # list of required source objects not found in the context
         no_source = []
-        results = context.copy()
+        #results = context.copy()  #  < -- was !
+        results = {}
         for k in cbs:
             c = CALLBACKS[k]
             if set(context.keys()).issuperset(set(c.func_code.co_varnames)):
