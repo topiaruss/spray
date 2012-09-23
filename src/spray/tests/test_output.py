@@ -26,6 +26,7 @@ class TestAmazonSESDestination(unittest.TestCase):
         row['from'] = 'rf@sponsorcraft.com'
         row['subject_en_uk'] = 'søme silly sübject'
         row['body_en_uk'] = 'Hello {{ first_name }} !'
+        row['recipient'] = 'crafter,bcc:admin'
         data['first_name'] = 'Russ'
         data['to'] = ('russf@topia.com',)
         return row, data

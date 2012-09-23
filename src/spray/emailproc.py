@@ -5,8 +5,10 @@ import stoneagehtml
 
 LOG = logging.getLogger(__name__)
 
-FROM_ADDRESSES = 'info@sponsorcraft.com'
-BCC_ADDRESSES = 'bcc-dump@sponsorcaft.com'
+FROM_ADDRESS = 'info@sponsorcraft.com'
+BCC_ADDRESSES = set(['bcc-dump@sponsorcraft.com'])
+ADMIN_ADDRESSES = set('rf@sponsorcraft.com jm@sponsorcraft.com '
+  'dk@sponsorcraft.com'.split())
 
 
 def build_multipart_mail(row, data, tempreg):
@@ -14,9 +16,22 @@ def build_multipart_mail(row, data, tempreg):
 
     # get sender from data / row / constant
     params['source'] = data.get('from') or \
-                       row.get('from') or FROM_ADDRESSES
-    params['to_addresses'] = data.get('to')
-    params['bcc_addresses'] = data.get('bcc') or BCC_ADDRESSES
+                       row.get('from') or FROM_ADDRESS
+
+    toa = set(data.get('to'))
+
+    # accumulate all the recip types, if present
+    for recip in 'crafter sponsor follower'.split():
+        recip = data.get('%s_email_address' % recip)
+        if recip:
+            toa = toa.union([recip])
+
+    params['to_addresses'] = list(toa)
+
+    # add admins to BCC if 'bcc_admin' is in matrix.recipient
+    direct_bcc = data.get('bcc') or BCC_ADDRESSES
+    matrix_bcc = 'bcc:admin' in row['recipient'] and ADMIN_ADDRESSES
+    params['bcc_addresses'] = list(direct_bcc.union(matrix_bcc))
 
     # subject comes from the row, not the data, so we use it two ways
     subject = row['subject_en_uk']
