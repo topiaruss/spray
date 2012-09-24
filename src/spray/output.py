@@ -186,7 +186,6 @@ class AmazonSESDestination(Destination):
               kw.get('text_body', ''))
             kw['text_body'] = hdr
         kw.update(self.overrides or {})
-        import pdb; pdb.set_trace()
         self.conn.send_email(**kw)
 
 AmazonSESDestination.register()
