@@ -5,7 +5,6 @@ from spray import output
 import unittest
 
 
-
 class TestAmazonSESDestination(unittest.TestCase):
 
     def test_instance(self):

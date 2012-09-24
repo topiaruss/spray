@@ -1,9 +1,9 @@
 from spray import hub
 from spray import matrix
-import argparse
 import ConfigParser
+import argparse
 import logging
-#Note : Some imports are deferred for conditional loading
+# Note: some imports are deferred for conditional loading
 
 LOG = logging.getLogger(__name__)
 
@@ -17,8 +17,9 @@ def register_callback(func):
 
 def get_undef_body_fields(template):
     "returns the tokens from a jinja template"
-    from jinja2 import Environment, meta, TemplateSyntaxError
-    env = Environment()
+    from jinja2 import meta, TemplateSyntaxError
+    from spray import jinjaenv
+    env = jinjaenv.env
     try:
         ast = env.parse(template)
         return tuple(meta.find_undeclared_variables(ast))
