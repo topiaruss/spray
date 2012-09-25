@@ -2,19 +2,20 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <style>
-  #top {margin: 0;padding: 0 0 30px 0;background-color: #F4F5F7;
-       border-spacing:0;
-       border-collapse:collapse;
-       width: 100%;
-     }
-  #core {text-align: center; border: 0; width: 600px;  margin-left: auto; margin-right: auto; }
-  #inner-core {background-color: #FFFFFF}
-  #mailhead {color: #9ab; font-family: helvetica, sans-serif; font-size:11px; padding: 10px 0 20px 0}
-  #content {border:none; background-color:#FFFFFF;}
-  #foottable {width: 100%; font: normal 11px helvetica, sans-serif; padding: 0;"}
-  .paper {background-color: #FFFFFF;padding: 20px;}
+    #top {margin: 0;padding: 0 0 30px 0; background-color: #eeeeee; border-spacing:0; border-collapse:collapse; width: 100%;}
+    .add-email{background-color: #eeeeee;}
+    .add-email a{color: #29abe2;}
+    #core {text-align: center; border: 0; width: 550px;  margin-left: auto; margin-right: auto;  font-size: 11px; color: #666; padding: 10px 0; font-family:arial, sans-serif;}
+    #inner-core {background-color: #FFFFFF;}
+    #mailhead {color: #9ab; font-family:arial, sans-serif; font-size:11px; padding: 10px 0 20px 0}
+    #content {border:none; background-color:#FFFFFF;}
+    #foottable {width: 100%; font: normal 11px helvetica, sans-serif; padding: 5 20px; border-top: 2px dashed  #eeeeee;;}
+    .paper {background-color: #FFFFFF;padding: 20px;}
+    table {border-spacing: 0px;}
   </style>
 </head>
+
+
 <body>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <table id='top'>
@@ -24,13 +25,13 @@
         <table id='core' >
         <tbody id='inner-core'>
           <tr>
-            <td >To ensure delivery, add 
+            <td class='add-email' >To ensure delivery, add 
               <strong><a href="mailto:info@sponsorcraft.com">info@sponsorcraft.com</a></strong>
             to your address book.
             </td>
           </tr>
           <tr>
-            <td><img 
+            <td style='width: 100%; border: none;'><img 
               src="https://s3-eu-west-1.amazonaws.com/scraftuk.served.assets/email/header-top.png"
               alt="">
             </td>
@@ -41,25 +42,19 @@
             <tbody>
               <tr>
                 <td class='paper'>
-                  <p style="text-align:center;margin:5px 0
-                  25px 0;padding:0"><a href="https://sponsorcraft.com"
-                  style="color:#28c; text-decoration:none"
-                  target="_blank"><img
-                  src="https://s3-eu-west-1.amazonaws.com/scraftuk.served.assets/email/logo.jpg"
-                  alt="Sponsorcraft" border="0" height="49"
-                  width="270"></a></p>
+                  <p style="text-align:center;margin:5px 0 25px 0;padding:0"><a href="https://sponsorcraft.com" target="_blank">
+                    <img src="https://s3-eu-west-1.amazonaws.com/scraftuk.served.assets/email/logo.jpg" alt="Sponsorcraft" border="0" height="49" width="270"></a>
+                  </p>
 
-                  <p style="color:#456;font-family:arial,
-                  sans-serif;font-size:24px;line-height:1.2;margin:15px
-                  0;padding:0"><strong>Hello!</strong></p>
+                  <p style="color:#666;font-family:arial,sans-serif;font-size:24px;line-height:1.2;margin:15px 0;padding:0">
+                    <strong>Hello!</strong>
+                  </p>
 
-                  <p style="color:#456;font-family:arial,
-                  sans-serif;font-size:14px;line-height:1.5;margin:15px
-                  0;padding:0"><strong>{{ subject }}</strong></p>
+                  <p style="color:#666;font-family:arial, sans-serif;font-size:14px;line-height:1.5;margin:15px 0;padding:0">
+                    <strong>{{ subject }}</strong>
+                  </p>
 
-                  <p style="color:#456;font-family:arial,
-                  sans-serif;font-size:14px;line-height:1.5;margin:15px
-                  0;padding:0">{{ body|safe }}</p>
+                  <p style="color:#666;font-family:arial, sans-serif;font-size:14px;line-height:1.5;margin:15px 0;padding:0">{{ body|safe }}</p>
 
                 </td>
               </tr>
@@ -73,19 +68,15 @@
               <tbody>
                 <tr>
                   <td style="width: 90%; padding: 0 10px 0 0;">
-                  <p style="color: #9ab;">You are
+                    <p style="color: #999;">You are
                     receiving this email because you
                     registered at Sponsorcraft.com and
                     agreed to receive email from us.</p>
                   </td>
-                  <td style="width:10%"> <a 
-                    href="https://sponsorcraft.com"
-                    style="color: #28c;
-                    text-decoration: none;"><img
-                    src="https://s3-eu-west-1.amazonaws.com/scraftuk.served.assets/email/crest.jpg"
-                    alt="Sponsorcraft" style="border:
-                    none;" border="0" height="60"
-                    width="61"></a> </td>
+                  <td style="width:10%"> <a href="https://sponsorcraft.com">
+                    <img src="https://s3-eu-west-1.amazonaws.com/scraftuk.served.assets/email/crest.jpg"
+                    alt="Sponsorcraft" style="border: none;" border="0" height="60" width="61"></a> 
+                  </td>
                   </tr>
                 </tbody>
               </table>

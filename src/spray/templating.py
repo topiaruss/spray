@@ -35,7 +35,7 @@ border-radius: 6px;">
 
 def buttonformat(uu,
   text='',
-  bcolour='#2786C2',
+  bcolour='#29ABE2',
   fcolour='#fff',
   font='arial, sans-serif'):
     "Makes a nice phat button in the middle of the page"
