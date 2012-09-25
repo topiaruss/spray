@@ -1,7 +1,10 @@
 from datetime import timedelta
 from spray.utils import ourtime
+import logging
 import spray
 import string
+
+LOG = logging.getLogger(__name__)
 
 UNITS = dict(mi='minutes', h='hours', d='days',
   w='weeks', mo='months', y='years')
@@ -59,19 +62,24 @@ class PeriodicEvent(object):
             self.next_occurrence = None
             return None
         # compute the next time, or None
-        pp = self.period(mm)
-        tp = self._get_timepoint(accessor)
-        if pp.total_seconds() < 0:
-            # negative means counting to end
-            pp = abs(pp)
-            dm = divmod((tp - nn).total_seconds() - 1, pp.total_seconds())
-            units = int(dm[0])
-            self.next_occurrence = units and (tp - (pp * units)) or None
-        else:
-            # pos is counting from a start time
-            dm = divmod((nn - tp).total_seconds(), pp.total_seconds())
-            periods_elapsed = int(dm[0])
-            self.next_occurrence = tp + ((periods_elapsed + 1) * pp)
+        try:
+            pp = self.period(mm)
+            tp = self._get_timepoint(accessor)
+            if pp.total_seconds() < 0:
+                # negative means counting to end
+                pp = abs(pp)
+                dm = divmod((tp - nn).total_seconds() - 1, pp.total_seconds())
+                units = int(dm[0])
+                self.next_occurrence = units and (tp - (pp * units)) or None
+            else:
+                # pos is counting from a start time
+                dm = divmod((nn - tp).total_seconds(), pp.total_seconds())
+                periods_elapsed = int(dm[0])
+                self.next_occurrence = tp + ((periods_elapsed + 1) * pp)
+        except Exception as e:
+            import pdb; pdb.set_trace()
+            LOG.exception('schedule_next error %s on %s' % (e, repr(self)))
+            self.next_occurrence = None
         return self.next_occurrence
 
     def _get_timepoint(self, accessor):
