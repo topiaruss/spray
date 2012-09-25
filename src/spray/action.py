@@ -84,6 +84,31 @@ class DummyEmailAction(Action):
 DummyEmailAction.register()
 
 
+class DummySMSAction(Action):
+
+    action_type = 'DummySMSAction'
+
+    def __init__(self, **kwargs):
+        super(DummySMSAction, self).__init__(**kwargs)
+
+    def _dump(self):
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        selection = {}
+        for k in ('action type', 'event id', 'recipient'):
+            selection[k] = self.row[k]
+        pp.pprint(selection)
+        pp.pprint(self.data)
+
+    def handle(self):
+        self.notify('start-handle')
+        #self._dump()
+        self.notify('end-handle')
+
+
+DummySMSAction.register()
+
+
 class EmailAction(Action):
 
     action_type = 'EmailAction'
@@ -164,3 +189,4 @@ class Processor(object):
         BROADCASTER.notify(**kwargs)
 
 ACTIONS['email'] = AVAILABLE_ACTIONS['EmailAction']
+ACTIONS['SMS'] = AVAILABLE_ACTIONS['DummySMSAction']

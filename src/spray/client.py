@@ -104,7 +104,7 @@ class Source(object):
                 except Exception as e:
                     LOG.exception('failure %s in callback %s for %s with %s' %
                       (e, c, k, context))
-                    results[k] = 'EXCEPTION %s' % e
+                    results[k] = '...'  # This will flag an exception in msg
             else:
                 no_source = no_source.union(set(c.func_code.co_varnames) -
                     set(context.keys()))
