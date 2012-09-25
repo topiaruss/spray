@@ -3,7 +3,8 @@ from spray.utils import ourtime
 import spray
 import string
 
-UNITS = dict(d='days', w='weeks', m='months', y='years')
+UNITS = dict(mi='minutes', h='hours', d='days',
+  w='weeks', mo='months', y='years')
 
 
 def _to_interval(stringint):
