@@ -98,7 +98,12 @@ class Source(object):
         for k in cbs:
             c = CALLBACKS[k]
             if set(context.keys()).issuperset(set(c.func_code.co_varnames)):
-                results[k] = c(*[context[v] for v in c.func_code.co_varnames])
+                try:
+                    results[k] = \
+                      c(*[context[v] for v in c.func_code.co_varnames])
+                except Exception as e:
+                    LOG.exception('failure %s in callback %s for %s with %s' %
+                      (e, c, k, context))
             else:
                 no_source = no_source.union(set(c.func_code.co_varnames) -
                     set(context.keys()))
