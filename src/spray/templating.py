@@ -5,7 +5,7 @@ from string import Template
 
 def urlformat(uu, text=''):
     "create a nice HTML anchor"
-    return '<a href="%s">%s</a>' % (uu, text or uu)
+    return '<a class="matrix-anchor" href="%s">%s</a>' % (uu, text or uu)
 
 button = Template("""
 <table align="center" border="0" cellpadding="0" cellspacing="0" width="360">
