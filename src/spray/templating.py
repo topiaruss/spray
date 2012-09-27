@@ -7,6 +7,11 @@ def urlformat(uu, text=''):
     "create a nice HTML anchor"
     return '<a class="matrix-anchor" href="%s">%s</a>' % (uu, text or uu)
 
+
+def urlformat_to_plain(uu, text=''):
+    "create a nice HTML anchor"
+    return '%s%s' % ((text and text + ' '), uu)
+
 button = Template("""
 <table align="center" border="0" cellpadding="0" cellspacing="0" width="360">
 <tbody>
@@ -44,3 +49,7 @@ def buttonformat(uu,
         bcolour=bcolour,
         fcolour=fcolour,
         font=font)
+
+
+def buttonformat_to_plain(uu, text='', bcolour='', fcolour='', font=''):
+    return '%s%s' % ((text and '%s : ' % text), uu)

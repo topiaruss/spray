@@ -38,8 +38,9 @@ class TestAmazonSESDestination(unittest.TestCase):
         tr.register('', "<head></head><body>{{ body }}</body>")
         row, data = self._build_dummy_mpart_send_data()
         from spray import jinjaenv
-        env = jinjaenv.env
-        mpart_params = emailproc.build_multipart_mail(env, row, data, tr)
+        env, ptenv = jinjaenv.env, jinjaenv.ptenv
+        mpart_params = emailproc.build_multipart_mail(
+          env, ptenv, row, data, tr)
         ses.mpart_send(**mpart_params)
 
     def test_mpart_send_safe(self):
@@ -49,8 +50,9 @@ class TestAmazonSESDestination(unittest.TestCase):
         row, data = self._build_dummy_mpart_send_data()
         row['subject_en_uk'] = 'søme silly sübject with safe body'
         from spray import jinjaenv
-        env = jinjaenv.env
-        mpart_params = emailproc.build_multipart_mail(env, row, data, tr)
+        env, ptenv = jinjaenv.env, jinjaenv.ptenv
+        mpart_params = emailproc.build_multipart_mail(
+          env, ptenv, row, data, tr)
         ses.mpart_send(**mpart_params)
 
 
@@ -132,29 +134,57 @@ class TestJinjaUrlFilter(unittest.TestCase):
         from jinja2 import Environment
         from spray import templating
         self.env = env = Environment()
+        self.ptenv = ptenv = Environment()
         env.filters['urlformat'] = templating.urlformat
+        ptenv.filters['urlformat'] = templating.urlformat_to_plain
+
+# --
 
     def test_bare_url_filter(self):
-        test_bareurl = self.env.from_string("blah {{ u1|urlformat }} de blah")
+        test_bareurl = self.env.from_string("Hi {{ u1|urlformat }} Bye")
         result = test_bareurl.render(u1='https://sc.com')
-        expect = u'blah <a class="matrix-anchor" '\
-          'href="https://sc.com">https://sc.com</a> de blah'
+        expect = u'Hi <a class="matrix-anchor" '\
+          'href="https://sc.com">https://sc.com</a> Bye'
         assert result == expect
+
+    def test_bare_url_filter_plaintext(self):
+        test_bareurl = self.ptenv.from_string("Hi {{ u1|urlformat }} Bye")
+        result = test_bareurl.render(u1='https://sc.com')
+        expect = u'Hi https://sc.com Bye'
+        assert result == expect
+
+# --
 
     def test_bare_url_filter_literal(self):
         test_bareurl = self.env.from_string(
-            "blah {{ 'https://sc.com'|urlformat }} de blah")
+            "Hi {{ 'https://sc.com'|urlformat }} Bye")
         result = test_bareurl.render()
-        expect = u'blah <a class="matrix-anchor" '\
-          'href="https://sc.com">https://sc.com</a> de blah'
+        expect = u'Hi <a class="matrix-anchor" '\
+          'href="https://sc.com">https://sc.com</a> Bye'
         assert result == expect
+
+    def test_bare_url_filter_literal_plaintext(self):
+        test_bareurl = self.ptenv.from_string(
+            "Hi {{ 'https://sc.com'|urlformat }} Bye")
+        result = test_bareurl.render()
+        expect = u'Hi https://sc.com Bye'
+        assert result == expect
+
+# --
 
     def test_url_with_text_filter(self):
         test_bareurl = self.env.from_string(
-          "blah {{ u1|urlformat('click') }} de blah")
+          "Hi {{ u1|urlformat('click') }} Bye")
         result = test_bareurl.render(u1='https://sc.com')
-        expect = u'blah <a class="matrix-anchor" '\
-          'href="https://sc.com">click</a> de blah'
+        expect = u'Hi <a class="matrix-anchor" '\
+          'href="https://sc.com">click</a> Bye'
+        assert result == expect
+
+    def test_url_with_text_filter_plaintext(self):
+        test_bareurl = self.ptenv.from_string(
+          "Hi {{ u1|urlformat('click here') }} Bye")
+        result = test_bareurl.render(u1='https://sc.com')
+        expect = u'Hi click here https://sc.com Bye'
         assert result == expect
 
 
@@ -164,12 +194,19 @@ class TestJinjaButtonFilter(unittest.TestCase):
         from jinja2 import Environment
         from spray import templating
         self.env = env = Environment()
+        self.ptenv = ptenv = Environment()
         env.filters['buttonformat'] = templating.buttonformat
+        ptenv.filters['buttonformat'] = templating.buttonformat_to_plain
 
     def test_bare_url_filter(self):
         test_bareurl = self.env.from_string("{{ u1|buttonformat }}")
         result = test_bareurl.render(u1='https://sc.com')
         assert 'sc.com' in result
+
+    def test_bare_url_filter_plaintext(self):
+        test_bareurl = self.ptenv.from_string("{{ u1|buttonformat }}")
+        result = test_bareurl.render(u1='https://sc.com')
+        assert result == 'https://sc.com'
 
     def test_url_with_text_filter(self):
         test_url = self.env.from_string(
@@ -180,3 +217,12 @@ class TestJinjaButtonFilter(unittest.TestCase):
         result = test_url.render(**kw)
         for v in kw.values():
             assert v in result
+
+    def test_url_with_text_filter_plaintext(self):
+        test_url = self.ptenv.from_string(
+          """{{ u1|buttonformat(fcolour=fcolour,
+            bcolour=bcolour, text=text, font=font) }}""")
+        kw = dict(u1='https://sc.com',
+          bcolour='BCOL', fcolour='FCOL', text='TXT', font='FFONT')
+        result = test_url.render(**kw)
+        assert result == 'TXT : https://sc.com'
