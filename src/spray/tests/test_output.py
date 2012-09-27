@@ -140,6 +140,13 @@ class TestJinjaUrlFilter(unittest.TestCase):
         expect = u'blah <a href="https://sc.com">https://sc.com</a> de blah'
         assert result == expect
 
+    def test_bare_url_filter_literal(self):
+        test_bareurl = self.env.from_string(
+            "blah {{ 'https://sc.com'|urlformat }} de blah")
+        result = test_bareurl.render()
+        expect = u'blah <a href="https://sc.com">https://sc.com</a> de blah'
+        assert result == expect
+
     def test_url_with_text_filter(self):
         test_bareurl = self.env.from_string(
           "blah {{ u1|urlformat('click') }} de blah")
