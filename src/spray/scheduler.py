@@ -90,10 +90,10 @@ class PeriodicEvent(object):
         "ask the mm for the period for this event type - negative if countdown"
         rr = mm.get_rows_for_event(self.eid)
         p = rr[0]['period']
-        for r in rr[1:]:
-            assert p == r['period']
-        if not p:
-            return None
+        for i, check in enumerate(rr[1:]):
+            if p != check['period']:
+                LOG.error("periods differ for row %s for event %s " % (
+                  i, self.eid))
         return _to_interval(p)
 
     def is_expired(self, external_nix=None):
