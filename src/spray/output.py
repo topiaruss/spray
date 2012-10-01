@@ -11,12 +11,14 @@ import boto
 import logging
 import os
 import smtplib
+import time
 
 LOG = logging.getLogger(__name__)
 
 # TODO: retrofit a zope interface for Channel hierarchy and unify formal params
 
 env = jinjaenv.env
+ptenv = jinjaenv.ptenv
 
 # == Template registries == #
 AVAILABLE_TEMPLATE_REGISTRIES = {}
@@ -170,6 +172,8 @@ class AmazonSESDestination(Destination):
         assert type(sender) == type("")
         assert type(recipients) in (list, tuple)
         self.conn.send_email(sender, subject, body, recipients)
+        #naiive rate limit
+        time.sleep(0.25)  # SES rate limit 5Hz
 
     def mpart_send(self, **kw):
         if self.overrides:
@@ -252,7 +256,7 @@ class HTMLEmailChannel(Channel):
 
     def render(self, row, data, style=''):
         send_params = emailproc.build_multipart_mail(
-          env, row, data, self.tempreg)
+          env, ptenv, row, data, self.tempreg)
         return send_params
 
     def send(self, row, data, style=''):

@@ -10,7 +10,7 @@ ADMIN_ADDRESSES = set('rf@sponsorcraft.com jm@sponsorcraft.com '
   'dk@sponsorcraft.com'.split())
 
 
-def build_multipart_mail(env, row, data, tempreg):
+def build_multipart_mail(env, ptenv, row, data, tempreg):
     params = {}
 
     # get sender from data / row / constant
@@ -50,7 +50,7 @@ def build_multipart_mail(env, row, data, tempreg):
     params['html_body'] = stone_age
 
     # text version
-    template = env.from_string('\n'.join(lines))  # TODO: Cache?
+    template = ptenv.from_string('\n'.join(lines))  # TODO: Cache?
     body = template.render(data)
     params['text_body'] = body
     params['body'] = None  # MUST FORCE AWS TO DO MULTIPART
