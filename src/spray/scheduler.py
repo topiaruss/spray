@@ -77,7 +77,6 @@ class PeriodicEvent(object):
                 periods_elapsed = int(dm[0])
                 self.next_occurrence = tp + ((periods_elapsed + 1) * pp)
         except Exception as e:
-            import pdb; pdb.set_trace()
             LOG.exception('schedule_next error %s on %s' % (e, repr(self)))
             self.next_occurrence = None
         return self.next_occurrence
