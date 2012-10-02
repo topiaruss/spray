@@ -92,7 +92,7 @@ def app(testing=False):
     if testing:
         return
 
-    print "hi"
+    print "starting sprayd"
 
     arg = get_command_line_args()
     config = get_config(arg.config_file)
