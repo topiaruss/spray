@@ -4,7 +4,7 @@ from spray import output
 import argparse
 import ConfigParser
 import logging
-import signal
+#import signal
 
 LOG = logging.getLogger(__name__)
 
@@ -81,8 +81,11 @@ def config_app(config):
     email_channel = output.HTMLEmailChannel(medium='email', destination=dest)
     output.CHAN_REG.register(email_channel)
 
+    queue = config.get('SQSQueue', 'name') or 'mainSQS'
+    print 'listening on %s' % queue
+
     #this will start running immediately
-    the_processor = action.Processor('testSQS', mm)
+    the_processor = action.Processor(queue, mm)
     assert the_processor  # trick the syntax checker
 
 
@@ -97,9 +100,6 @@ def app(testing=False):
     arg = get_command_line_args()
     config = get_config(arg.config_file)
     config_logging(config)
-    signal.signal(signal.SIGINT, on_exit)
+    #signal.signal(signal.SIGINT, on_exit)
 
     config_app(config)
-
-
-
