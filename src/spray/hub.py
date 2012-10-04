@@ -74,6 +74,7 @@ class SQSQueue(object):
 QUEUES['test'] = DummyQueue('test')
 QUEUES['send'] = DummyQueue('send')
 QUEUES['testSQS'] = SQSQueue('testSQS')
+QUEUES['mainSQS'] = SQSQueue('mainSQS')
 
 
 class Hub(object):
