@@ -1,11 +1,12 @@
-import threading
-import logging
-import time
 from spray import hub
 from spray import interface
 from spray import output
 from spray.utils import observer
 from zope.interface import implements
+import datetime
+import logging
+import threading
+import time
 
 LOG = logging.getLogger(__name__)
 
@@ -140,21 +141,25 @@ class Processor(object):
     Pulls events from its queue, looks them up, handles them.
     """
 
-    def __init__(self, queue, matrix, running=True):
+    def __init__(self, queue, matrix, running=True, max_time=None):
         if isinstance(queue, str):
             our_hub = hub.Hub()
             self.queue = our_hub.get_or_create(queue)
         else:
             self.queue = queue
         self.matrix = matrix
+        self.expire = max_time and (datetime.datetime.now() + max_time) or None
         self.tt = threading.Thread(target=self.runner)
         if running:
             self.start()
 
     def runner(self):
-        print 'running...'
+        print "running %s" % \
+          ((self.expire and ("'til %s" % self.expire)) or '...')
         while self.is_alive:
             self.step()
+            if datetime.datetime.now() > self.expire:
+                self.is_alive = False
 
     def step(self):
         event = self.queue.get_event()
