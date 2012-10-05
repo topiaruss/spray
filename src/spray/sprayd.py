@@ -3,6 +3,7 @@ from spray import matrix
 from spray import output
 import argparse
 import ConfigParser
+import datetime
 import logging
 #import signal
 
@@ -84,8 +85,8 @@ def config_app(config):
     queue = config.get('SQSQueue', 'name') or 'mainSQS'
     print 'listening on %s' % queue
 
-    #this will start running immediately
-    the_processor = action.Processor(queue, mm)
+    max_time = datetime.timedelta(minutes=55)
+    the_processor = action.Processor(queue, mm, max_time=max_time)
     assert the_processor  # trick the syntax checker
 
 
