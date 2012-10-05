@@ -176,7 +176,7 @@ class AmazonSESDestination(Destination):
         time.sleep(0.25)  # SES rate limit 5Hz
 
     def mpart_send(self, **kw):
-        if self.overrides:
+        if any(self.overrides.values()):
             hdr = """
             [[  ** JUST FOR DEBUG **
             Some of the original addresses were overridden. Original values:
@@ -189,7 +189,8 @@ class AmazonSESDestination(Destination):
               kw.get('bcc_addresses', ''),
               kw.get('text_body', ''))
             kw['text_body'] = hdr
-        kw.update(self.overrides or {})
+            # override any, override all
+            kw.update(self.overrides)
         self.conn.send_email(**kw)
 
 AmazonSESDestination.register()
