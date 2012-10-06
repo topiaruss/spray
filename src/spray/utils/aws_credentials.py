@@ -15,14 +15,16 @@ try:
     import settings
     STATIC_PATH = None
 except:
-    STATIC_PATH = 'etc/spray.client.csv'
+    candidates = ['etc/spray.client.csv',
+      os.path.abspath('./../../../etc/spray.client.csv')]
+    STATIC_PATH = [p for p in candidates if os.path.exists(p)][0]
 
 
 def get_credentials(filename):
     "let's not force an extension on the parameter... flexibility, later"
     path = STATIC_PATH or \
       os.path.join(settings.SITE_ROOT, 'etc', filename + '.csv')
-
+    print 'credentials source from: %s' % path
     with open(path, 'rb') as csvfile:
         rdr = csv.reader(csvfile, delimiter=',', quotechar='"')
 

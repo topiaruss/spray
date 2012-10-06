@@ -176,7 +176,7 @@ class AmazonSESDestination(Destination):
         time.sleep(0.25)  # SES rate limit 5Hz
 
     def mpart_send(self, **kw):
-        if any(self.overrides.values()):
+        if self.overrides and any(self.overrides.values()):
             hdr = """
             [[  ** JUST FOR DEBUG **
             Some of the original addresses were overridden. Original values:
