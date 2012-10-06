@@ -19,12 +19,16 @@ except:
       os.path.abspath('./../../../etc/spray.client.csv')]
     STATIC_PATH = [p for p in candidates if os.path.exists(p)][0]
 
+first_pass_only = [1]
+
 
 def get_credentials(filename):
     "let's not force an extension on the parameter... flexibility, later"
     path = STATIC_PATH or \
       os.path.join(settings.SITE_ROOT, 'etc', filename + '.csv')
-    print 'credentials source from: %s' % path
+    if first_pass_only:
+        print 'credentials source from: %s' % path
+        del first_pass_only[0]
     with open(path, 'rb') as csvfile:
         rdr = csv.reader(csvfile, delimiter=',', quotechar='"')
 
