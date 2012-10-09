@@ -37,7 +37,6 @@ messaging or social actions""",
           'gspread>=0.0.13',
           'jinja2',
           'msgpack-python',
-          'stoneagehtml',
           'zope.interface',
       ],
       entry_points="""

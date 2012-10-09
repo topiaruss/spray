@@ -247,8 +247,7 @@ class HTMLEmailChannel(Channel):
     """
     Formats the content of the message using the row's template,
     if it can find one. Then it uses the delivery template to wrap the
-    message. Finally it does a stoneage html pass, to check the message
-    is legal for email.
+    message.
     It uses the mpart_send method of dest. Easiest route to MIME.
     """
 

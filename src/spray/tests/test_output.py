@@ -143,8 +143,8 @@ class TestJinjaUrlFilter(unittest.TestCase):
     def test_bare_url_filter(self):
         test_bareurl = self.env.from_string("Hi {{ u1|urlformat }} Bye")
         result = test_bareurl.render(u1='https://sc.com')
-        expect = u'Hi <a class="matrix-anchor" '\
-          'href="https://sc.com">https://sc.com</a> Bye'
+        expect = u'Hi <a class="matrix-anchor" style="color: #29ABE2"'\
+          ' href="https://sc.com">https://sc.com</a> Bye'
         assert result == expect
 
     def test_bare_url_filter_plaintext(self):
@@ -159,8 +159,8 @@ class TestJinjaUrlFilter(unittest.TestCase):
         test_bareurl = self.env.from_string(
             "Hi {{ 'https://sc.com'|urlformat }} Bye")
         result = test_bareurl.render()
-        expect = u'Hi <a class="matrix-anchor" '\
-          'href="https://sc.com">https://sc.com</a> Bye'
+        expect = u'Hi <a class="matrix-anchor" style="color: #29ABE2"'\
+          ' href="https://sc.com">https://sc.com</a> Bye'
         assert result == expect
 
     def test_bare_url_filter_literal_plaintext(self):
@@ -176,8 +176,8 @@ class TestJinjaUrlFilter(unittest.TestCase):
         test_bareurl = self.env.from_string(
           "Hi {{ u1|urlformat('click') }} Bye")
         result = test_bareurl.render(u1='https://sc.com')
-        expect = u'Hi <a class="matrix-anchor" '\
-          'href="https://sc.com">click</a> Bye'
+        expect = u'Hi <a class="matrix-anchor" style="color: #29ABE2"'\
+          ' href="https://sc.com">click</a> Bye'
         assert result == expect
 
     def test_url_with_text_filter_plaintext(self):
