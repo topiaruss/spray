@@ -53,3 +53,20 @@ def buttonformat(uu,
 
 def buttonformat_to_plain(uu, text='', bcolour='', fcolour='', font=''):
     return '%s%s' % ((text and '%s : ' % text), uu)
+
+
+def featuretext(text,
+  colour='#29abe2',
+  font='arial, sans-serif',
+  fontsize='24px',
+  formatting='strong'):
+    "For making a special splash"
+    ss = 'color: {colour}; font-family: {font}; font-size:{fontsize}'.format(
+      colour=colour, font=font, fontsize=fontsize)
+    hh = '<span style="{style}"><{fmt}>{text}</{fmt}></span>'.format(
+      style=ss, fmt=formatting, text=text)
+    return hh
+
+
+def featuretext_to_plain(text, colour='', font='', fontsize='', formatting=''):
+    return '%s' % text

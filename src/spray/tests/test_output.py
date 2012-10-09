@@ -226,3 +226,39 @@ class TestJinjaButtonFilter(unittest.TestCase):
           bcolour='BCOL', fcolour='FCOL', text='TXT', font='FFONT')
         result = test_url.render(**kw)
         assert result == 'TXT : https://sc.com'
+
+
+class TestJinjaFeaturetextFilter(unittest.TestCase):
+
+    def setUp(self):
+        from jinja2 import Environment
+        from spray import templating
+        self.env = env = Environment()
+        self.ptenv = ptenv = Environment()
+        env.filters['featuretext'] = templating.featuretext
+        ptenv.filters['featuretext'] = templating.featuretext_to_plain
+
+    def test_bare_filter(self):
+        html = self.env.from_string("{{ 'some text'|featuretext }}")
+        result = html.render()
+        expect = u'<span style="color: #29abe2; '\
+          'font-family: arial, sans-serif; font-size:24px">'\
+          '<strong>some text</strong></span>'
+        assert expect == result
+
+    def test_text_param_filter(self):
+        html = self.env.from_string("{{ tt|featuretext }}")
+        result = html.render(tt='some text')
+        expect = u'<span style="color: #29abe2; '\
+          'font-family: arial, sans-serif; font-size:24px">'\
+          '<strong>some text</strong></span>'
+        assert expect == result
+
+    def test_several_param_filter(self):
+        html = self.env.from_string("{{ tt|featuretext(colour='red',"\
+          "font='elfvetica',fontsize='2px',formatting='em') }}")
+        result = html.render(tt='some text')
+        expect = u'<span style="color: red; '\
+          'font-family: elfvetica; font-size:2px">'\
+          '<em>some text</em></span>'
+        assert expect == result
