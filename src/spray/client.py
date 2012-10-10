@@ -2,6 +2,7 @@ from spray import hub
 from spray import matrix
 import ConfigParser
 import argparse
+import inspect
 import logging
 # Note: some imports are deferred for conditional loading
 
@@ -44,6 +45,14 @@ def get_undef_addr_fields(event_id, act_type, recipient_cell):
         LOG.exception("Prob in recip field: eid: %s, actn: %s, recpcell: %s" %
           (event_id, act_type, recipient_cell))
         return ()
+
+
+def get_required_args(func):
+    "return a list of the arg names required http://bit.ly/TgqZQX"
+    args, varargs, varkw, defaults = inspect.getargspec(func)
+    if defaults:
+        args = args[:-len(defaults)]
+    return args
 
 
 class Source(object):
@@ -97,7 +106,7 @@ class Source(object):
         results = {}
         for k in cbs:
             c = CALLBACKS[k]
-            if set(context.keys()).issuperset(set(c.func_code.co_varnames)):
+            if set(context.keys()).issuperset(set(get_required_args(c))):
                 try:
                     results[k] = \
                       c(*[context[v] for v in c.func_code.co_varnames])
