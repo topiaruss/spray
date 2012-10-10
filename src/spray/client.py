@@ -106,17 +106,17 @@ class Source(object):
         results = {}
         for k in cbs:
             c = CALLBACKS[k]
-            if set(context.keys()).issuperset(set(get_required_args(c))):
+            reqargs = set(get_required_args(c))
+            available = set(context.keys())
+            if available.issuperset(reqargs):
                 try:
-                    results[k] = \
-                      c(*[context[v] for v in c.func_code.co_varnames])
+                    results[k] = c(*[context[v] for v in reqargs])
                 except Exception as e:
                     LOG.exception('failure %s in callback %s for %s with %s' %
                       (e, c, k, context))
                     results[k] = '...'  # This will flag an exception in msg
             else:
-                no_source = no_source.union(set(c.func_code.co_varnames) -
-                    set(context.keys()))
+                no_source = no_source.union(reqargs - available)
         return dict(no_source=no_source, unfilled=unfilled, results=results)
 
     def send(self, event_id, context={}):
