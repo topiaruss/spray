@@ -110,6 +110,8 @@ class Source(object):
             available = set(context.keys())
             if available.issuperset(reqargs):
                 try:
+                    reqargs = sorted(list(reqargs))
+                    # MUST sort all callback params
                     results[k] = c(*[context[v] for v in reqargs])
                 except Exception as e:
                     LOG.exception('failure %s in callback %s for %s with %s' %
