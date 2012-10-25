@@ -164,6 +164,7 @@ class AmazonSESDestination(Destination):
           aws_secret_access_key=conf[1],
           region=region)
 
+
     def send(self, body, data):
         sender = data.get('from') or emailproc.TEMP_FROM_ADDRESS
         or_to = self.overrides and self.overrides['to_addresses'] or ''
