@@ -130,7 +130,7 @@ class EmailAction(Action):
             tb = traceback.format_exc(8)  # 8 lines
             self.notify('handler-exception', exception=e,
               event=self.event, data=self.data, traceback=tb)
-        self.notify('handle-end')
+        self.notify('handle-end', data=self.data)
 
 
 EmailAction.register()
