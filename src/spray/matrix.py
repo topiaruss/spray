@@ -38,6 +38,7 @@ class ActionMatrix(object):
     """
     def __init__(self):
         self.data = None
+        self.provenance = u""
 
     def _ensure_updated(self):
         if self.data is None:
@@ -99,9 +100,11 @@ class CSVActionMatrix(ActionMatrix):
 
     def __init__(self, filepath):
         self.filepath = filepath
+        self.provenance = "Pending CSV file at: %s" % self.filepath
 
     def get_rows(self):
         self.csvfile = open(self.filepath, 'r')
+        self.provenance = "CSV file at: %s" % self.filepath
         rdr = csv.reader(self.csvfile)
         rows = [r for r in rdr]
         return rows
@@ -114,10 +117,12 @@ class GoogleActionMatrix(ActionMatrix):
     def __init__(self, credentials, url):
         self.creds = credentials
         self.url = url
+        self.provenance = "Pending Google SS at %s" % url
 
     def get_rows(self):
         gc = gspread.login(self.creds.email, self.creds.password)
         ss = gc.open_by_url(self.url)
+        self.provenance = "Google SS at %s" % self.url
         ws = ss.get_worksheet(1)
         return ws.get_all_values()
 

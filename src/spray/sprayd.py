@@ -64,6 +64,7 @@ def config_app(config):
     kw.update(dict(credentials=matrix.Credentials()))
     mm = matrix.matrixFactory(matrix_type, kw)
     mm.update()
+    print "Matrix : %s" % mm.provenance
 
     def get_override(config, k):
         v = config.get('RecipientOverride', k)
