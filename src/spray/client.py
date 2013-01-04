@@ -122,10 +122,10 @@ class Source(object):
         return dict(no_source=no_source, unfilled=unfilled, results=results)
 
     def send(self, event_id, context={}):
-        ret = dict(unfilled=[], no_source=[])
+        ret = dict(unfilled=[], no_source=[], results={})
         if self.matrix is not None:
             cbresults = self._do_callbacks(event_id, context)
-            context = cbresults.pop('results')
+            context = cbresults['results']
             ret = cbresults
         self._send(event_id, context)
         return ret

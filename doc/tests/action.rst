@@ -119,8 +119,9 @@ as the CSV matrix
 
   >>> the_processor = action.Processor('send', mm, running=False)
   >>> source = client.Source('fake_events', 'send')
-  >>> source.send("user.profile.register", user_data)
-  {'unfilled': [], 'no_source': []}
+  >>> ret = source.send("user.profile.register", user_data)
+  >>> ret == {'unfilled': [], 'no_source': [], 'results': {}}
+  True
 
   >>> step = the_processor.step()  
     {   'action type': 'email',
