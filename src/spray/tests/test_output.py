@@ -262,3 +262,12 @@ class TestJinjaFeaturetextFilter(unittest.TestCase):
           'font-family: elfvetica; font-size:2px">'\
           '<em>some text</em></span>'
         assert expect == result
+
+    def test_promotion_of_template_avoids_unicode_error(self):
+        # the str is promoted to unicode by jinja...
+        html = self.env.from_string(str("a fiver is {{ amount }}"))
+        # No render error
+        result = html.render(amount=u'\u00A3 5.00')
+        expect = u'a fiver is \u00A3 5.00'
+        self.assertEqual(expect, result)
+
