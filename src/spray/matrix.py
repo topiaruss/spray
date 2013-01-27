@@ -75,12 +75,12 @@ class ActionMatrix(object):
         return [ACTIONS[row['action_type']](event=event, row=row) \
           for row in actionrows]
 
-    def get_rows_for_event(self, eid=None):
+    def get_rows_for_event(self, event_id=None):
         "returns a couple of rows for one event, or all rows"
         self._ensure_updated()
-        if eid is not None:
+        if event_id is not None:
             # this is a potentially multi-row response
-            return self.data[eid]
+            return self.data[event_id]
         # we must agglomerate the many multi-row sequences
         rows = []
         for k, v in self.data.items():

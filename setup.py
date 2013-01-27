@@ -26,6 +26,7 @@ messaging or social actions""",
         test=(
             'zope.app.testing',
             'zope.testing',
+            'zope.testrunner',
             'MiniMock',
             'Mock',
             ),

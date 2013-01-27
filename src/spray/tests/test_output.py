@@ -2,7 +2,9 @@
 
 from spray import emailproc
 from spray import output
+from spray import SPRAY_ROOT
 import unittest
+import os
 
 
 class TestAmazonSESDestination(unittest.TestCase):
@@ -87,6 +89,7 @@ class TestTemplateRegistration(unittest.TestCase):
         tr_instance = output.AVAILABLE_TEMPLATE_REGISTRIES['email']
         assert tr_instance.__class__.__name__ == "SimpleTemplateRegistry"
 
+TEMPL_DIR = os.path.join(SPRAY_ROOT, 'templates/email')
 
 class TestFSBasedTemplateReg(unittest.TestCase):
 
@@ -94,11 +97,11 @@ class TestFSBasedTemplateReg(unittest.TestCase):
         self.assertRaises(KeyError, output.FSBasedTemplateRegistry)
 
     def test_instantiation_with_default_dir(self):
-        tt = output.FSBasedTemplateRegistry(templates_dir='./templates/email')
+        tt = output.FSBasedTemplateRegistry(templates_dir=TEMPL_DIR)
         tt = tt  # defeat editor checking
 
     def test_lookup_default_template(self):
-        tt = output.FSBasedTemplateRegistry(templates_dir='./templates/email')
+        tt = output.FSBasedTemplateRegistry(templates_dir=TEMPL_DIR)
         default = tt.lookup('')
         from jinja2 import Template
         assert isinstance(default, Template)

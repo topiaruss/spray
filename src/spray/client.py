@@ -135,7 +135,7 @@ class Source(object):
         rows = self.matrix.get_rows_for_event(event_id)
         events = {}
         for r in rows:
-            eid = r['event id']
+            eid = r['event_id']
             # get the tokens needed for the body fields
             bfields = [v for k, v in r.items() if k.startswith('body')\
                        or k.startswith('subject')]
@@ -313,7 +313,7 @@ class DryRun(object):
                 ff.write(template.substitute({'cb': k, 'used': used}))
 
     def blast_events(self):
-        "blast one message for each event id"
+        "blast one message for each event_id"
 
         # retain next line for registry side-effects of import
         from spray.tests import fullcallbacks

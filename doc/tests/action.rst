@@ -15,7 +15,8 @@ the processor can use to decide what to do when an event arrives.
 For testing, we use a canned file to initialize the matrix.
 
   >>> from spray import matrix 
-  >>> mm = matrix.CSVActionMatrix('./doc/tests/System Event-Action matrix - Matrix.csv')
+  >>> from spray import SPRAY_ROOT
+  >>> mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
 
 We must call update anytime the datasource may have changed.  This is the case
 irrespective which type of ActionMatrix we use.
@@ -46,7 +47,7 @@ DummyEmailAction just prints some info, as you'll see below
 
   >>> [a.handle() for a in actions]
     {   'action_type': u'email',
-        'event id': u'user.profile.register',
+        'event_id': u'user.profile.register',
         'recipient': u'admins'}
     {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}
     [None]
@@ -77,7 +78,7 @@ And do a single step on the processor to see what it does.
 
   >>> the_processor.step()
     {   'action_type': u'email',
-        'event id': u'system.project.drafted',
+        'event_id': u'system.project.drafted',
         'recipient': u'crafter'}
     {   'email': 'russf@topia.com', 'name': 'Russ Ferriday'}
 
@@ -108,8 +109,13 @@ Now we can proceed and get the demo spreadsheet. Bear in mind this goes to Googl
 for data, so it stretches your tests a bit.  If you find this block commented out
 with ".." you know why...
 
-  .. >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dENnMWQwM2dOTTNaZWo3M1JZOEtVa1E'
-  >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AoY07RiDm5HYdDR6R2hiSVE4aWI1azlMYlRnZlhSSVE#gid=0'
+Testing Matrix
+
+  >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dG9ITmowOEhQNU85c2NhOUtsb2ZzbFE'
+
+Production Matrix
+
+  .. >>> url = 'https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AoY07RiDm5HYdDR6R2hiSVE4aWI1azlMYlRnZlhSSVE#gid=0'
 
   >>> mm = matrix.GoogleActionMatrix(creds, url)
   >>> mm.update()
@@ -125,7 +131,7 @@ as the CSV matrix
 
   >>> step = the_processor.step()  
     {   'action_type': 'email',
-        'event id': 'system.project.drafted',
+        'event_id': 'system.project.drafted',
         'recipient': 'crafter'}
     {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}
 

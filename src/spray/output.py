@@ -2,6 +2,7 @@ from boto import ses
 from spray import emailproc
 from spray import interface
 from spray import jinjaenv
+from spray import SPRAY_ROOT
 from spray.settings import CREDENTIALS_FILENAME
 from spray.utils import aws_credentials
 from spray.utils import genfind
@@ -87,9 +88,8 @@ class FSBasedTemplateRegistry(SimpleTemplateRegistry):
 
 DEFAULT_TEMPLATE_REGISTRY = SimpleTemplateRegistry()
 SimpleTemplateRegistry.make_available('semail')
-templ_dir = os.path.join(os.path.dirname(__file__), '../../templates/email')
-FSBasedTemplateRegistry.make_available('email',
-  templates_dir=templ_dir)
+templ_dir = os.path.join(SPRAY_ROOT, 'templates/email')
+FSBasedTemplateRegistry.make_available('email', templates_dir=templ_dir)
 
 
 # == Destination registries == #
@@ -157,10 +157,9 @@ class AmazonSESDestination(Destination):
     implements(interface.IDestination)
 
     def __init__(self, overrides=None):
-        self.region = 'eu-west-1'
         self.overrides = overrides
         conf = aws_credentials.get_credentials(CREDENTIALS_FILENAME)
-        region = ses.get_region(self.region)
+        region = ses.regions()[0]  # Getting first region
         self.conn = boto.connect_ses(aws_access_key_id=conf[0],
           aws_secret_access_key=conf[1],
           region=region)

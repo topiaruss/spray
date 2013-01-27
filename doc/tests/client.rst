@@ -59,7 +59,7 @@ matrix, so we are not hiding anything...), called
 
  System Event-Action matrix - Matrix.csv, 
 
-there is the event id 'system.project.drafted'. To send that event, I need
+there is the event_id 'system.project.drafted'. To send that event, I need
 to provide the following data::
 
    crafter_first_name
@@ -96,7 +96,8 @@ and this call will be used internally by the client system.
 (We'll need a matrix for this...)
 
   >>> from spray import matrix
-  >>> mm = matrix.CSVActionMatrix('./doc/tests/System Event-Action matrix - Matrix.csv')
+  >>> from spray import SPRAY_ROOT
+  >>> mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
   >>> mm.update()
 
   >>> src = client.Source('src', matrix=mm)
@@ -113,7 +114,7 @@ Now let's Mock the inside of src, the bit that sends over the wire...
   >>> status = src.send('system.project.drafted')
   >>> src._send.assert_called_once_with('system.project.drafted', {})
 
-No magic so far. Without the mock, we would send the event id, but nothing else.
+No magic so far. Without the mock, we would send the event_id, but nothing else.
 This is not good for the spray backend, but it will just have to take what it
 gets. 
 

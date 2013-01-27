@@ -42,8 +42,9 @@ Action Matrix
 -------------
 
   >>> from spray import matrix 
+  >>> from spray import SPRAY_ROOT
   >>> mm = matrix.CSVActionMatrix(
-  ...   './doc/tests/System Event-Action matrix - Matrix.csv')
+  ...   SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
   >>> mm.update()
 
 
