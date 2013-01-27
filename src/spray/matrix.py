@@ -72,7 +72,7 @@ class ActionMatrix(object):
         from spray import action
         ACTIONS = action.ACTIONS
         actionrows = self.data[event.event_id]
-        return [ACTIONS[row['action type']](event=event, row=row) \
+        return [ACTIONS[row['action_type']](event=event, row=row) \
           for row in actionrows]
 
     def get_rows_for_event(self, eid=None):
@@ -98,9 +98,10 @@ class CSVActionMatrix(ActionMatrix):
     Google example spreadsheet.
     """
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, *args, **kwargs):
         self.filepath = filepath
         self.provenance = "Pending CSV file at: %s" % self.filepath
+        super(CSVActionMatrix, self).__init__(*args, **kwargs)
 
     def get_rows(self):
         self.csvfile = open(self.filepath, 'r')
@@ -114,10 +115,11 @@ CSVActionMatrix.register()
 
 class GoogleActionMatrix(ActionMatrix):
 
-    def __init__(self, credentials, url):
+    def __init__(self, credentials, url, *args, **kwargs):
         self.creds = credentials
         self.url = url
         self.provenance = "Pending Google SS at %s" % url
+        super(GoogleActionMatrix, self).__init__(*args, **kwargs)
 
     def get_rows(self):
         gc = gspread.login(self.creds.email, self.creds.password)

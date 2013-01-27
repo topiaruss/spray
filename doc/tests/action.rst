@@ -45,7 +45,7 @@ Now let's invoke the handler(s) for the event. The current
 DummyEmailAction just prints some info, as you'll see below
 
   >>> [a.handle() for a in actions]
-    {   'action type': u'email',
+    {   'action_type': u'email',
         'event id': u'user.profile.register',
         'recipient': u'admins'}
     {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}
@@ -76,7 +76,7 @@ Let's send something into the queue using this source
 And do a single step on the processor to see what it does.  
 
   >>> the_processor.step()
-    {   'action type': u'email',
+    {   'action_type': u'email',
         'event id': u'system.project.drafted',
         'recipient': u'crafter'}
     {   'email': 'russf@topia.com', 'name': 'Russ Ferriday'}
@@ -124,7 +124,7 @@ as the CSV matrix
   True
 
   >>> step = the_processor.step()  
-    {   'action type': 'email',
+    {   'action_type': 'email',
         'event id': 'system.project.drafted',
         'recipient': 'crafter'}
     {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}

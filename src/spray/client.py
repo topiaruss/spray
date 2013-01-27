@@ -144,7 +144,7 @@ class Source(object):
                   get_undef_body_fields(f))
             # get the tokens needed for the recipient field
             events.setdefault(eid, []).extend(get_undef_addr_fields(
-              eid, r['action type'], r['recipient']))
+              eid, r['action_type'], r['recipient']))
         # uniquify
         fevents = {}
         for k, v in events.items():

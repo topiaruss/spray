@@ -75,7 +75,7 @@ class DummyEmailAction(Action):
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         selection = {}
-        for k in ('action type', 'event id', 'recipient'):
+        for k in ('action_type', 'event id', 'recipient'):
             selection[k] = self.row[k]
         pp.pprint(selection)
         pp.pprint(self.data)
@@ -96,7 +96,7 @@ class DummySMSAction(Action):
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         selection = {}
-        for k in ('action type', 'event id', 'recipient'):
+        for k in ('action_type', 'event id', 'recipient'):
             selection[k] = self.row[k]
         pp.pprint(selection)
         pp.pprint(self.data)

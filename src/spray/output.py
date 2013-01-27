@@ -87,8 +87,9 @@ class FSBasedTemplateRegistry(SimpleTemplateRegistry):
 
 DEFAULT_TEMPLATE_REGISTRY = SimpleTemplateRegistry()
 SimpleTemplateRegistry.make_available('semail')
+templ_dir = os.path.join(os.path.dirname(__file__), '../../templates/email')
 FSBasedTemplateRegistry.make_available('email',
-  templates_dir='./templates/email')
+  templates_dir=templ_dir)
 
 
 # == Destination registries == #
