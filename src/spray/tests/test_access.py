@@ -28,8 +28,8 @@ class TestCredentials(unittest.TestCase):
     def test_credentialled_SES_access(self):
         "check that the credentials can access the SES service"
         creds = aws_credentials.get_credentials(CREDENTIALS_FILENAME)
-        region = regions[0]  # only one at moment
-         conn = connect_ses(aws_access_key_id=creds[0],
+        region = regions()[0]  # only one at moment
+        conn = connect_ses(aws_access_key_id=creds[0],
           aws_secret_access_key=creds[1],
           region=region)
         verified = conn.list_verified_email_addresses()

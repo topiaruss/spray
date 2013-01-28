@@ -100,12 +100,9 @@ and this call will be used internally by the client system.
   >>> mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
   >>> mm.update()
 
-  >>> src = client.Source('src', matrix=mm)
-  >>> src.get_event_field_tokens('system.project.drafted')
-  ['crafter_email_address', 'crafter_first_name', 'project_preview_url']
+Stripped out some stuff here, since moving to separate assembler class.
 
-  >>> src.get_event_field_tokens()['moderator.project.moderated']
-  ['crafter_email_address', 'crafter_first_name', 'moderation_table']
+  >>> src = client.Source('src', matrix=mm)
 
 Now let's Mock the inside of src, the bit that sends over the wire...
 

@@ -23,6 +23,7 @@ class Assembler(object):
         self.event_id = event_id
         self.context = context
         self.results = None
+        self.syntax_error = self.broken_template = None
 
     def assemble(self):
         self._do_callbacks(self.event_id, self.context)
@@ -36,11 +37,11 @@ class Assembler(object):
             ast = env.parse(template)
             return tuple(meta.find_undeclared_variables(ast))
         except TemplateSyntaxError as e:
-            print e
-            print template
+            self.syntax_error, self.broken_template = e, template
             LOG.exception("Broken token - possibly a space in {{}}. template: %s" %
               template)
-            return ()
+            #  using None to flag an exception
+            return None
 
     def get_undef_addr_fields(self, event_id, act_type, recipient_cell):
         "parse the recipient cell from the spreadsheet, ret a list of addrs or ()"
@@ -51,7 +52,7 @@ class Assembler(object):
             ret = [(pat % (r, act_type)) for r in recipients if r not in ignores]
             return [str(r) for r in ret]
         except Exception as e:
-            print e
+            self.syntax_error(str(e), 'line: %s' % e.lineno)
             LOG.exception("Prob in recip field: eid: %s, actn: %s, recpcell: %s" %
               (event_id, act_type, recipient_cell))
             return ()
