@@ -16,43 +16,107 @@ def register_callback(func):
     CALLBACKS[token_id] = func
 
 
-def get_undef_body_fields(template):
-    "returns the tokens from a jinja template"
-    from jinja2 import meta, TemplateSyntaxError
-    from spray import jinjaenv
-    env = jinjaenv.env
-    try:
-        ast = env.parse(template)
-        return tuple(meta.find_undeclared_variables(ast))
-    except TemplateSyntaxError as e:
-        print e
-        print template
-        LOG.exception("Broken token - possibly a space in {{}}. template: %s" %
-          template)
-        return ()
+class Assembler(object):
 
+    def __init__(self, mm, event_id, context):
+        self.matrix = mm
+        self.event_id = event_id
+        self.context = context
+        self.results = None
 
-def get_undef_addr_fields(event_id, act_type, recipient_cell):
-    "parse the recipient cell from the spreadsheet, ret a list of addrs or ()"
-    try:
-        recipients = [r.strip() for r in recipient_cell.split(',')]
-        ignores = ('bcc:admins',)
-        pat = '%s_%s_address'
-        ret = [(pat % (r, act_type)) for r in recipients if r not in ignores]
-        return [str(r) for r in ret]
-    except Exception as e:
-        print e
-        LOG.exception("Prob in recip field: eid: %s, actn: %s, recpcell: %s" %
-          (event_id, act_type, recipient_cell))
-        return ()
+    def assemble(self):
+        self._do_callbacks(self.event_id, self.context)
 
+    def get_undef_body_fields(self, template):
+        "returns the tokens from a jinja template"
+        from jinja2 import meta, TemplateSyntaxError
+        from spray import jinjaenv
+        env = jinjaenv.env
+        try:
+            ast = env.parse(template)
+            return tuple(meta.find_undeclared_variables(ast))
+        except TemplateSyntaxError as e:
+            print e
+            print template
+            LOG.exception("Broken token - possibly a space in {{}}. template: %s" %
+              template)
+            return ()
 
-def get_required_args(func):
-    "return a list of the arg names required http://bit.ly/TgqZQX"
-    args, varargs, varkw, defaults = inspect.getargspec(func)
-    if defaults:
-        args = args[:-len(defaults)]
-    return args
+    def get_undef_addr_fields(self, event_id, act_type, recipient_cell):
+        "parse the recipient cell from the spreadsheet, ret a list of addrs or ()"
+        try:
+            recipients = [r.strip() for r in recipient_cell.split(',')]
+            ignores = ('bcc:admins',)
+            pat = '%s_%s_address'
+            ret = [(pat % (r, act_type)) for r in recipients if r not in ignores]
+            return [str(r) for r in ret]
+        except Exception as e:
+            print e
+            LOG.exception("Prob in recip field: eid: %s, actn: %s, recpcell: %s" %
+              (event_id, act_type, recipient_cell))
+            return ()
+
+    def get_required_args(self, func):
+        "return a list of the arg names required http://bit.ly/TgqZQX"
+        args, varargs, varkw, defaults = inspect.getargspec(func)
+        if defaults:
+            args = args[:-len(defaults)]
+        return args
+
+    def get_event_field_tokens(self, event_id=None):
+        "returns the tokens for ALL rows under an event"
+        rows = self.matrix.get_rows_for_event(event_id)
+        events = {}
+        for r in rows:
+            eid = r['event_id']
+            # get the tokens needed for the body fields
+            bfields = [v for k, v in r.items() if k.startswith('body')\
+                       or k.startswith('subject')]
+            for f in bfields:
+                events.setdefault(eid, []).extend(
+                  self.get_undef_body_fields(f))
+            # get the tokens needed for the recipient field
+            events.setdefault(eid, []).extend(self.get_undef_addr_fields(
+              eid, r['action_type'], r['recipient']))
+        # uniquify
+        fevents = {}
+        for k, v in events.items():
+            fevents[k] = sorted(list(set(v)))
+        events = fevents
+        if len(events) == 1:
+            return events.values()[0]
+        return events
+
+    def _do_callbacks(self, event_id, context):
+        # the tokens we need for this event
+        tokens = self.get_event_field_tokens(event_id)
+
+        # tokens we know we can't do -- no callbacks for them
+        unfilled = set(tokens).difference(set(CALLBACKS.keys()))
+
+        # the callbacks we want to try
+        cbs = set(tokens).intersection(set(CALLBACKS.keys()))
+
+        # list of required source objects not found in the context
+        no_source = set()
+        #results = context.copy()  #  < -- was !
+        results = {}
+        for k in cbs:
+            c = CALLBACKS[k]
+            reqargs = set(self.get_required_args(c))
+            available = set(context.keys())
+            if available.issuperset(reqargs):
+                try:
+                    reqargs = sorted(list(reqargs))
+                    # MUST sort all callback params
+                    results[k] = c(*[context[v] for v in reqargs])
+                except Exception as e:
+                    LOG.exception('failure %s in callback %s for %s with %s' %
+                      (e, c, k, context))
+                    results[k] = '...'  # This will flag an exception in msg
+            else:
+                no_source = no_source.union(reqargs - available)
+        self.results = dict(no_source=no_source, unfilled=unfilled, results=results)
 
 
 class Source(object):
@@ -90,69 +154,16 @@ class Source(object):
 
         self.send_queue.create_and_send(event_id, data)
 
-    def _do_callbacks(self, event_id, context):
-        # the tokens we need for this event
-        tokens = self.get_event_field_tokens(event_id)
-
-        # tokens we know we can't do -- no callbacks for them
-        unfilled = set(tokens).difference(set(CALLBACKS.keys()))
-
-        # the callbacks we want to try
-        cbs = set(tokens).intersection(set(CALLBACKS.keys()))
-
-        # list of required source objects not found in the context
-        no_source = set()
-        #results = context.copy()  #  < -- was !
-        results = {}
-        for k in cbs:
-            c = CALLBACKS[k]
-            reqargs = set(get_required_args(c))
-            available = set(context.keys())
-            if available.issuperset(reqargs):
-                try:
-                    reqargs = sorted(list(reqargs))
-                    # MUST sort all callback params
-                    results[k] = c(*[context[v] for v in reqargs])
-                except Exception as e:
-                    LOG.exception('failure %s in callback %s for %s with %s' %
-                      (e, c, k, context))
-                    results[k] = '...'  # This will flag an exception in msg
-            else:
-                no_source = no_source.union(reqargs - available)
-        return dict(no_source=no_source, unfilled=unfilled, results=results)
-
     def send(self, event_id, context={}):
         ret = dict(unfilled=[], no_source=[], results={})
         if self.matrix is not None:
-            cbresults = self._do_callbacks(event_id, context)
-            context = cbresults['results']
-            ret = cbresults
+            assembler = Assembler(self.matrix, event_id, context)
+            assembler.assemble()
+            context = assembler.results['results']
+            ret = assembler.results
+
         self._send(event_id, context)
         return ret
-
-    def get_event_field_tokens(self, event_id=None):
-        "returns the tokens for ALL rows under an event"
-        rows = self.matrix.get_rows_for_event(event_id)
-        events = {}
-        for r in rows:
-            eid = r['event_id']
-            # get the tokens needed for the body fields
-            bfields = [v for k, v in r.items() if k.startswith('body')\
-                       or k.startswith('subject')]
-            for f in bfields:
-                events.setdefault(eid, []).extend(
-                  get_undef_body_fields(f))
-            # get the tokens needed for the recipient field
-            events.setdefault(eid, []).extend(get_undef_addr_fields(
-              eid, r['action_type'], r['recipient']))
-        # uniquify
-        fevents = {}
-        for k, v in events.items():
-            fevents[k] = sorted(list(set(v)))
-        events = fevents
-        if len(events) == 1:
-            return events.values()[0]
-        return events
 
 
 class ClientApp(object):
