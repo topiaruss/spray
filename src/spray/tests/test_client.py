@@ -54,4 +54,17 @@ class TestAssembler(unittest.TestCase):
             assert tokens
 
 # That's enough for now.. .we'll go over to our application to run through all the
-# callbacks.
+# callbacks. But lets test the integrated Assembler results...
+
+    def test_assembler_integration(self):
+        mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
+        mm.update()
+        ass = client.Assembler(mm, 'crafter.message.sent', {})
+        ret = ass.assemble()
+        self.assertEqual(ass.results, {'unfilled': set(['follower_email_address',
+          'username', 'crafter_email', 'project_name', 'sponsor_email_address',
+          'sponsor_first_name', 'copy admins_email_address', 'follower_first_name',
+          'message']), 'results': {}, 'no_source': set([])})
+        pass
+
+

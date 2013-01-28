@@ -119,6 +119,7 @@ class Assembler(object):
             else:
                 no_source = no_source.union(reqargs - available)
         self.results = dict(no_source=no_source, unfilled=unfilled, results=results)
+        return self.results
 
 
 class Source(object):
