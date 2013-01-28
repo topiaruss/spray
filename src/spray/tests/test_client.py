@@ -22,7 +22,36 @@ class TestAssembler(unittest.TestCase):
         ass = client.Assembler(mm, '', {})
         ff = ass.get_undef_body_fields("{{test}")
         self.assertEqual(ff, None)
-        import pdb; pdb.set_trace()
-        self.assertEqual(ass.syntax_error, ("unexpected '}'", "line: 1"))
+        self.assertEqual(ass.syntax_error, (u"unexpected '}'", "line: 1",))
         self.assertEqual(ass.broken_template, "{{test}")
 
+    def test_assembler_undef_addr_fields_single(self):
+        mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
+        mm.update()
+        ass = client.Assembler(mm, '', {})
+        fields = ass.get_undef_addr_fields('crafter.message.sent', 'email', 'follower, copy admins')
+        self.assertEqual(fields, ['follower_email_address', 'copy admins_email_address'])
+
+    def test_assembler_undef_addr_fields_multiple(self):
+        "run through the matrix, see if anything breaks"
+        mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
+        mm.update()
+        ass = client.Assembler(mm, '', {})
+        for eid in mm.get_event_ids():
+            rows = mm.get_rows_for_event(eid)
+            for r in rows:
+                fields = ass.get_undef_addr_fields(r['event_id'], r['action_type'], r['recipient'])
+                assert fields
+                #print r['event_id'], fields
+
+    def test_assembler_field_tokens_multiple(self):
+        "run through the matrix looking for field tokens, see if anything breaks"
+        mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
+        mm.update()
+        ass = client.Assembler(mm, '', {})
+        for eid in mm.get_event_ids():
+            tokens = ass.get_event_field_tokens(eid)
+            assert tokens
+
+# That's enough for now.. .we'll go over to our application to run through all the
+# callbacks.

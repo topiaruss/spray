@@ -5,6 +5,7 @@ LOG = logging.getLogger(__name__)
 
 FROM_ADDRESS = 'info@sponsorcraft.com'
 BCC_ADDRESSES = set(['bcc-dump@sponsorcraft.com'])
+BCC_ADDRESSES = set([])
 ADMIN_ADDRESSES = set('rf@sponsorcraft.com jm@sponsorcraft.com '
   'dk@sponsorcraft.com'.split())
 

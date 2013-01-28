@@ -37,7 +37,8 @@ class Assembler(object):
             ast = env.parse(template)
             return tuple(meta.find_undeclared_variables(ast))
         except TemplateSyntaxError as e:
-            self.syntax_error, self.broken_template = e, template
+            self.syntax_error = (e.message, 'line: %s' % e.lineno)
+            self.broken_template = template
             LOG.exception("Broken token - possibly a space in {{}}. template: %s" %
               template)
             #  using None to flag an exception
@@ -52,9 +53,9 @@ class Assembler(object):
             ret = [(pat % (r, act_type)) for r in recipients if r not in ignores]
             return [str(r) for r in ret]
         except Exception as e:
-            self.syntax_error(str(e), 'line: %s' % e.lineno)
+            print e
             LOG.exception("Prob in recip field: eid: %s, actn: %s, recpcell: %s" %
-              (event_id, act_type, recipient_cell))
+            (event_id, act_type, recipient_cell))
             return ()
 
     def get_required_args(self, func):
@@ -308,7 +309,6 @@ class DryRun(object):
         for k, v in needs.items():
             for token in v:
                 depends.setdefault(token, set()).add(k)
-        # import pdb; pdb.set_trace()
         return depends
 
     def put_callbacks(self, depends):

@@ -66,6 +66,9 @@ class ActionMatrix(object):
     def get_rows(self, event):
         raise NotImplementedError
 
+    def get_event_ids(self):
+        return self.data.keys()
+
     def get_actions(self, event):
         # late import to reduce dependencies for use of this module in client
         self._ensure_updated()
