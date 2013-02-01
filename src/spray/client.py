@@ -47,7 +47,11 @@ class Assembler(object):
     def get_undef_addr_fields(self, event_id, act_type, recipient_cell):
         "parse the recipient cell from the spreadsheet, ret a list of addrs or ()"
         try:
-            recipients = [r.strip() for r in recipient_cell.split(',')]
+            # this is to fix django recip cells, which are lists.
+            if type(recipient_cell) in [str, unicode]:
+                recipient_cell = recipient_cell.split(',')
+            assert type(recipient_cell == list)
+            recipients = [r.strip() for r in recipient_cell]
             ignores = ('bcc:admins',)
             pat = '%s_%s_address'
             ret = [(pat % (r, act_type)) for r in recipients if r not in ignores]
