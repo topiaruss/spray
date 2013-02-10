@@ -79,6 +79,10 @@ def config_app(config):
     dest = output.DESTINATION_REGISTRY['AmazonSESDestination'](
       overrides=overrides)
 
+    lookup_name = config.get('EmailDestination', 'name')
+    dest = output.DESTINATION_REGISTRY[lookup_name](
+      overrides=overrides)
+
     # this overwrites the default, which is a simple Channel()
     email_channel = output.HTMLEmailChannel(medium='email', destination=dest)
     output.CHAN_REG.register(email_channel)
@@ -105,3 +109,46 @@ def app(testing=False):
     #signal.signal(signal.SIGINT, on_exit)
 
     config_app(config)
+
+
+def processor_factory(config):
+    """initially for the preview functionality in sprayUI.
+    This will configure a working processor, with all necessary deps,
+    and return the contents. It will eventually replace config_app, above."""
+
+    #get the matrix
+    matrix_type = config.get('ActionMatrix', 'type')
+    kw = dict(config.items('ActionMatrix')[1:])
+    kw.update(dict(credentials=matrix.Credentials()))
+    mm = matrix.matrixFactory(matrix_type, kw)
+    mm.update()
+    print "Matrix : %s" % mm.provenance
+
+    def get_override(config, k):
+        v = config.get('RecipientOverride', k)
+        return v and v.split() or ()
+
+    overrides = dict(
+        to_addresses=get_override(config, 'to_addresses'),
+        cc_addresses=get_override(config, 'cc_addresses'),
+        bcc_addresses=get_override(config, 'bcc_addresses'),
+    )
+    lookup_name = config.get('EmailDestination', 'name')
+    dest = output.DESTINATION_REGISTRY[lookup_name](
+      overrides=overrides)
+
+    # this overwrites the default, which is a simple Channel()
+    email_channel = output.HTMLEmailChannel(medium='email', destination=dest)
+    output.CHAN_REG.register(email_channel)
+
+    queue = config.get('SQSQueue', 'name')
+    print 'listening on %s' % queue
+
+    try:
+        max_time = config.get('Processor', 'max_time')
+        max_time = int(max_time)
+        max_time = datetime.timedelta(minutes=max_time)
+    except:
+        max_time = None
+
+    return action.Processor(queue, mm, max_time=max_time)

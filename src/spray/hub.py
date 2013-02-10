@@ -73,6 +73,7 @@ class SQSQueue(object):
 
 QUEUES['test'] = DummyQueue('test')
 QUEUES['send'] = DummyQueue('send')
+QUEUES['sprayui'] = DummyQueue('sprayui')
 QUEUES['testSQS'] = SQSQueue('testSQS')
 QUEUES['mainSQS'] = SQSQueue('mainSQS')
 

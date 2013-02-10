@@ -152,6 +152,18 @@ class MockSmtpDestination(Destination):
 MockSmtpDestination.register()
 
 
+class  FakeSES(object ):
+
+    def __init__(self):
+        self.output = []
+
+    def send_email(self, *args, **kwargs):
+        self.output.append(dict(args=args, kwargs=kwargs))
+
+    def get_traffic(self):
+        return self.output
+
+
 class AmazonSESDestination(Destination):
 
     implements(interface.IDestination)
@@ -168,12 +180,13 @@ class AmazonSESDestination(Destination):
         sender = data.get('from') or emailproc.TEMP_FROM_ADDRESS
         or_to = self.overrides and self.overrides['to_addresses'] or ''
         recipients = or_to or data['to']
-        subject = data.get('subject') or data.get('subject_en_uk')
+        subject = data.get('subject') or data.get('subject_en-gb')
         assert type(sender) == type("")
         assert type(recipients) in (list, tuple)
         self.conn.send_email(sender, subject, body, recipients)
         #naiive rate limit
-        time.sleep(0.25)  # SES rate limit 5Hz
+        if not isinstance(self.conn, FakeSES):
+            time.sleep(0.25)  # SES rate limit 5Hz
 
     def mpart_send(self, **kw):
         if self.overrides and any(self.overrides.values()):
@@ -195,6 +208,19 @@ class AmazonSESDestination(Destination):
 
 AmazonSESDestination.register()
 
+
+class DummyAmazonSESDestination(AmazonSESDestination):
+
+    implements(interface.IDestination)
+
+    def __init__(self, overrides=None):
+        self.overrides = overrides
+        self.conn = FakeSES()
+
+    def get_traffic(self):
+        return self.conn.get_traffic()
+
+DummyAmazonSESDestination.register()
 
 # == Channels == #
 
@@ -239,7 +265,7 @@ class Channel(object):
     def send(self, row, data, style=''):
         body = self.render(data, style)
         # temp kludge - I don't want the row going into the destination...
-        data['subject_en_uk'] = row.get('subject_en_uk')
+        data['subject_en-gb'] = row.get('subject_en-gb')
         self.dest.send(body, data)
 
 
@@ -263,6 +289,7 @@ class HTMLEmailChannel(Channel):
         #TODO: roll this into parent class - unify params
         send_params = self.render(row, data, style)
         self.dest.mpart_send(**send_params)
+        return dest
 
 
 class ChannelRegistry(object):

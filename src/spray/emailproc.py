@@ -33,11 +33,11 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     params['bcc_addresses'] = list(direct_bcc.union(matrix_bcc))
 
     # subject comes from the row, not the data, so we use it two ways
-    subject = row['subject_en_uk']
+    subject = row['subject_en-gb']
     params['subject'] = subject
     data['subject'] = subject
 
-    rawtext = row['body_en_uk']
+    rawtext = row['body_en-gb']
     lines = rawtext.split('\\n')
 
     # create the html version

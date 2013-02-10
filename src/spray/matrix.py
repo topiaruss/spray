@@ -36,7 +36,7 @@ class ActionMatrix(object):
     providing the update mechanism and booby-trapped
     placeholder methods.
     """
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.data = None
         self.provenance = u""
 

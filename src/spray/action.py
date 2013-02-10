@@ -124,13 +124,15 @@ class EmailAction(Action):
     def handle(self):
         self.notify('handle')
         try:
-            self.channel.send(self.row, self.data)
+            self.dest = self.channel.send(self.row, self.data)
         except Exception as e:
             import traceback
             tb = traceback.format_exc(8)  # 8 lines
             self.notify('handler-exception', exception=e,
               event=self.event, data=self.data, traceback=tb)
         self.notify('handle-end', data=self.data)
+        # returning the outcome of the action. Used for testing
+        return self
 
 
 EmailAction.register()
@@ -158,19 +160,18 @@ class Processor(object):
           ((self.expire and ("'til %s" % self.expire)) or '...')
         while self.is_alive:
             self.step()
-            if datetime.datetime.now() > self.expire:
+            if self.expire is not None and datetime.datetime.now() > self.expire:
                 self.is_alive = False
 
     def step(self):
         event = self.queue.get_event()
         if event is None:
-            #self.notify('event-None')
             time.sleep(2)
             return
         self.notify('event-got')
         try:
             actions = self.matrix.get_actions(event)
-            [a.handle() for a in actions]
+            self.entrails = [a.handle() for a in actions]
         except Exception as e:
             self.notify('event-exception', exception=e, event=event)
         finally:
@@ -181,6 +182,8 @@ class Processor(object):
     def stop(self):
         if self.tt.is_alive():
             self.is_alive = False
+            if self.queue.name == 'sprayui':
+                self.queue.put(None)
             self.tt.join()
 
     def start(self):

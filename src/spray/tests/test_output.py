@@ -25,8 +25,8 @@ class TestAmazonSESDestination(unittest.TestCase):
     def _build_dummy_mpart_send_data(self):
         row, data = {}, {}
         row['from'] = 'rf@sponsorcraft.com'
-        row['subject_en_uk'] = 'søme silly sübject'
-        row['body_en_uk'] = 'Hello {{ first_name }}! <br/> '\
+        row['subject_en-gb'] = 'søme silly sübject'
+        row['body_en-gb'] = 'Hello {{ first_name }}! <br/> '\
           'How is <a href="https://sponsorcraft.com">this link</a>?'
         #row['recipient'] = 'crafter,bcc:admin'
         row['recipient'] = 'crafter'
@@ -50,7 +50,7 @@ class TestAmazonSESDestination(unittest.TestCase):
         tr = output.SimpleTemplateRegistry()
         tr.register('', "<head></head><body>{{ body|safe }}</body>")
         row, data = self._build_dummy_mpart_send_data()
-        row['subject_en_uk'] = 'søme silly sübject with safe body'
+        row['subject_en-gb'] = 'søme silly sübject with safe body'
         from spray import jinjaenv
         env, ptenv = jinjaenv.env, jinjaenv.ptenv
         mpart_params = emailproc.build_multipart_mail(
