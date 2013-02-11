@@ -64,7 +64,7 @@ def config_app(config):
     kw.update(dict(credentials=matrix.Credentials()))
     mm = matrix.matrixFactory(matrix_type, kw)
     mm.update()
-    print "Matrix : %s" % mm.provenance
+    #print "Matrix : %s" % mm.provenance
 
     def get_override(config, k):
         v = config.get('RecipientOverride', k)
@@ -88,7 +88,6 @@ def config_app(config):
     output.CHAN_REG.register(email_channel)
 
     queue = config.get('SQSQueue', 'name') or 'mainSQS'
-    print 'listening on %s' % queue
 
     max_time = datetime.timedelta(minutes=55)
     the_processor = action.Processor(queue, mm, max_time=max_time)
@@ -122,7 +121,7 @@ def processor_factory(config):
     kw.update(dict(credentials=matrix.Credentials()))
     mm = matrix.matrixFactory(matrix_type, kw)
     mm.update()
-    print "Matrix : %s" % mm.provenance
+    #print "Matrix : %s" % mm.provenance
 
     def get_override(config, k):
         v = config.get('RecipientOverride', k)
@@ -142,7 +141,6 @@ def processor_factory(config):
     output.CHAN_REG.register(email_channel)
 
     queue = config.get('SQSQueue', 'name')
-    print 'listening on %s' % queue
 
     try:
         max_time = config.get('Processor', 'max_time')

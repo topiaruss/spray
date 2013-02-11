@@ -366,5 +366,3 @@ class DryRun(object):
 #This is used by setup.py and buildout.cfg to generate an app in bin/
 def dryrun():
     DryRun()()
-
-#  what remains relates to test configuration
