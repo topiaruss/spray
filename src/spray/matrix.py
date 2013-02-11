@@ -83,7 +83,7 @@ class ActionMatrix(object):
         self._ensure_updated()
         if event_id is not None:
             # this is a potentially multi-row response
-            return self.data[event_id]
+            return self.data.get(event_id, [])
         # we must agglomerate the many multi-row sequences
         rows = []
         for k, v in self.data.items():

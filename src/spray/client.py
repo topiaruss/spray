@@ -411,12 +411,12 @@ name = DummyAmazonSESDestination
 
 class ProcessBox(object):
 
-    def __init__(self, config=None, *args, **kwargs):
+    def __init__(self, config=None, matrix=None, *args, **kwargs):
         if config is None:
             sio = StringIO(SPRAYUI_CONFIG)
             config = sprayd.ConfWrap(sio)
         self.config = config
-        self.proc = sprayd.processor_factory(config)
+        self.proc = sprayd.processor_factory(config, matrix)
 
     def grind(self):
         # this is a kludge while we hope that processing continues

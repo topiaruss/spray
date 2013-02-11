@@ -110,17 +110,20 @@ def app(testing=False):
     config_app(config)
 
 
-def processor_factory(config):
+def processor_factory(config, matrix=None):
     """initially for the preview functionality in sprayUI.
     This will configure a working processor, with all necessary deps,
     and return the contents. It will eventually replace config_app, above."""
 
-    #get the matrix
-    matrix_type = config.get('ActionMatrix', 'type')
-    kw = dict(config.items('ActionMatrix')[1:])
-    kw.update(dict(credentials=matrix.Credentials()))
-    mm = matrix.matrixFactory(matrix_type, kw)
-    mm.update()
+    mm = matrix
+    if mm is None:
+        #get the matrix
+        matrix_type = config.get('ActionMatrix', 'type')
+        kw = dict(config.items('ActionMatrix')[1:])
+        kw.update(dict(credentials=matrix.Credentials()))
+        mm = matrix.matrixFactory(matrix_type, kw)
+        mm.update()
+
     #print "Matrix : %s" % mm.provenance
 
     def get_override(config, k):
