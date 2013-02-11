@@ -196,8 +196,8 @@ class AmazonSESDestination(Destination):
             to: %s
             cc: %s
             bcc: %s
-            Original Text message starts on the next line]]
-            %s""" % (kw.get('to_addresses', ''),
+            Original Text message starts after the blank line]]\n\n%s""" %\
+              (kw.get('to_addresses', ''),
               kw.get('cc_addresses', ''),
               kw.get('bcc_addresses', ''),
               kw.get('text_body', ''))
