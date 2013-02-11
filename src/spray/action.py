@@ -8,6 +8,7 @@ import logging
 import threading
 import time
 
+
 LOG = logging.getLogger(__name__)
 
 # used for instantiating the correct matrix type based on live or testing

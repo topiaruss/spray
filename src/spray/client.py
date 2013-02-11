@@ -1,9 +1,13 @@
 from spray import hub
 from spray import matrix
-import ConfigParser
+from spray import sprayd
+from StringIO import StringIO
 import argparse
+import ConfigParser
 import inspect
 import logging
+import time
+
 # Note: some imports are deferred for conditional loading
 
 LOG = logging.getLogger(__name__)
@@ -366,3 +370,70 @@ class DryRun(object):
 #This is used by setup.py and buildout.cfg to generate an app in bin/
 def dryrun():
     DryRun()()
+
+
+SPRAYUI_CONFIG = """
+[Logging]
+level = logging.DEBUG
+format = %(asctime)s-%(levelname)s-%(module)s-%(message)s
+filename = sprayui.log
+
+# split with spaces - no commas
+[RecipientOverride]
+#to_addresses = test-override@sponsorcraft.com jm@sponsorcraft.com sophia.duffy@sponsorcraft.com rf@sponsorcraft.com
+to_addresses = rf@sponsorcraft.com
+
+[ActionMatrix]
+# this is the matrix that will be used for the processor
+
+#type =  GoogleActionMatrix
+#production
+#url = https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AoY07RiDm5HYdDR6R2hiSVE4aWI1azlMYlRnZlhSSVE#gid=0
+#testing
+#url = https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dG9ITmowOEhQNU85c2NhOUtsb2ZzbFE
+#develop
+#url = https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dE13Vk5ydFJFcTBJOFBYbmlBc2ROenc
+
+#type =  CSVActionMatrix
+#filepath = ./doc/tests/System Event-Action matrix - Matrix.csv
+
+type = DjangoActionMatrix
+
+#bit of a misnomer - any queue type, predefined.
+[SQSQueue]
+name = sprayui
+
+[EmailDestination]
+name = DummyAmazonSESDestination
+
+"""
+
+
+class ProcessBox(object):
+
+    def __init__(self, config=None, *args, **kwargs):
+        if config is None:
+            sio = StringIO(SPRAYUI_CONFIG)
+            config = sprayd.ConfWrap(sio)
+        self.config = config
+        self.proc = sprayd.processor_factory(config)
+
+    def grind(self):
+        # this is a kludge while we hope that processing continues
+        while len(self.proc.queue.queue):
+            time.sleep(0.1)
+        time.sleep(0.2)
+
+    def stop(self):
+        self.proc.stop()
+
+    def get_evidence(self):
+        evidence = []
+        # Break gracefuly if no actions have been run
+        try:
+            entrails = self.proc.entrails
+        except AttributeError:
+            return []
+        for e in entrails:
+            evidence.append(e.channel.dest.get_traffic())
+        return evidence
