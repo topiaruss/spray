@@ -156,8 +156,9 @@ class Processor(object):
             self.start()
 
     def runner(self):
-        print "running %s" % \
-          ((self.expire and ("'til %s" % self.expire)) or '...')
+        if self.expire is not None:
+            print "running %s" % \
+              ((self.expire and ("'til %s" % self.expire)) or '...')
         while self.is_alive:
             self.step()
             if self.expire is not None and datetime.datetime.now() > self.expire:
