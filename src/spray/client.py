@@ -39,6 +39,8 @@ class Assembler(object):
         from spray import jinjaenv
         env = jinjaenv.env
         try:
+            if template is None:
+                template = ''
             unescaped = unescape.unescape(template)
             ast = env.parse(unescaped)
             return tuple(meta.find_undeclared_variables(ast))
