@@ -110,12 +110,12 @@ def app(testing=False):
     config_app(config)
 
 
-def processor_factory(config, matrix=None):
+def processor_factory(config, aematrix=None):
     """initially for the preview functionality in sprayUI.
     This will configure a working processor, with all necessary deps,
     and return the contents. It will eventually replace config_app, above."""
 
-    mm = matrix
+    mm = aematrix
     if mm is None:
         #get the matrix
         matrix_type = config.get('ActionMatrix', 'type')
