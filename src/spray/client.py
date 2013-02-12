@@ -1,6 +1,7 @@
 from spray import hub
 from spray import matrix
 from spray import sprayd
+from spray.utils import unescape
 from StringIO import StringIO
 import argparse
 import ConfigParser
@@ -38,15 +39,15 @@ class Assembler(object):
         from spray import jinjaenv
         env = jinjaenv.env
         try:
-            ast = env.parse(template)
+            unescaped = unescape.unescape(template)
+            ast = env.parse(unescaped)
             return tuple(meta.find_undeclared_variables(ast))
         except TemplateSyntaxError as e:
             self.syntax_error = (e.message, 'line: %s' % e.lineno)
             self.broken_template = template
-            LOG.exception("Broken token - possibly a space in {{}}. template: %s" %
-              template)
-            #  using None to flag an exception
-            return None
+            LOG.exception("Broken token - possibly a space in {{}}. %s. Template: %s" %
+              (self.syntax_error, template))
+            raise
 
     def get_undef_addr_fields(self, event_id, act_type, recipient_cell):
         "parse the recipient cell from the spreadsheet, ret a list of addrs or ()"
