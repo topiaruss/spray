@@ -1,5 +1,4 @@
 from boto import connect_ses
-from boto import ses
 from boto.sqs import regions
 from boto.sqs.connection import SQSConnection
 from spray.settings import CREDENTIALS_FILENAME
@@ -28,9 +27,7 @@ class TestCredentials(unittest.TestCase):
     def test_credentialled_SES_access(self):
         "check that the credentials can access the SES service"
         creds = aws_credentials.get_credentials(CREDENTIALS_FILENAME)
-        region = regions()[0]  # only one at moment
         conn = connect_ses(aws_access_key_id=creds[0],
-          aws_secret_access_key=creds[1],
-          region=region)
+          aws_secret_access_key=creds[1])
         verified = conn.list_verified_email_addresses()
         assert len(verified) > 0
