@@ -438,5 +438,6 @@ class ProcessBox(object):
         except AttributeError:
             return []
         for e in entrails:
-            evidence.append(e.channel.dest.get_traffic())
+            traffic = e.channel.dest.get_traffic()
+            evidence.append((e.row, traffic))
         return evidence

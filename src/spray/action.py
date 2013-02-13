@@ -133,6 +133,7 @@ class EmailAction(Action):
               event=self.event, data=self.data, traceback=tb)
         self.notify('handle-end', data=self.data)
         # returning the outcome of the action. Used for testing
+        # TODO This behaviour must spread to the other actions!!
         return self
 
 

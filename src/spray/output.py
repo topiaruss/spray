@@ -289,7 +289,7 @@ class HTMLEmailChannel(Channel):
         #TODO: roll this into parent class - unify params
         send_params = self.render(row, data, style)
         self.dest.mpart_send(**send_params)
-        return dest
+        return self.dest
 
 
 class ChannelRegistry(object):

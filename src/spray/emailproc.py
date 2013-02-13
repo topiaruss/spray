@@ -1,5 +1,6 @@
 # emailproc.py - bits and pieces of email processing
 import logging
+from spray.utils import unescape
 
 LOG = logging.getLogger(__name__)
 
@@ -38,7 +39,8 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     data['subject'] = subject
 
     rawtext = row['body_en-gb']
-    lines = rawtext.split('\\n')
+    unescaped = unescape.unescape(rawtext)
+    lines = unescaped.split('\\n')
 
     # create the html version
     template = env.from_string('<br/>\n'.join(lines))  # TODO: Cache?
