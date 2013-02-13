@@ -1,3 +1,4 @@
+import jinja2
 import unittest
 from spray import client
 from spray import matrix
@@ -20,10 +21,7 @@ class TestAssembler(unittest.TestCase):
     def test_assembler_body_fields_syntax_error(self):
         mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
         ass = client.Assembler(mm, '', {})
-        ff = ass.get_undef_body_fields("{{test}")
-        self.assertEqual(ff, None)
-        self.assertEqual(ass.syntax_error, (u"unexpected '}'", "line: 1",))
-        self.assertEqual(ass.broken_template, "{{test}")
+        self.assertRaises(jinja2.TemplateSyntaxError, ass.get_undef_body_fields, "{{intentionally broken}")
 
     def test_assembler_undef_addr_fields_single(self):
         mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
@@ -61,6 +59,7 @@ class TestAssembler(unittest.TestCase):
         mm.update()
         ass = client.Assembler(mm, 'crafter.message.sent', {})
         ret = ass.assemble()
+        ret = ret  # trick lint
         self.assertEqual(ass.results, {'unfilled': set(['follower_email_address',
           'username', 'crafter_email', 'project_name', 'sponsor_email_address',
           'sponsor_first_name', 'copy admins_email_address', 'follower_first_name',
