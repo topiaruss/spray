@@ -129,6 +129,12 @@ class Assembler(object):
                     results[k] = '...'  # This will flag an exception in msg
             else:
                 no_source = no_source.union(reqargs - available)
+
+        # ignore the unfilled items that will be processed later
+        # whip_these_out = [u for u in unfilled if '__' in u]
+        # for u in whip_these_out:
+        #     unfilled.remove(u)
+
         self.results = dict(no_source=no_source, unfilled=unfilled, results=results)
         return self.results
 

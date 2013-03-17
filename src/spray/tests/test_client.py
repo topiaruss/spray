@@ -55,15 +55,39 @@ class TestAssembler(unittest.TestCase):
 # callbacks. But lets test the integrated Assembler results...
 
     def test_assembler_integration(self):
-        mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
+        mm = matrix.CSVActionMatrix(SPRAY_ROOT +
+          '/doc/tests/System Event-Action matrix - Matrix.csv')
         mm.update()
         ass = client.Assembler(mm, 'crafter.message.sent', {})
         ret = ass.assemble()
         ret = ret  # trick lint
-        self.assertEqual(ass.results, {'unfilled': set(['follower_email_address',
-          'username', 'crafter_email', 'project_name', 'sponsor_email_address',
-          'sponsor_first_name', 'copy admins_email_address', 'follower_first_name',
+        self.assertEqual(ass.results, {'unfilled':
+          set(['follower_email_address', 'username', 'crafter_email',
+          'project_name', 'sponsor_email_address', 'sponsor_first_name',
+          'copy admins_email_address', 'follower_first_name',
           'message']), 'results': {}, 'no_source': set([])})
         pass
 
+    def test_late_recipient_expansion_no_context(self):
+        mm = matrix.CSVActionMatrix(SPRAY_ROOT + '/doc/tests/System Event-Action matrix - Matrix.csv')
+        mm.update()
+        ass = client.Assembler(mm, 'sponsor.project.fundingtarget', {})
+        ret = ass.assemble()
+        ret = ret  # trick lint
+        self.maxDiff = None
+        self.assertEqual(ass.results,
+          {'unfilled': set(['follower_first_name', 'project_name',
+          'crafter_first_name', '_tweet_address', 'crafter_email_address',
+          'crafter_SMS_address', '_facebook post_address',
+          'crafter_last_name',
+          'project__followers_email_address',
+          'project__sponsors_email_address',
+          'sponsor_first_name',
+          'crafter_twitter_tag', 'project_url', 'days_until_completion_date',
+          'crafter_facebook post_address', 'institution']),
+          'results': {},
+          'no_source': set([])} )
+        pass
 
+    # See other tests up at the project level, where we have users
+    # and projects in context, and callbacks to fill the blanks.
