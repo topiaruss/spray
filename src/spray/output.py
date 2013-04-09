@@ -285,11 +285,19 @@ class HTMLEmailChannel(Channel):
           env, ptenv, row, data, self.tempreg)
         return send_params
 
-    def send(self, row, data, style=''):
-        #TODO: roll this into parent class - unify params
+    def individual_recipient_send(self, row, data, style=''):
         send_params = self.render(row, data, style)
         self.dest.mpart_send(**send_params)
         return self.dest
+
+    def send(self, row, data, style=''):
+        #TODO: roll this into parent class - unify params
+        print
+        print row
+        print data
+        accu = []
+        accu.extend(self.individual_recipient_send(row, data, style))
+        return accu
 
 
 class ChannelRegistry(object):
