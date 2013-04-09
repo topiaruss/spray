@@ -15,10 +15,19 @@ try:
     import settings
     STATIC_PATH = None
 except:
-    candidates = ['etc/spray.client.csv',
-      os.path.abspath('./../../../etc/spray.client.csv')]
-    STATIC_PATH = [p for p in candidates if os.path.exists(p)][0]
+    curdir = os.path.abspath('.')
+    while not curdir.endswith('spray'):
+        curdir = os.path.split(curdir)[0]
+        print 'going up a dir to %s' % curdir
+    candidates = ['scraft.spray.client.csv', 'spray.client.csv']
+    for c in candidates:
+        csvfile = os.path.join(curdir, 'etc', c)
+        print 'checking %s for csv file' % csvfile
+        if os.path.exists(csvfile):
+            STATIC_PATH = csvfile
+            break
 
+assert STATIC_PATH
 first_pass_only = [1]
 
 
@@ -29,6 +38,7 @@ def get_credentials(filename):
     if first_pass_only:
         print 'credentials source from: %s' % path
         del first_pass_only[0]
+
     with open(path, 'rb') as csvfile:
         rdr = csv.reader(csvfile, delimiter=',', quotechar='"')
 
@@ -38,8 +48,5 @@ def get_credentials(filename):
 
         #get the data
         data = rdr.next()
-
-        # let's keep it sane. Filename must match User Name, and that's that
-        assert data[0] == filename
 
         return (data[1:])

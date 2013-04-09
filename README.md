@@ -1,8 +1,8 @@
 Spray
 =====
 
-A python system for turning website events into 
-e-mail, SMS, or social actions.  
+A python system for turning website events into
+e-mail, SMS, or social actions.
 
 Development status : Pre-Alpha - contributions welcome.
 
@@ -20,7 +20,7 @@ If you have not developed on your system before, you may need to do the followin
 
 The first one of these commands will ask for your password.
 
-It's good development practice to use a virtual environment for your work. 
+It's good development practice to use a virtual environment for your work.
 The following commands will create a top level folder for sponsorcraft
 development, then a folder whose job is is to provide the virtualenv::
 
@@ -37,14 +37,14 @@ then clone it into the current directory on your development machine - something
 
     $ git clone https://github.com/Sponsorcraft/spray.git
 
-In case you are confused, there will now be ANOTHER directory called spray, in 
-the current directory that is ALSO called spray. 
+In case you are confused, there will now be ANOTHER directory called spray, in
+the current directory that is ALSO called spray.
 
 Assuming the clone worked, issue the following commands::
 
     $ cd spray
-    $ python bootstrap.py 
-    $ bin/buildout 
+    $ python bootstrap.py -v 1.7.0
+    $ bin/buildout
     $ bin/test
 
 Test will probably complain due to lack of credentials files, and a few test
@@ -54,9 +54,9 @@ You need to have access to an SQS queue, and an SES account on your AWS
 account. Then you can start sending  formatted messages, by running bin/sprayd
 in the background, and using
 
-    $ bin/client 
-    or 
-    $ bin/dryrun -t your.email@wherever.net 
+    $ bin/client
+    or
+    $ bin/dryrun -t your.email@wherever.net
 
 to send a single message to the queue.
 
@@ -68,10 +68,10 @@ in your account before sprayd tries to attach to it.
 Docs
 ----
 
-There's an argoUML file, spray/doc/spray.zargo, containing the 
+There's an argoUML file, spray/doc/spray.zargo, containing the
 design that we are working to.
 
-spray/doc/tests contains python doctests that outline how to 
+spray/doc/tests contains python doctests that outline how to
 use the code.
 
 TODO
