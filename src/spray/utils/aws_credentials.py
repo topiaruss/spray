@@ -27,7 +27,6 @@ except:
             STATIC_PATH = csvfile
             break
 
-assert STATIC_PATH
 first_pass_only = [1]
 
 
