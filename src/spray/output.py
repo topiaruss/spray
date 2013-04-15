@@ -282,56 +282,15 @@ class HTMLEmailChannel(Channel):
 
     def render(self, row, data, style=''):
         send_params = emailproc.build_multipart_mail(
-          env, ptenv, row, data, self.tempreg)
+                       env, ptenv, row, data, self.tempreg)
         return send_params
-
-    def individual_recipient_send(self, row, data, style=''):
-        send_params = self.render(row, data, style)
-        self.dest.mpart_send(**send_params)
-        return self.dest
-
-    def expand_recipients(self, recipient, data):
-        from spray import client
-        if not '__' in recipient:
-            yield data  # and we are done. Otherwise....
-        else:
-            # find callbacks that depend on the expandable data
-            related_keys = [k for k in client.CALLBACKS.keys()
-                            if k.startswith(recipient)]
-
-            # invoke each of those callbacks
-            related_data = {}
-            for rk in related_keys:
-                rv = data[rk]
-                related_data[rk] = client.CALLBACKS[rk](rv, front_end=False)
-
-            # iterate related data, replacing it.
-            #TODO - initially there will just be one key in the related_data
-            # dict, because we'll enforce that in the templates.
-            # Later we may add project__sponsors_first_name for instance
-            # so we'll have to re-render.
-            # for now, we just set the email address.
-            for k, items in related_data.items():
-                for v in items:
-                    snip_dominant_class = k.split('__')[1]
-                    match = snip_dominant_class.replace('s_', '_', 1)
-                    data[match] = v
-                    yield data
 
     def send(self, row, data, style=''):
         #TODO: roll this into parent class - unify params
-        # print
-        # print row
-        # print data
-
-        accu = []
-
-        for recipient in row['recipient']:
-            for data in self.expand_recipients(recipient, data):
-                print 'sending to %s' % data
-                results = self.individual_recipient_send(row, data, style)
-                accu.append(results)
-        return accu
+        print 'HTMLEMailChan sending to %s %s' % (row, data)
+        send_params = self.render(row, data, style)
+        self.dest.mpart_send(**send_params)
+        return self.dest
 
 
 class ChannelRegistry(object):

@@ -3,6 +3,7 @@ from spray import interface
 from spray import output
 from spray.utils import observer
 from zope.interface import implements
+import copy
 import datetime
 import logging
 import threading
@@ -122,10 +123,65 @@ class EmailAction(Action):
         # TODO: take the channel from the matrix, so we can switch test/prod
         self.channel = output.CHAN_REG.lookup('email')
 
+    def individual_recipient_send(self, row, data, style=''):
+        send_params = self.render(row, data, style)
+        self.dest.mpart_send(**send_params)
+        return self.dest
+
+    def expand_recipients(self, row, data):
+        from spray import client
+        for recipient in (r for r in row['recipient']):
+            if not '__' in recipient:
+                yield row, data  # and we are done. Otherwise....
+            else:
+                # recipient will be something like 'project__followers'
+                data = copy.deepcopy(data)
+
+                # no need for the old body
+                data['body'] = None
+
+                # get a list of callbacks that depend on the expandable data
+                # something like 'project__followers_email_address'
+                related_keys = [k for k in client.CALLBACKS.keys()
+                                if k.startswith(recipient)]
+
+                # invoke each of those callbacks in backend mode, to expand
+                # them into ordered sets of the subject values, passing
+                # in the value from data that was returned by the same client
+                # in front-end mode when running in the client space
+                related_data = {}
+                for rk in related_keys:
+                    rv = data[rk]  # this value is a primary key to the dominant c.
+                    related_data[rk] = client.CALLBACKS[rk](rv, front_end=False)
+
+                # so now related_data will look like:
+                # { project__followers_email_address: ['a@a.com', 'b@b.com'] }
+                # iterate the lists in parallel , replacing
+                # subordinate fields such as follower_first_name
+
+                #TODO - initially there will just be one key in the related_data
+                # dict, because we'll enforce that in the templates.
+                # Later we may add project__sponsors_first_name for instance
+                # and this will be hard.
+
+                # for now, we just set the email address.
+                for k, items in related_data.items():
+                    for v in items:
+                        snip_dominant_class = k.split('__')[1]
+                        # make the plural singular
+                        match = snip_dominant_class.replace('s_', '_', 1)
+                        data[match] = v
+                        print '*' * 20
+                        print data
+                        yield row, data
+
     def handle(self):
         self.notify('handle')
+        self.accu = []
         try:
-            self.dest = self.channel.send(self.row, self.data)
+            for erow, edata in self.expand_recipients(self.row, self.data):
+                self.dest = self.channel.send(erow, edata)
+                self.accu.append(self.dest)
         except Exception as e:
             import traceback
             tb = traceback.format_exc(8)  # 8 lines
