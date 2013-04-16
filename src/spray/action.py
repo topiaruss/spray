@@ -146,6 +146,12 @@ class EmailAction(Action):
                 # recipient will be something like 'project__followers'
                 data = copy.deepcopy(data)
 
+                # purge any other email addresses to prevent dupes
+                for k in data.keys():
+                    if k.endswith('_email_address') and '__' not in k:
+                        self.notify('flush', k=k, v=data[k], recip=recipient)
+                        del data[k]
+
                 # no need for the old body
                 data['body'] = None
 
