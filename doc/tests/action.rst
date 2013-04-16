@@ -62,7 +62,7 @@ controlled by the Spreadsheet. A step-by-step processor is just a processor
 that needs to be told to process a new event. This is useful for testing.
 We create this kind of processor by setting running=False on creation.
 
-  >>> the_processor = action.Processor('send', mm, running=False, tracing=True)
+  >>> the_processor = action.Processor('send', mm, running=False)
   >>> the_processor.tracing
   True
 

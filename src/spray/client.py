@@ -426,7 +426,7 @@ class ProcessBox(object):
             config = sprayd.ConfWrap(sio)
         self.config = config
         self.tracing = kwargs.get('tracing')
-        self.proc = sprayd.processor_factory(config, matrix, tracing=self.tracing)
+        self.proc = sprayd.processor_factory(config, matrix)
 
     def grind(self):
         # this is a kludge while we hope that processing continues
@@ -438,7 +438,7 @@ class ProcessBox(object):
         self.proc.stop()
 
     def get_evidence(self):
-        "returns [action][replica]{row:row, traffic:traffic}"
+        "returns [step][action][replica]{row:row, traffic:traffic}"
         entrails = []
         # Break gracefuly if no actions have been run
         try:

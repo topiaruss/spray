@@ -161,7 +161,9 @@ class  FakeSES(object ):
         self.output.append(dict(args=args, kwargs=kwargs))
 
     def get_traffic(self):
-        return self.output
+        out = self.output
+        self.output = []
+        return out
 
 
 class AmazonSESDestination(Destination):
@@ -205,6 +207,9 @@ class AmazonSESDestination(Destination):
             # override any, override all
             kw.update(self.overrides)
         self.conn.send_email(**kw)
+
+    def get_traffic(self):
+        return self.conn.get_traffic()
 
 AmazonSESDestination.register()
 
@@ -287,7 +292,7 @@ class HTMLEmailChannel(Channel):
 
     def send(self, row, data, style=''):
         #TODO: roll this into parent class - unify params
-        print 'HTMLEMailChan sending to %s %s' % (row, data)
+        # print 'HTMLEMailChan sending to %s %s' % (row, data)
         send_params = self.render(row, data, style)
         self.dest.mpart_send(**send_params)
         return self.dest
