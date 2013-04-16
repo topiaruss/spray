@@ -47,6 +47,11 @@ class Action(observer.Observable):
         self.data = self.event.data
         self.setup_channel(self.row)
 
+        # any true state, or a param [] ends up tracing
+        self.tracing = kwargs.get('tracing')
+        if self.tracing:
+            self.tracing = []
+
     def setup_channel(self, channel):
         pass
 
@@ -72,8 +77,10 @@ class DummyEmailAction(Action):
     def __init__(self, **kwargs):
         super(DummyEmailAction, self).__init__(**kwargs)
 
-    def handle(self):
+    def handle(self, tracing=False):
         self.notify('start-handle')
+        if tracing and not self.tracing:
+            self.tracing = []
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         selection = {}
@@ -103,7 +110,9 @@ class DummySMSAction(Action):
         pp.pprint(selection)
         pp.pprint(self.data)
 
-    def handle(self):
+    def handle(self, tracing=False):
+        if tracing and not self.tracing:
+            self.tracing = []
         self.notify('start-handle')
         #self._dump()
         self.notify('end-handle')
@@ -175,13 +184,16 @@ class EmailAction(Action):
                         print data
                         yield row, data
 
-    def handle(self):
+    def handle(self, tracing=None):
+        if tracing and not self.tracing:
+            self.tracing = []
         self.notify('handle')
-        self.accu = []
         try:
             for erow, edata in self.expand_recipients(self.row, self.data):
                 self.dest = self.channel.send(erow, edata)
-                self.accu.append(self.dest)
+                if self.tracing is not None:
+                    self.tracing.append(dict(traffic=self.dest.get_traffic(),
+                        row=erow))
         except Exception as e:
             import traceback
             tb = traceback.format_exc(8)  # 8 lines
@@ -190,7 +202,7 @@ class EmailAction(Action):
         self.notify('handle-end', data=self.data)
         # returning the outcome of the action. Used for testing
         # TODO This behaviour must spread to the other actions!!
-        return self
+        return self.tracing
 
 
 EmailAction.register()
@@ -201,15 +213,17 @@ class Processor(object):
     Pulls events from its queue, looks them up, handles them.
     """
 
-    def __init__(self, queue, matrix, running=True, max_time=None):
+    def __init__(self, queue, matrix, running=True, tracing=False, max_time=None):
         if isinstance(queue, str):
             our_hub = hub.Hub()
             self.queue = our_hub.get_or_create(queue)
         else:
             self.queue = queue
         self.matrix = matrix
+        self.tracing = tracing
         self.expire = max_time and (datetime.datetime.now() + max_time) or None
         self.tt = threading.Thread(target=self.runner)
+        self.entrails = []
         if running:
             self.start()
 
@@ -230,7 +244,10 @@ class Processor(object):
         self.notify('event-got')
         try:
             actions = self.matrix.get_actions(event)
-            self.entrails = [a.handle() for a in actions]
+            entrails = [a.handle(tracing=self.tracing) for a in actions]
+            if entrails:
+                print 'was %s ++ %s' % (len(self.entrails), len(entrails))
+                self.entrails.append(entrails)
         except Exception as e:
             self.notify('event-exception', exception=e, event=event)
         finally:

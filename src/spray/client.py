@@ -425,7 +425,8 @@ class ProcessBox(object):
             sio = StringIO(SPRAYUI_CONFIG)
             config = sprayd.ConfWrap(sio)
         self.config = config
-        self.proc = sprayd.processor_factory(config, matrix)
+        self.tracing = kwargs.get('tracing')
+        self.proc = sprayd.processor_factory(config, matrix, tracing=self.tracing)
 
     def grind(self):
         # this is a kludge while we hope that processing continues
@@ -437,13 +438,11 @@ class ProcessBox(object):
         self.proc.stop()
 
     def get_evidence(self):
-        evidence = []
+        "returns [action][replica]{row:row, traffic:traffic}"
+        entrails = []
         # Break gracefuly if no actions have been run
         try:
             entrails = self.proc.entrails
         except AttributeError:
-            return []
-        for e in entrails:
-            traffic = e.channel.dest.get_traffic()
-            evidence.append((e.row, traffic))
-        return evidence
+            pass
+        return entrails

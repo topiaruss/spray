@@ -110,7 +110,7 @@ def app(testing=False):
     config_app(config)
 
 
-def processor_factory(config, aematrix=None):
+def processor_factory(config, aematrix=None, tracing=False):
     """initially for the preview functionality in sprayUI.
     This will configure a working processor, with all necessary deps,
     and return the contents. It will eventually replace config_app, above."""
@@ -152,4 +152,4 @@ def processor_factory(config, aematrix=None):
     except:
         max_time = None
 
-    return action.Processor(queue, mm, max_time=max_time)
+    return action.Processor(queue, mm, max_time=max_time, tracing=tracing)
