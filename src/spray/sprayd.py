@@ -62,9 +62,9 @@ def config_app(config):
     matrix_type = config.get('ActionMatrix', 'type')
     kw = dict(config.items('ActionMatrix')[1:])
     kw.update(dict(credentials=matrix.Credentials()))
+    matrix_modes = config.get('ActionMatrix', 'mode_list').split()
     mm = matrix.matrixFactory(matrix_type, kw)
-    mm.update()
-    #print "Matrix : %s" % mm.provenance
+    mm.update(modes=matrix_modes)
 
     def get_override(config, k):
         v = config.get('RecipientOverride', k)
