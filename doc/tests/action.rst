@@ -82,7 +82,7 @@ And do a single step on the processor to see what it does.
     {   'action_type': u'email',
         'event_id': u'system.project.drafted',
         'recipient': u'crafter'}
-    {   'email': 'russf@topia.com', 'name': 'Russ Ferriday'}
+    {   'email': 'russf@topia.com', 'name': 'Russ Ferriday', 'site_id': 1}
 
 
 GoogleActionMatrix
@@ -138,7 +138,7 @@ as the CSV matrix
     {   'action_type': 'email',
         'event_id': 'system.project.drafted',
         'recipient': 'crafter'}
-    {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach'}
+    {   'email': 'kai@iqpp.de', 'name': 'Kai Diefenbach', 'site_id': 1}
 
 
 

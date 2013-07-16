@@ -109,7 +109,8 @@ Now let's Mock the inside of src, the bit that sends over the wire...
   >>> from mock import MagicMock
   >>> src._send = MagicMock()
   >>> status = src.send('system.project.drafted')
-  >>> src._send.assert_called_once_with('system.project.drafted', {})
+  >>> src._send.assert_called_once_with('system.project.drafted',
+  ...     {'site_id': 1})
 
 No magic so far. Without the mock, we would send the event_id, but nothing else.
 This is not good for the spray backend, but it will just have to take what it
@@ -147,9 +148,9 @@ Define Callbacks!!::
 
 what did we just cause to happen?
 
-  >>> sorted(client.CALLBACKS.items()) 
-  [('crafter_email_address', <function crafter_email_address_callback at <SOME ADDRESS>>), 
-   ('crafter_first_name', <function crafter_first_name_callback at <SOME ADDRESS>>), 
+  >>> sorted(client.CALLBACKS.items())
+  [('crafter_email_address', <function crafter_email_address_callback at <SOME ADDRESS>>),
+   ('crafter_first_name', <function crafter_first_name_callback at <SOME ADDRESS>>),
    ('project_preview_url', <function project_preview_url_callback at <SOME ADDRESS>>)]
 
 Ah. I get it.  So now, if I make the same call again, giving some context...
@@ -158,8 +159,8 @@ Ah. I get it.  So now, if I make the same call again, giving some context...
   >>> project=object()
   >>> context = dict(project=project)
   >>> status = src.send('system.project.drafted', context)
-  >>> expect = dict(project_preview_url='sillyproject')
-  >>> src._send.assert_called_once_with('system.project.drafted', expect)  
+  >>> expect = dict(project_preview_url='sillyproject', site_id=1)
+  >>> src._send.assert_called_once_with('system.project.drafted', expect)
   >>> sorted(status['unfilled'])
   []
   >>> sorted(status['no_source'])
@@ -177,8 +178,9 @@ My god, that's clever.  And if I do it with a full set of context?
   >>> context = dict(project=project, crafter=crafter)
   >>> status = src.send('system.project.drafted', context)
   >>> expect = dict(crafter_email_address='crafty@nevernever.never',
-  ... crafter_first_name='crafty', project_preview_url='sillyproject')
-  >>> src._send.assert_called_once_with('system.project.drafted', expect)  
+  ... crafter_first_name='crafty', project_preview_url='sillyproject',
+  ... site_id=1)
+  >>> src._send.assert_called_once_with('system.project.drafted', expect)
   >>> sorted(status['unfilled'])
   []
 
@@ -198,8 +200,9 @@ kilroy are just printed as evidence that the calls were made.)
   kilroy
 
   >>> expect = dict(crafter_email_address='crafty@nevernever.never',
-  ... crafter_first_name='crafty', project_preview_url='sillyproject')
-  >>> src._send.assert_called_once_with('system.project.drafted', expect)  
+  ... crafter_first_name='crafty', project_preview_url='sillyproject',
+  ... site_id=1)
+  >>> src._send.assert_called_once_with('system.project.drafted', expect)
   >>> sorted(status['unfilled'])
   []
 

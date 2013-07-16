@@ -89,7 +89,7 @@ class TestTemplateRegistration(unittest.TestCase):
         tr_instance = output.AVAILABLE_TEMPLATE_REGISTRIES['email']
         assert tr_instance.__class__.__name__ == "SimpleTemplateRegistry"
 
-TEMPL_DIR = os.path.join(SPRAY_ROOT, 'templates/email')
+TEMPL_DIR = os.path.join(SPRAY_ROOT, 'templates')
 
 class TestFSBasedTemplateReg(unittest.TestCase):
 
@@ -106,6 +106,12 @@ class TestFSBasedTemplateReg(unittest.TestCase):
         from jinja2 import Template
         assert isinstance(default, Template)
 
+    def _test_lookup_explicit_SC_template(self):
+        tt = output.FSBasedTemplateRegistry(templates_dir=TEMPL_DIR)
+        import pdb; pdb.set_trace()
+        default = tt.lookup('', site='sponsorcraft_com')
+        from jinja2 import Template
+        assert isinstance(default, Template)
 
 class TestChannel(unittest.TestCase):
 

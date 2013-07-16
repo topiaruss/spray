@@ -9,6 +9,12 @@ import inspect
 import logging
 import time
 
+try:
+    from django.config import settings
+    SITE_ID = settings.SITE_ID
+except:
+    SITE_ID = 1
+
 # Note: some imports are deferred for conditional loading
 
 LOG = logging.getLogger(__name__)
@@ -182,6 +188,7 @@ class Source(object):
             context = assembler.results['results']
             ret = assembler.results
 
+        context['site_id'] = SITE_ID
         self._send(event_id, context)
         return ret
 

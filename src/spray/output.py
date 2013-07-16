@@ -1,4 +1,5 @@
 from boto import ses
+from collections import defaultdict
 from spray import emailproc
 from spray import interface
 from spray import jinjaenv
@@ -26,34 +27,36 @@ AVAILABLE_TEMPLATE_REGISTRIES = {}
 
 
 class SimpleTemplateRegistry(object):
+    "registry by site, with the default site being 'sponsorcraft_com'"
+    # {site1: {style1: 'template blah'}}
 
     def __init__(self, **kw):
         super(SimpleTemplateRegistry, self).__init__()
-        self.reg = {}
+        self.reg = defaultdict(dict)
 
-    def _process_and_store(self, style, text):
+    def _process_and_store(self, style, text, site='sponsorcraft_com'):
         template = env.from_string(text)
-        self.reg[style] = template
+        self.reg[site][style] = template
 
     @classmethod
     def make_available(cls, medium, **kwargs):
         AVAILABLE_TEMPLATE_REGISTRIES[medium] = cls(**kwargs)
 
-    def register(self, style, text):
+    def register(self, style, text, site='sponsorcraft_com'):
         "register a template in this registry"
-        self._process_and_store(style, text)
+        self._process_and_store(style, text, site)
 
-    def lookup(self, style):
+    def lookup(self, style, site='sponsorcraft_com'):
         """returns a processed jinja2 style Template ready for render()"""
-        return self.reg[style]
+        return self.reg[site][style]
 
-    def render(self, data, style=''):
+    def render(self, data, style='', site='sponsorcraft_com'):
         """convenience method that does the lookup and render in one step"""
         try:
-            template = self.lookup(style)
+            template = self.lookup(style, site)
         except KeyError:
             LOG.exception("missing template. Fallback to default")
-            template = self.lookup('')
+            template = self.lookup('', site)
         return template.render(data)
 
 
@@ -68,6 +71,9 @@ class FSBasedTemplateRegistry(SimpleTemplateRegistry):
     def __init__(self, **kw):
         super(FSBasedTemplateRegistry, self).__init__(**kw)
         try:
+            # this is becoming the directory for sites, which then
+            # contain the original templates, but the name does not change
+            # in the settings file, so I'm not going to rename it.
             self.dirpath = kw['templates_dir']
         except KeyError as e:
             import sys
@@ -77,18 +83,21 @@ class FSBasedTemplateRegistry(SimpleTemplateRegistry):
         self.update()
 
     def update(self):
-        templ_names = genfind.gen_find('*', self.dirpath)
-        templ_files = genopen.gen_open(templ_names)
-        for f in templ_files:
-            style = os.path.basename(f.name).split('.')[0]
-            if style == 'default':
-                style = ''
-            self._process_and_store(style, f.read())
+        site_names = genfind.gen_find('*', self.dirpath)
+        for site_name in site_names:
+            site_path = os.path.join(self.dirpath, site_name)
+            templ_names = genfind.gen_find('*', site_path)
+            templ_files = genopen.gen_open(templ_names)
+            for f in templ_files:
+                style = os.path.basename(f.name).split('.')[0]
+                if style == 'default':
+                    style = ''
+                self._process_and_store(style, f.read())
 
 
 DEFAULT_TEMPLATE_REGISTRY = SimpleTemplateRegistry()
 SimpleTemplateRegistry.make_available('semail')
-templ_dir = os.path.join(SPRAY_ROOT, 'templates/email')
+templ_dir = os.path.join(SPRAY_ROOT, 'templates')
 FSBasedTemplateRegistry.make_available('email', templates_dir=templ_dir)
 
 
