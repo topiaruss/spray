@@ -83,8 +83,10 @@ class FSBasedTemplateRegistry(SimpleTemplateRegistry):
         self.update()
 
     def update(self):
-        site_names = genfind.gen_find('*', self.dirpath)
-        for site_name in site_names:
+        names = [
+            o for o in os.listdir(self.dirpath) if
+            os.path.isdir(os.path.join(self.dirpath, o))]
+        for site_name in names:
             site_path = os.path.join(self.dirpath, site_name)
             templ_names = genfind.gen_find('*', site_path)
             templ_files = genopen.gen_open(templ_names)
@@ -92,7 +94,7 @@ class FSBasedTemplateRegistry(SimpleTemplateRegistry):
                 style = os.path.basename(f.name).split('.')[0]
                 if style == 'default':
                     style = ''
-                self._process_and_store(style, f.read())
+                self._process_and_store(style, f.read(), site=site_name)
 
 
 DEFAULT_TEMPLATE_REGISTRY = SimpleTemplateRegistry()

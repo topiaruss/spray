@@ -106,12 +106,27 @@ class TestFSBasedTemplateReg(unittest.TestCase):
         from jinja2 import Template
         assert isinstance(default, Template)
 
-    def _test_lookup_explicit_SC_template(self):
+    def test_lookup_explicit_sc_template(self):
         tt = output.FSBasedTemplateRegistry(templates_dir=TEMPL_DIR)
-        import pdb; pdb.set_trace()
         default = tt.lookup('', site='sponsorcraft_com')
         from jinja2 import Template
         assert isinstance(default, Template)
+        self.assertIn('<meta site-name="sponsorcraft_com">', default.render())
+
+    def test_lookup_explicit_sc_internal_template(self):
+        tt = output.FSBasedTemplateRegistry(templates_dir=TEMPL_DIR)
+        default = tt.lookup('internal', site='sponsorcraft_com')
+        from jinja2 import Template
+        assert isinstance(default, Template)
+        self.assertIn('<meta site-name="sponsorcraft_com">', default.render())
+
+    def test_lookup_explicit_soton_template(self):
+        tt = output.FSBasedTemplateRegistry(templates_dir=TEMPL_DIR)
+        default = tt.lookup('', site='soton_ac_uk')
+        from jinja2 import Template
+        assert isinstance(default, Template)
+        self.assertIn('<meta site-name="soton_ac_uk">', default.render())
+
 
 class TestChannel(unittest.TestCase):
 
