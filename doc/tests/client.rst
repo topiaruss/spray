@@ -1,7 +1,7 @@
 client tests
 ============
 
-Let's create the hub that wraps our messaging service, and hides the 
+Let's create the hub that wraps our messaging service, and hides the
 details of making and finding queues.
 
   >>> from spray import hub
@@ -13,8 +13,8 @@ about such details for us.
 
   >>> send_queue = ourhub.get_or_create("send")
 
-Now that we have a queue we can associate it with a new source.   
-The source from then onwards is our connection to the whole 
+Now that we have a queue we can associate it with a new source.
+The source from then onwards is our connection to the whole
 messaging system.
 
   >>> from spray import client
@@ -55,9 +55,9 @@ Providing Data
 --------------
 
 In our csv file we use for tests (btw, this is intended to become our production
-matrix, so we are not hiding anything...), called 
+matrix, so we are not hiding anything...), called
 
- System Event-Action matrix - Matrix.csv, 
+ System Event-Action matrix - Matrix.csv,
 
 there is the event_id 'system.project.drafted'. To send that event, I need
 to provide the following data::
@@ -66,19 +66,19 @@ to provide the following data::
    project_preview_url
    crafter_email_address
 
-This is an easy case. Later, we'll need to provide perhaps eight fields, and 
+This is an easy case. Later, we'll need to provide perhaps eight fields, and
 that will become quite onerous. Once an event is running and a message is
 being sent, if the marketing deparment decides to add a new field to that
 message, then the code that's generating events will be one field short
-of its data.  Two points here: 1. it is essential that the message 
+of its data.  Two points here: 1. it is essential that the message
 building not fail if a field is missing.  2. it would be nice if in most
-cases, adding a field did not cause any more developer work, and 
-in the extreme case, that we were told about any field that could not 
-be filled. 
+cases, adding a field did not cause any more developer work, and
+in the extreme case, that we were told about any field that could not
+be filled.
 
 This Section describes how we plan to do all that.
 
-The basic notion is that we can pass a bundle of context to all top-level 
+The basic notion is that we can pass a bundle of context to all top-level
 event-sending calls. What is in this bundle will depend on the context
 of the call. If we are logged in we can pass either the user id, or
 the user object, if we have it to hand.  If we are on a project page
@@ -89,7 +89,7 @@ It will be up to the top-level event to turn the information it has into
 a field value, if it can.  How can it magically do this? Easy! Read on.
 
 
-First let's see what field names are in the message for the event.  
+First let's see what field names are in the message for the event.
 We won't normally use this at runtime, but it's handy for development
 and this call will be used internally by the client system.
 
@@ -114,16 +114,16 @@ Now let's Mock the inside of src, the bit that sends over the wire...
 
 No magic so far. Without the mock, we would send the event_id, but nothing else.
 This is not good for the spray backend, but it will just have to take what it
-gets. 
+gets.
 
 Let's see what's in status
-  
+
   >>> sorted(status['unfilled'])
   ['crafter_email_address', 'crafter_first_name', 'project_preview_url']
 
 So, helpfully, the send method has told us that it was unable to fill three fields.
 
-What do we need to do to help those fields get filled? 
+What do we need to do to help those fields get filled?
 
 Define Callbacks!!::
 
@@ -169,12 +169,12 @@ Ah. I get it.  So now, if I make the same call again, giving some context...
 Status is telling me that it had no source for the crafter.
 
 Oh, so if sender is given a callback, but the source for that callback to do its
-job is not available, you tell me the name of the source. 
+job is not available, you tell me the name of the source.
 
 My god, that's clever.  And if I do it with a full set of context?
 
   >>> src._send = MagicMock()
-  >>> project, crafter = object(), object()  
+  >>> project, crafter = object(), object()
   >>> context = dict(project=project, crafter=crafter)
   >>> status = src.send('system.project.drafted', context)
   >>> expect = dict(crafter_email_address='crafty@nevernever.never',
@@ -209,7 +209,7 @@ kilroy are just printed as evidence that the calls were made.)
   >>> sorted(status['no_source'])
   []
 
-Now we can fill out all the callbacks for the client, and ensure we pass all relevant 
+Now we can fill out all the callbacks for the client, and ensure we pass all relevant
 context when we send events, and we are done ;)
 
 Cool! Ship it!
