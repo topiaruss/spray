@@ -63,8 +63,8 @@ that needs to be told to process a new event. This is useful for testing.
 We create this kind of processor by setting running=False on creation.
 
   >>> the_processor = action.Processor('send', mm, running=False)
-  >>> the_processor.tracing
-  True
+  >>> the_processor
+  <spray.action.Processor object at ...>
 
 Now let's create a dummy source named 'fake_events', 'cause that's all it does.
 It will explicitly use the 'send' queue.
