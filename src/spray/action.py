@@ -188,8 +188,13 @@ class EmailAction(Action):
         try:
             for erow, edata in self.expand_recipients(self.row, self.data):
                 self.dest = self.channel.send(erow, edata)
-                self.tracing.append(dict(traffic=self.dest.get_traffic(),
-                                    row=erow))
+                try:
+                    traffic = self.dest.get_traffic()
+                    self.tracing.append(dict(traffic=traffic, row=erow))
+                except:
+                    # we get here on production due to SESConnection  missing
+                    # get_traffic()
+                    pass
         except Exception as e:
             import traceback
             tb = traceback.format_exc(8)  # 8 lines
