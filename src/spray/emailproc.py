@@ -21,7 +21,7 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     toa = set(data.get('to', tuple()))
 
     # accumulate all the recip types, if present
-    for recip in 'crafter sponsor follower helper'.split():
+    for recip in 'crafter sponsor follower helper sponsorcraft'.split():
         recip = data.get('%s_email_address' % recip)
         if recip:
             toa = toa.union([recip])

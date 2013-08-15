@@ -202,21 +202,35 @@ class AmazonSESDestination(Destination):
             time.sleep(0.25)  # SES rate limit 5Hz
 
     def mpart_send(self, **kw):
-        if self.overrides and any(self.overrides.values()):
+        overrides = [i for i in self.overrides.items() if i[1] is not None]
+        if overrides and any(overrides):
+            LOG.debug("overrides active. Old: %s, New: %s" % (kw, overrides))
             hdr = """
             [[  ** JUST FOR DEBUG **
-            Some of the original addresses were overridden. Original values:
+            Some of the original addresses were overridden.
+
+            Original values:
             to: %s
             cc: %s
             bcc: %s
+
+            New values:
+            to: %s
+            cc: %s
+            bcc: %s
+
             Original Text message starts after the blank line]]\n\n%s""" %\
-              (kw.get('to_addresses', ''),
-              kw.get('cc_addresses', ''),
-              kw.get('bcc_addresses', ''),
+              (kw.get('to_addresses'),
+              kw.get('cc_addresses'),
+              kw.get('bcc_addresses'),
+
+              overrides.get('to_addresses'),
+              overrides.get('cc_addresses'),
+              overrides.get('bcc_addresses'),
+
               kw.get('text_body', ''))
             kw['text_body'] = hdr
-            # override any, override all
-            kw.update(self.overrides)
+            kw.update(overrides)
         self.conn.send_email(**kw)
 
     def get_traffic(self):

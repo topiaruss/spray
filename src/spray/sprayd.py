@@ -68,7 +68,7 @@ def config_app(config):
 
     def get_override(config, k):
         v = config.get('RecipientOverride', k)
-        return v and v.split() or ()
+        return v and v.split() or None
 
     overrides = dict(
         to_addresses=get_override(config, 'to_addresses'),
