@@ -202,8 +202,10 @@ class AmazonSESDestination(Destination):
             time.sleep(0.25)  # SES rate limit 5Hz
 
     def mpart_send(self, **kw):
-        overrides = [i for i in self.overrides.items() if i[1] is not None]
-        if overrides and any(overrides):
+        overrides = self.overrides and self.overrides.copy() or {}
+        # clear any None values
+        [overrides.pop(k) for k,v in overrides.items() if v is None]
+        if any(overrides):
             LOG.debug("overrides active. Old: %s, New: %s" % (kw, overrides))
             hdr = """
             [[  ** JUST FOR DEBUG **
