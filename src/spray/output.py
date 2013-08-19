@@ -320,6 +320,8 @@ class HTMLEmailChannel(Channel):
     def send(self, row, data, style=''):
         #TODO: roll this into parent class - unify params
         # print 'HTMLEMailChan sending to %s %s' % (row, data)
+        data['event_id'] = row['event_id']
+        data['site_name'] = row['site_name']
         send_params = self.render(row, data, style)
         self.dest.mpart_send(**send_params)
         return self.dest
