@@ -40,7 +40,7 @@ border-radius: 6px;">
 
 def buttonformat(uu,
   text='',
-  bcolour='#29ABE2',
+  bcolour='#000',
   fcolour='#fff',
   font='arial, sans-serif'):
     "Makes a nice phat button in the middle of the page"
@@ -56,7 +56,7 @@ def buttonformat_to_plain(uu, text='', bcolour='', fcolour='', font=''):
 
 
 def featuretext(text,
-  colour='#29abe2',
+  colour='#000',
   font='arial, sans-serif',
   fontsize='24px',
   formatting='strong'):
