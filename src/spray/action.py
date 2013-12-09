@@ -149,7 +149,7 @@ class EmailAction(Action):
                 data['body'] = None
 
                 # get a list of callbacks that depend on the expandable data
-                # something like 'project__followers_email_address'
+                # e.g. 'project__followers_email_address'
                 related_keys = [k for k in client.CALLBACKS.keys()
                                 if k.startswith(recipient)]
 
@@ -162,25 +162,13 @@ class EmailAction(Action):
                     rv = data[rk]  # this value is a primary key to the dominant c.
                     related_data[rk] = client.CALLBACKS[rk](rv, front_end=False)
 
-                # so now related_data will look like:
-                # { project__followers_email_address: ['a@a.com', 'b@b.com'] }
-                # iterate the lists in parallel , replacing
-                # subordinate fields such as follower_first_name
-
-                #TODO - initially there will just be one key in the related_data
-                # dict, because we'll enforce that in the templates.
-                # Later we may add project__sponsors_first_name for instance
-                # and this will be hard.
-
-                # for now, we just set the email address.
+                # Convert to singular version of template tag
                 for k, items in related_data.items():
                     for v in items:
                         snip_dominant_class = k.split('__')[1]
                         # make the plural singular
                         match = snip_dominant_class.replace('s_', '_', 1)
                         data[match] = v
-                        # print '*' * 20
-                        # print data
                         yield row, data
 
     def handle(self):
