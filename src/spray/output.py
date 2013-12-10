@@ -313,15 +313,20 @@ class HTMLEmailChannel(Channel):
         super(HTMLEmailChannel, self).__init__(**kw)
 
     def render(self, row, data, style=''):
-        send_params = emailproc.build_multipart_mail(
-                       env, ptenv, row, data, self.tempreg)
+        send_params = emailproc.build_multipart_mail(env, ptenv, row, data, self.tempreg)
         return send_params
 
     def send(self, row, data, style=''):
         #TODO: roll this into parent class - unify params
         # print 'HTMLEMailChan sending to %s %s' % (row, data)
         data['event_id'] = row['event_id']
-        data['site_name'] = row['site_name']
+
+        try:
+            from django.contrib.sites.models import Site
+            data['site_name'] = Site.objects.get(id=data['site_id']).folder_name
+        except KeyError:
+            data['site_name'] = row['site_name']
+
         send_params = self.render(row, data, style)
         self.dest.mpart_send(**send_params)
         return self.dest
@@ -346,8 +351,7 @@ CHAN_REG = ChannelRegistry()
 
 # TODO: replace hardwired channels with sprayd.cfg channels
 # in the meantime, sprayd.py switches the destination to AmazonSESDestination
-email_channel = Channel(medium='email',
-                        destination=DESTINATION_REGISTRY['DummyDestination']())
+email_channel = Channel(medium='email', destination=DESTINATION_REGISTRY['DummyDestination']())
 CHAN_REG.register(email_channel)
 
 # TEST

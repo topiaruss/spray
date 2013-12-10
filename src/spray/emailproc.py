@@ -47,7 +47,8 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     body = template.render(data)
     data['body'] = body
     style = row.get('body_fmt', '')
-    params['html_body'] = tempreg.render(data, style)
+    site = data.get('site_name', '')
+    params['html_body'] = tempreg.render(data, style, site)
 
     # text version
     template = ptenv.from_string('\n'.join(lines))  # TODO: Cache?
