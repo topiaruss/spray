@@ -141,6 +141,9 @@ class Assembler(object):
         # for u in whip_these_out:
         #     unfilled.remove(u)
 
+        if not context.has_key('site_id'):
+            context['site_id'] = SITE_ID  # from import above (should probably remove)
+        results['site_id'] = context['site_id']
         self.results = dict(no_source=no_source, unfilled=unfilled, results=results)
         return self.results
 
@@ -188,7 +191,9 @@ class Source(object):
             context = assembler.results['results']
             ret = assembler.results
 
-        context['site_id'] = SITE_ID
+        if not context.has_key('site_id'):
+            context['site_id'] = SITE_ID
+
         self._send(event_id, context)
         return ret
 
