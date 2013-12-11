@@ -110,6 +110,11 @@ class Assembler(object):
         # the tokens we need for this event
         tokens = self.get_event_field_tokens(event_id)
 
+        fields_to_expand = {'follower_first_name': 'project__followers_first_name'}
+        for key, val in fields_to_expand.items():
+            if key in tokens:
+                tokens.append(val)
+
         # tokens we know we can't do -- no callbacks for them
         unfilled = set(tokens).difference(set(CALLBACKS.keys()))
 
@@ -224,11 +229,10 @@ class ClientApp(object):
 
     def config_app(self, config):
         me = Source('me', 'testSQS')
-        crafter_data = dict(crafter_first_name='Russ', name="Russ Ferriday",
-          to=('russf@topia.com',))
-        me.send("admins.payment.processed", crafter_data)
-        #me.send("system.project.drafted", crafter_data)
-        print "sent"
+        event_id = "sponsor.project.fundingtarget"
+        project_data = dict(user_first_name='Test User', name="Testing", to=('pf@sponsorcraft.com',))
+        me.send(event_id, project_data)
+        print "sent %s" % event_id
 
     def __call__(self):
         "simple command line action"
