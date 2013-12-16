@@ -46,12 +46,16 @@ class SimpleTemplateRegistry(object):
         "register a template in this registry"
         self._process_and_store(style, text, site)
 
-    def lookup(self, style, site='sponsorcraft_com'):
+    def lookup(self, style, site=None):
         """returns a processed jinja2 style Template ready for render()"""
+        if not site:  #accommodate '' and None
+            site = 'sponsorcraft_com'
         return self.reg[site][style]
 
-    def render(self, data, style='', site='sponsorcraft_com'):
+    def render(self, data, style='', site=None):
         """convenience method that does the lookup and render in one step"""
+        if not site:  #accomodate '' and None
+            site = 'sponsorcraft_com'
         try:
             template = self.lookup(style, site)
         except KeyError:
