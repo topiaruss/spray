@@ -20,11 +20,11 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
 
     toa = set(data.get('to', tuple()))
 
-    # accumulate all the recip types, if present
-    for recip in 'crafter sponsor follower helper sponsorcraft'.split():
-        recip = data.get('%s_email_address' % recip)
-        if recip:
-            toa = toa.union([recip])
+    # accumulate all the recipient types, if present
+    for recipient in row['recipient']:
+        recipient = data.get('%s_email_address' % recipient)
+        if recipient:
+            toa = toa.union([recipient])
 
     params['to_addresses'] = list(toa)
 
