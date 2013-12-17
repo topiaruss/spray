@@ -28,7 +28,9 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
             recipient = is_plural.group('singular')
         recipient = data.get('%s_email_address' % recipient)
         if recipient:
-            toa = toa.union([recipient])
+            if isinstance(recipient, str):
+                recipient = [recipient]
+            toa = toa.union(recipient)
 
     params['to_addresses'] = list(toa)
 
