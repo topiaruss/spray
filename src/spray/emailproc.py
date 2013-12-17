@@ -1,5 +1,6 @@
 # emailproc.py - bits and pieces of email processing
 import logging
+import re
 from spray.utils import unescape
 
 LOG = logging.getLogger(__name__)
@@ -22,6 +23,9 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
 
     # accumulate all the recipient types, if present
     for recipient in row['recipient']:
+        is_plural = re.search("^[a-z]+__(?P<singular>[a-z]+)s$", recipient)
+        if is_plural:
+            recipient = is_plural.group('singular')
         recipient = data.get('%s_email_address' % recipient)
         if recipient:
             toa = toa.union([recipient])

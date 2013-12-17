@@ -169,6 +169,7 @@ class EmailAction(Action):
                         # make the plural singular
                         match = snip_dominant_class.replace('s_', '_', 1)
                         data[match] = v
+                        del data[k]  # Remove plural version (we've expanded and don't want to trip up addressing)
                         yield row, data
 
     def handle(self):
