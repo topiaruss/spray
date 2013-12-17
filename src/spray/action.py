@@ -162,15 +162,17 @@ class EmailAction(Action):
                     rv = data[rk]  # this value is a primary key to the dominant c.
                     related_data[rk] = client.CALLBACKS[rk](rv, front_end=False)
 
-                # Convert to singular version of template tag
-                for k, items in related_data.items():
-                    for v in items:
-                        snip_dominant_class = k.split('__')[1]
-                        # make the plural singular
-                        match = snip_dominant_class.replace('s_', '_', 1)
-                        data[match] = v
-                        del data[k]  # Remove plural version (we've expanded and don't want to trip up addressing)
-                yield row, data  # Only yield after _all_ tags have been converted to singular form
+                # Convert plural to singular versions of template tags
+                set_length = len(related_data[related_keys[0]])
+                for n in range(set_length):
+                    # Process n-th item of _every_ list so each outgoing email has complete data
+                    for plural_key, items in related_data.items():
+                        singular_key = plural_key.split('__')[1].replace('s_', '_', 1)  # Derive singular key from plural key
+                        data[singular_key] = items[n]  # Give singular plural's value
+                        if plural_key in data:
+                            del data[plural_key]  # Remove plural version so we don't trip up addressing
+                    yield row, data  # Only yield after _all_ tags have been converted to singular form
+
 
     def handle(self):
         self.notify('handle')
