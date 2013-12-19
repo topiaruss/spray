@@ -52,6 +52,15 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     unescaped = unescape.unescape(rawtext)
     lines = unescaped.split('\\n')
 
+    # Temp fix for pledge_amounts coming back from SQS as str. Fix all or just pledge_amount.  Refactor str -> unicode!
+    if 'pledge_amount' in data.keys():
+        data['pledge_amount'] = data['pledge_amount'].decode('utf-8')
+
+    # Or refactor converting all string (and refactor up)
+    # for k,v in data.items():
+    #     if isinstance(v, str):
+    #         data[k] = v.decode('utf-8')
+
     # create the html version
     template = env.from_string('<br/>\n'.join(lines))  # TODO: Cache?
     body = template.render(data)
