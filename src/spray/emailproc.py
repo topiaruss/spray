@@ -15,8 +15,7 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     params = {}
 
     # get sender from data / row / constant
-    params['source'] = data.get('from') or \
-                       row.get('from') or FROM_ADDRESS
+    params['source'] = data.get('from') or row.get('from') or FROM_ADDRESS
 
     toa = set(data.get('to', tuple()))
 
@@ -54,7 +53,8 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
 
     # Temp fix for pledge_amounts coming back from SQS as str. Fix all or just pledge_amount.  Refactor str -> unicode!
     if 'pledge_amount' in data.keys():
-        data['pledge_amount'] = data['pledge_amount'].decode('utf-8')
+        if isinstance(data['pledge_amount'], str):
+            data['pledge_amount'] = data['pledge_amount'].decode('utf-8')
 
     # Or refactor converting all string (and refactor up)
     # for k,v in data.items():
