@@ -5,11 +5,10 @@ from spray.utils import unescape
 
 LOG = logging.getLogger(__name__)
 
+# TODO: refactor to settings
 FROM_ADDRESS = 'info@sponsorcraft.com'
 BCC_ADDRESSES = set(['bcc-dump@sponsorcraft.com'])
-BCC_ADDRESSES = set([])
-ADMIN_ADDRESSES = set('rf@sponsorcraft.com jm@sponsorcraft.com '
-  'dk@sponsorcraft.com'.split())
+ADMIN_ADDRESSES = set('rf@sponsorcraft.com jm@sponsorcraft.com dk@sponsorcraft.com'.split())
 
 
 def build_multipart_mail(env, ptenv, row, data, tempreg):
@@ -23,12 +22,14 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
 
     # accumulate all the recipient types, if present
     for recipient in row['recipient']:
+        if recipient == 'bcc:admins':
+            continue
         is_plural = re.search("^[a-z]+__(?P<singular>[a-z]+)s$", recipient)
         if is_plural:
             recipient = is_plural.group('singular')
         recipient = data.get('%s_email_address' % recipient)
         if recipient:
-            if isinstance(recipient, str):
+            if isinstance(recipient, (str, unicode)):
                 recipient = [recipient]
             toa = toa.union(recipient)
 
@@ -38,6 +39,9 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     direct_bcc = data.get('bcc') or BCC_ADDRESSES
     matrix_bcc = 'bcc:admin' in row['recipient'] and ADMIN_ADDRESSES or set([])
     params['bcc_addresses'] = list(direct_bcc.union(matrix_bcc))
+
+    # If we only have BCC and no to address, promote bcc to
+    # params['to_addresses'] = params['bcc_addresses']
 
     # subject comes from the row, not the data, so we use it two ways
     subject = row['subject_en-gb']

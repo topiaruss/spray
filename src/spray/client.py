@@ -110,10 +110,11 @@ class Assembler(object):
         # the tokens we need for this event
         tokens = self.get_event_field_tokens(event_id)
 
-        fields_to_expand = {'follower_first_name': 'project__followers_first_name'}
-        for key, val in fields_to_expand.items():
-            if key in tokens:
-                tokens.append(val)
+        fields_to_expand = {'follower_first_name': 'project__followers_first_name',}
+        for singular_token, plural_token in fields_to_expand.items():
+            if singular_token in tokens:
+                tokens = [token for token in tokens if token != singular_token]  # Remove singular token
+                tokens.append(plural_token)
 
         # tokens we know we can't do -- no callbacks for them
         unfilled = set(tokens).difference(set(CALLBACKS.keys()))
