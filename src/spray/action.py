@@ -133,7 +133,9 @@ class EmailAction(Action):
     def expand_recipients(self, row, data):
         from spray import client
         for recipient in (r for r in row['recipient']):
-            if not '__' in recipient:
+            if recipient == 'bcc:admins':  # Lookup bcc:admins staticvalue
+                continue
+            elif not '__' in recipient:
                 yield row, data  # and we are done. Otherwise....
             else:
                 # recipient will be something like 'project__followers'
@@ -159,17 +161,21 @@ class EmailAction(Action):
                 # in front-end mode when running in the client space
                 related_data = {}
                 for rk in related_keys:
-                    rv = data[rk]  # this value is a primary key to the dominant c.
-                    related_data[rk] = client.CALLBACKS[rk](rv, front_end=False)
+                    if rk in data.keys():  # Because we don't necessarily have _all_ related keys
+                        rv = data[rk]  # this value is a primary key to the dominant c.
+                        related_data[rk] = client.CALLBACKS[rk](rv, front_end=False)
 
-                # Convert to singular version of template tag
-                for k, items in related_data.items():
-                    for v in items:
-                        snip_dominant_class = k.split('__')[1]
-                        # make the plural singular
-                        match = snip_dominant_class.replace('s_', '_', 1)
-                        data[match] = v
-                        yield row, data
+                # Convert plural to singular versions of template tags
+                set_length = len(related_data.values()[0])
+                for n in range(set_length):
+                    # Process n-th item of _every_ list so each outgoing email has complete data
+                    for plural_key, items in related_data.items():
+                        singular_key = plural_key.split('__')[1].replace('s_', '_', 1)  # Derive singular key from plural key
+                        data[singular_key] = items[n]  # Give singular plural's value
+                        if plural_key in data:
+                            del data[plural_key]  # Remove plural version so we don't trip up addressing
+                    yield row, data  # Only yield after _all_ tags have been converted to singular form
+
 
     def handle(self):
         self.notify('handle')
@@ -180,8 +186,7 @@ class EmailAction(Action):
                     traffic = self.dest.get_traffic()
                     self.tracing.append(dict(traffic=traffic, row=erow))
                 except:
-                    # we get here on production due to SESConnection  missing
-                    # get_traffic()
+                    # we get here on production due to SESConnection missing get_traffic()
                     pass
         except Exception as e:
             import traceback

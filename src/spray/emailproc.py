@@ -1,30 +1,36 @@
 # emailproc.py - bits and pieces of email processing
 import logging
+import re
 from spray.utils import unescape
 
 LOG = logging.getLogger(__name__)
 
+# TODO: refactor to settings
 FROM_ADDRESS = 'info@sponsorcraft.com'
 BCC_ADDRESSES = set(['bcc-dump@sponsorcraft.com'])
-BCC_ADDRESSES = set([])
-ADMIN_ADDRESSES = set('rf@sponsorcraft.com jm@sponsorcraft.com '
-  'dk@sponsorcraft.com'.split())
+ADMIN_ADDRESSES = set('rf@sponsorcraft.com jm@sponsorcraft.com dk@sponsorcraft.com'.split())
 
 
 def build_multipart_mail(env, ptenv, row, data, tempreg):
     params = {}
 
     # get sender from data / row / constant
-    params['source'] = data.get('from') or \
-                       row.get('from') or FROM_ADDRESS
+    params['source'] = data.get('from') or row.get('from') or FROM_ADDRESS
 
     toa = set(data.get('to', tuple()))
 
     # accumulate all the recipient types, if present
     for recipient in row['recipient']:
+        if recipient == 'bcc:admins':
+            continue
+        is_plural = re.search("^[a-z]+__(?P<singular>[a-z]+)s$", recipient)
+        if is_plural:
+            recipient = is_plural.group('singular')
         recipient = data.get('%s_email_address' % recipient)
         if recipient:
-            toa = toa.union([recipient])
+            if isinstance(recipient, (str, unicode)):
+                recipient = [recipient]
+            toa = toa.union(recipient)
 
     params['to_addresses'] = list(toa)
 
@@ -32,6 +38,9 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     direct_bcc = data.get('bcc') or BCC_ADDRESSES
     matrix_bcc = 'bcc:admin' in row['recipient'] and ADMIN_ADDRESSES or set([])
     params['bcc_addresses'] = list(direct_bcc.union(matrix_bcc))
+
+    # If we only have BCC and no to address, promote bcc to
+    # params['to_addresses'] = params['bcc_addresses']
 
     # subject comes from the row, not the data, so we use it two ways
     subject = row['subject_en-gb']
@@ -41,6 +50,16 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     rawtext = row['body_en-gb']
     unescaped = unescape.unescape(rawtext)
     lines = unescaped.split('\\n')
+
+    # Temp fix for pledge_amounts coming back from SQS as str. Fix all or just pledge_amount.  Refactor str -> unicode!
+    if 'pledge_amount' in data.keys():
+        if isinstance(data['pledge_amount'], str):
+            data['pledge_amount'] = data['pledge_amount'].decode('utf-8')
+
+    # Or refactor converting all string (and refactor up)
+    # for k,v in data.items():
+    #     if isinstance(v, str):
+    #         data[k] = v.decode('utf-8')
 
     # create the html version
     template = env.from_string('<br/>\n'.join(lines))  # TODO: Cache?
