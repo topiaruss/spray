@@ -1,6 +1,7 @@
 import gspread
 import os
 from spray.utils import ucsv as csv
+from django.contrib.sites.models import Site
 
 MATRICES = {}
 
@@ -75,8 +76,12 @@ class ActionMatrix(object):
         from spray import action
         ACTIONS = action.ACTIONS
         actionrows = self.data[event.event_id]
-        return [ACTIONS[row['action_type']](event=event, row=row) \
-          for row in actionrows]
+
+        # Only keep actions that match our site name. TODO settle on either site_id or site_name
+        event_site_name = Site.objects.get(id=event.data['site_id']).folder_name
+        actionrows = [row for row in actionrows if row['site_name'] == event_site_name]
+
+        return [ACTIONS[row['action_type']](event=event, row=row) for row in actionrows]
 
     def get_rows_for_event(self, event_id=None):
         "returns a couple of rows for one event, or all rows"

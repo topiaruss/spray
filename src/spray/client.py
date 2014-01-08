@@ -190,6 +190,9 @@ class Source(object):
         self.send_queue.create_and_send(event_id, data)
 
     def send(self, event_id, context={}):
+        if 'site_id' not in context:
+            context['site_id'] = SITE_ID
+
         ret = dict(unfilled=[], no_source=[], results={})
         if self.matrix is not None:
             assembler = Assembler(self.matrix, event_id, context)
@@ -197,8 +200,7 @@ class Source(object):
             context = assembler.results['results']
             ret = assembler.results
 
-        if not context.has_key('site_id'):
-            context['site_id'] = SITE_ID
+
 
         self._send(event_id, context)
         return ret
