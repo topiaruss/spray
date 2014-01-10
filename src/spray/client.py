@@ -107,6 +107,9 @@ class Assembler(object):
         return events
 
     def _do_callbacks(self, event_id, context):
+        if not context.has_key('site_id'):
+            context['site_id'] = SITE_ID
+
         # the tokens we need for this event
         tokens = self.get_event_field_tokens(event_id)
 
@@ -136,20 +139,12 @@ class Assembler(object):
                     # MUST sort all callback params
                     results[k] = c(*[context[v] for v in reqargs])
                 except Exception as e:
-                    LOG.exception('failure %s in callback %s for %s with %s' %
-                      (e, c, k, context))
+                    LOG.exception('failure %s in callback %s for %s with %s' % (e, c, k, context))
                     results[k] = '...'  # This will flag an exception in msg
             else:
                 no_source = no_source.union(reqargs - available)
 
-        # ignore the unfilled items that will be processed later
-        # whip_these_out = [u for u in unfilled if '__' in u]
-        # for u in whip_these_out:
-        #     unfilled.remove(u)
-
-        if not context.has_key('site_id'):
-            context['site_id'] = SITE_ID  # from import above (should probably remove)
-        results['site_id'] = context['site_id']
+        results['site_id'] = context['site_id']  # Make sure we always have a site_id for the backend, regardless of callbacks params
         self.results = dict(no_source=no_source, unfilled=unfilled, results=results)
         return self.results
 
