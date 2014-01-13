@@ -5,7 +5,6 @@ from spray import interface
 from spray.utils import aws_credentials
 from zope.interface import implements
 import Queue
-from spray.settings import CREDENTIALS_FILENAME
 
 
 # The singleton directory of ...
@@ -15,7 +14,6 @@ QUEUES = {}
 class DummyQueue(Queue.Queue):
     """
     A dummy queue used for function and doc testing
-    TODO: class hierarchy or ZCA interface
     """
     implements(interface.IQueue)
 
@@ -46,8 +44,7 @@ class SQSQueue(object):
     def __init__(self, name, acc_sec_pair=None, visibility_timeout=30):
         self.name = name
         if acc_sec_pair is None:
-            acc_sec_pair = aws_credentials.get_credentials(
-              CREDENTIALS_FILENAME)
+            acc_sec_pair = aws_credentials.get_credentials()
         self.region_name = 'eu-west-1'
         self.region = [r for r in regions() if r.name == self.region_name][0]
         self.conn = SQSConnection(aws_access_key_id=acc_sec_pair[0],
@@ -77,10 +74,10 @@ QUEUES['sprayui'] = DummyQueue('sprayui')
 QUEUES['testSQS'] = SQSQueue('testSQS')
 QUEUES['testSQS-2'] = SQSQueue('testSQS-2')
 QUEUES['mainSQS'] = SQSQueue('mainSQS')
+QUEUES['spray-preview'] = SQSQueue('spray-preview')
 
 
 class Hub(object):
-
     def get_or_create(self, name):
         """Utility to grab or create a named queue"""
         return QUEUES.setdefault(name, DummyQueue(name))
