@@ -82,9 +82,9 @@ class Assembler(object):
             args = args[:-len(defaults)]
         return args
 
-    def get_event_field_tokens(self, event_id=None):
+    def get_event_field_tokens(self, event_id=None, site_id=None):
         "returns the tokens for ALL rows under an event"
-        rows = self.matrix.get_rows_for_event(event_id)
+        rows = self.matrix.get_rows_for_event(event_id, site_id)
         events = {}
         for r in rows:
             eid = r['event_id']
@@ -111,7 +111,7 @@ class Assembler(object):
             context['site_id'] = SITE_ID
 
         # the tokens we need for this event
-        tokens = self.get_event_field_tokens(event_id)
+        tokens = self.get_event_field_tokens(event_id, site_id=context['site_id'])
 
         fields_to_expand = {'follower_first_name': 'project__followers_first_name',}
         for singular_token, plural_token in fields_to_expand.items():
@@ -177,9 +177,8 @@ class Source(object):
         return unicode(self).encode("utf-8")
 
     def _send(self, event_id, data={}):
-        """Sends the event with passed event_id and data to the queue.
-        """
-        assert type(event_id) == str
+        """Sends the event with passed event_id and data to the queue."""
+        assert type(event_id) in (str, unicode)
         assert type(data) == dict
 
         self.send_queue.create_and_send(event_id, data)
@@ -195,55 +194,53 @@ class Source(object):
             context = assembler.results['results']
             ret = assembler.results
 
-
-
         self._send(event_id, context)
         return ret
 
-
-class ClientApp(object):
-    """ Simple app to send a message to a queue.
-        config.app provides a usage example
-    """
-
-    def get_config(self, cf):
-        config = ConfigParser.RawConfigParser()
-        config.readfp(cf)
-        return config
-
-    def get_command_line_args(self):
-        pp = argparse.ArgumentParser(
-          description='Spray messaging daemon for Sponsorcraft website')
-        pp.add_argument('-c', '--config_file', metavar='file',
-          type=argparse.FileType('r'), default='sprayd.cfg',
-          help='a config file (defaults to sprayd.cfg)')
-        return pp.parse_args()
-
-    def config_logging(self, config):
-        level = eval(config.get('Logging', 'level'))
-        format = config.get('Logging', 'format')
-        lfile = config.get('Logging', 'filename')
-        logging.basicConfig(level=level, format=format, filename=lfile)
-
-    def config_app(self, config):
-        me = Source('me', 'testSQS')
-        event_id = "sponsor.project.fundingtarget"
-        project_data = dict(user_first_name='Test User', name="Testing", to=('pf@sponsorcraft.com',))
-        me.send(event_id, project_data)
-        print "sent %s" % event_id
-
-    def __call__(self):
-        "simple command line action"
-
-        arg = self.get_command_line_args()
-        config = self.get_config(arg.config_file)
-        self.config_logging(config)
-        self.config_app(config)
+#
+# class ClientApp(object):
+#     """ Simple app to send a message to a queue.
+#         config.app provides a usage example
+#     """
+#
+#     def get_config(self, cf):
+#         config = ConfigParser.RawConfigParser()
+#         config.readfp(cf)
+#         return config
+#
+#     def get_command_line_args(self):
+#         pp = argparse.ArgumentParser(
+#           description='Spray messaging daemon for Sponsorcraft website')
+#         pp.add_argument('-c', '--config_file', metavar='file',
+#           type=argparse.FileType('r'), default='sprayd.cfg',
+#           help='a config file (defaults to sprayd.cfg)')
+#         return pp.parse_args()
+#
+#     def config_logging(self, config):
+#         level = eval(config.get('Logging', 'level'))
+#         format = config.get('Logging', 'format')
+#         lfile = config.get('Logging', 'filename')
+#         logging.basicConfig(level=level, format=format, filename=lfile)
+#
+#     def config_app(self, config):
+#         me = Source('me', 'testSQS')
+#         event_id = "sponsor.project.fundingtarget"
+#         project_data = dict(user_first_name='Test User', name="Testing", to=('pf@sponsorcraft.com',))
+#         me.send(event_id, project_data)
+#         print "sent %s" % event_id
+#
+#     def __call__(self):
+#         "simple command line action"
+#
+#         arg = self.get_command_line_args()
+#         config = self.get_config(arg.config_file)
+#         self.config_logging(config)
+#         self.config_app(config)
 
 
 #This is used by setup.py and buildout.cfg to generate an app in bin/
-def app():
-    ClientApp()()
+# def app():
+#     ClientApp()()
 
 CALLBACK_HEADER = """# When implementing a callback, refine the context
 # name, from the bulky template, then access the data from that
@@ -266,133 +263,133 @@ client.register_callback(${cb}_callback)
 
 """)
 
-
-class DryRun(object):
-    """ Simple app to create a sample email to all event_id
-    """
-
-    def get_config(self, cf):
-        config = ConfigParser.RawConfigParser()
-        config.readfp(cf)
-        return config
-
-    def config_logging(self, config):
-        level = eval(config.get('Logging', 'level'))
-        format = config.get('Logging', 'format')
-        lfile = config.get('Logging', 'filename')
-        logging.basicConfig(level=level, format=format, filename=lfile)
-
-    def get_command_line_args(self):
-        pp = argparse.ArgumentParser(
-          description='Send all the messages on the config page')
-
-        pp.add_argument('-c', '--config_file', metavar='file',
-          type=argparse.FileType('r'), default='dryrun.cfg',
-          help='a config file (defaults to sprayd.cfg)')
-
-        pp.add_argument('-q', '--queue', default='',
-          help='the queue you want to send to (defaults to sprayd.cfg)')
-
-        pp.add_argument('-m', '--matrix', default='',
-          help='the matrix to test (defaults to our main matrix)')
-
-        pp.add_argument('-t', '--to', default='',
-          help='the delivery email address(es) (defaults to russf@topia.com)')
-
-        # pp.add_argument('-s', '--stuffing', default='',
-        #   help='the matrix to stuff from (defaults to our main matrix)')
-
-        return pp.parse_args()
-
-    def config_app(self, config, arg):
-        self.recip = arg.to.split() or config.get('Email', 'recip').split()
-        self.sender = config.get('Email', 'from')
-        self.bcc = config.get('Email', 'bcc').split()
-
-        # setup a matrix
-        url = arg.matrix or config.get('ActionMatrix', 'url')
-        if url.startswith('http'):
-            creds = matrix.Credentials()
-            self.mm = matrix.GoogleActionMatrix(creds, url)
-        else:
-            self.mm = matrix.CSVActionMatrix(url)
-        self.mm.update()
-
-        #now setup a queue, but with a custom matrix
-        queue = arg.queue or config.get('Queue', 'queue') or 'testSQS'
-        self.me = Source('me', queue, self.mm)
-
-    #TODO setup stuffing
-    # surl = arg.stuffing or config.get('Stuffing', url)
-    # surl = surl
-    def build_stuffing(self):
-        self.context = dict(project=dict(),
-                            user=dict(),
-                            system=dict())
-
-    def explore_events(self):
-        "summarizes the callbacks needed and for which events"
-        events = self.mm.data.keys()
-        needs = {}
-        for e in events:
-            tokens = self.me.get_event_field_tokens(e)
-            needs[e] = tokens
-        depends = {}
-        for k, v in needs.items():
-            for token in v:
-                depends.setdefault(token, set()).add(k)
-        return depends
-
-    def put_callbacks(self, depends):
-        """Generates a file with all the callback stubs we know about.
-        This will be in the execution directory. It may be necessary to
-        move it to the tests directory where we keep a fresh copy.
-        """
-        keys = sorted(depends.keys())
-        with open('fullcallbacks.py', 'w') as ff:
-            ff.write(CALLBACK_HEADER)
-            for k in keys:
-                used = sorted(depends[k])
-                used = '\n# '.join(used)
-                ff.write(template.substitute({'cb': k, 'used': used}))
-
-    def blast_events(self):
-        "blast one message for each event_id"
-
-        # retain next line for registry side-effects of import
-        from spray.tests import fullcallbacks
-        if fullcallbacks:
-            pass  # defeat PEP8 checker
-
-        events = sorted(self.mm.data.keys())
-        for e in events:  # [:5]:
-            # print '5 only'
-            # crafter_user_project_system is a dummy context that
-            # satisfies all stubs. It should be dropped as soon as all stubs
-            # are filled.
-            self.me.send(e, {'to': self.recip,
-                             'bcc': self.bcc,
-                             'sender': self.sender,
-                             'crafter_user_project_system': {}})
-
-    def __call__(self):
-        "heed the call!"
-
-        arg = self.get_command_line_args()
-        config = self.get_config(arg.config_file)
-        self.config_logging(config)
-        self.config_app(config, arg)
-        self.build_stuffing()
-        #  messy, but we enable these two lines to generate a fresh callback
-        #    from the current data.
-        #  depends = self.explore_events()
-        #  self.put_callbacks(depends)
-        self.blast_events()
-
-
-#This is used by setup.py and buildout.cfg to generate an app in bin/
-def dryrun():
-    DryRun()()
+#
+# class DryRun(object):
+#     """ Simple app to create a sample email to all event_id
+#     """
+#
+#     def get_config(self, cf):
+#         config = ConfigParser.RawConfigParser()
+#         config.readfp(cf)
+#         return config
+#
+#     def config_logging(self, config):
+#         level = eval(config.get('Logging', 'level'))
+#         format = config.get('Logging', 'format')
+#         lfile = config.get('Logging', 'filename')
+#         logging.basicConfig(level=level, format=format, filename=lfile)
+#
+#     def get_command_line_args(self):
+#         pp = argparse.ArgumentParser(
+#           description='Send all the messages on the config page')
+#
+#         pp.add_argument('-c', '--config_file', metavar='file',
+#           type=argparse.FileType('r'), default='dryrun.cfg',
+#           help='a config file (defaults to sprayd.cfg)')
+#
+#         pp.add_argument('-q', '--queue', default='',
+#           help='the queue you want to send to (defaults to sprayd.cfg)')
+#
+#         pp.add_argument('-m', '--matrix', default='',
+#           help='the matrix to test (defaults to our main matrix)')
+#
+#         pp.add_argument('-t', '--to', default='',
+#           help='the delivery email address(es) (defaults to russf@topia.com)')
+#
+#         # pp.add_argument('-s', '--stuffing', default='',
+#         #   help='the matrix to stuff from (defaults to our main matrix)')
+#
+#         return pp.parse_args()
+#
+#     def config_app(self, config, arg):
+#         self.recip = arg.to.split() or config.get('Email', 'recip').split()
+#         self.sender = config.get('Email', 'from')
+#         self.bcc = config.get('Email', 'bcc').split()
+#
+#         # setup a matrix
+#         url = arg.matrix or config.get('ActionMatrix', 'url')
+#         if url.startswith('http'):
+#             creds = matrix.Credentials()
+#             self.mm = matrix.GoogleActionMatrix(creds, url)
+#         else:
+#             self.mm = matrix.CSVActionMatrix(url)
+#         self.mm.update()
+#
+#         #now setup a queue, but with a custom matrix
+#         queue = arg.queue or config.get('Queue', 'queue') or 'testSQS'
+#         self.me = Source('me', queue, self.mm)
+#
+#     #TODO setup stuffing
+#     # surl = arg.stuffing or config.get('Stuffing', url)
+#     # surl = surl
+#     def build_stuffing(self):
+#         self.context = dict(project=dict(),
+#                             user=dict(),
+#                             system=dict())
+#
+#     def explore_events(self):
+#         "summarizes the callbacks needed and for which events"
+#         events = self.mm.data.keys()
+#         needs = {}
+#         for e in events:
+#             tokens = self.me.get_event_field_tokens(e)
+#             needs[e] = tokens
+#         depends = {}
+#         for k, v in needs.items():
+#             for token in v:
+#                 depends.setdefault(token, set()).add(k)
+#         return depends
+#
+#     def put_callbacks(self, depends):
+#         """Generates a file with all the callback stubs we know about.
+#         This will be in the execution directory. It may be necessary to
+#         move it to the tests directory where we keep a fresh copy.
+#         """
+#         keys = sorted(depends.keys())
+#         with open('fullcallbacks.py', 'w') as ff:
+#             ff.write(CALLBACK_HEADER)
+#             for k in keys:
+#                 used = sorted(depends[k])
+#                 used = '\n# '.join(used)
+#                 ff.write(template.substitute({'cb': k, 'used': used}))
+#
+#     def blast_events(self):
+#         "blast one message for each event_id"
+#
+#         # retain next line for registry side-effects of import
+#         from spray.tests import fullcallbacks
+#         if fullcallbacks:
+#             pass  # defeat PEP8 checker
+#
+#         events = sorted(self.mm.data.keys())
+#         for e in events:  # [:5]:
+#             # print '5 only'
+#             # crafter_user_project_system is a dummy context that
+#             # satisfies all stubs. It should be dropped as soon as all stubs
+#             # are filled.
+#             self.me.send(e, {'to': self.recip,
+#                              'bcc': self.bcc,
+#                              'sender': self.sender,
+#                              'crafter_user_project_system': {}})
+#
+#     def __call__(self):
+#         "heed the call!"
+#
+#         arg = self.get_command_line_args()
+#         config = self.get_config(arg.config_file)
+#         self.config_logging(config)
+#         self.config_app(config, arg)
+#         self.build_stuffing()
+#         #  messy, but we enable these two lines to generate a fresh callback
+#         #    from the current data.
+#         #  depends = self.explore_events()
+#         #  self.put_callbacks(depends)
+#         self.blast_events()
+#
+#
+# #This is used by setup.py and buildout.cfg to generate an app in bin/
+# def dryrun():
+#     DryRun()()
 
 
 SPRAYUI_CONFIG = """
@@ -403,23 +400,10 @@ filename = sprayui.log
 
 # split with spaces - no commas
 [RecipientOverride]
-#to_addresses = test-override@sponsorcraft.com jm@sponsorcraft.com sophia.duffy@sponsorcraft.com rf@sponsorcraft.com
-to_addresses = rf@sponsorcraft.com
+to_addresses = test-override@sponsorcraft.com
 
 [ActionMatrix]
 # this is the matrix that will be used for the processor
-
-#type =  GoogleActionMatrix
-#production
-#url = https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AoY07RiDm5HYdDR6R2hiSVE4aWI1azlMYlRnZlhSSVE#gid=0
-#testing
-#url = https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dG9ITmowOEhQNU85c2NhOUtsb2ZzbFE
-#develop
-#url = https://docs.google.com/a/sponsorcraft.com/spreadsheet/ccc?key=0AgfJ64xPw-46dE13Vk5ydFJFcTBJOFBYbmlBc2ROenc
-
-#type =  CSVActionMatrix
-#filepath = ./doc/tests/System Event-Action matrix - Matrix.csv
-
 type = DjangoActionMatrix
 
 #bit of a misnomer - any queue type, predefined.
@@ -428,7 +412,6 @@ name = sprayui
 
 [EmailDestination]
 name = DummyAmazonSESDestination
-
 """
 
 
@@ -454,7 +437,7 @@ class ProcessBox(object):
     def get_evidence(self):
         "returns [step][action][replica]{row:row, traffic:traffic}"
         entrails = []
-        # Break gracefuly if no actions have been run
+        # Break gracefully if no actions have been run
         try:
             entrails = self.proc.entrails
         except AttributeError:
