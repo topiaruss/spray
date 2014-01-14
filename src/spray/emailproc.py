@@ -23,7 +23,7 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     for recipient in row['recipient']:
         if recipient == 'bcc:admins':
             continue
-        is_plural = re.search("^[a-z]+__(?P<singular>[a-z]+)s$", recipient)
+        is_plural = re.search("^[a-z]+__(?P<singular>[a-z_]+)s$", recipient)
         if is_plural:
             recipient = is_plural.group('singular')
         recipient = data.get('%s_email_address' % recipient)
