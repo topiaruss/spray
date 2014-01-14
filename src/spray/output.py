@@ -4,7 +4,6 @@ from spray import emailproc
 from spray import interface
 from spray import jinjaenv
 from spray import SPRAY_ROOT
-from spray.settings import CREDENTIALS_FILENAME
 from spray.utils import aws_credentials
 from spray.utils import genfind
 from spray.utils import genopen
@@ -187,7 +186,7 @@ class AmazonSESDestination(Destination):
 
     def __init__(self, overrides=None):
         self.overrides = overrides
-        conf = aws_credentials.get_credentials(CREDENTIALS_FILENAME)
+        conf = aws_credentials.get_credentials()
         region = ses.regions()[0]  # Getting first region
         self.conn = boto.connect_ses(aws_access_key_id=conf[0],
           aws_secret_access_key=conf[1],

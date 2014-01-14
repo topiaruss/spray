@@ -4,13 +4,7 @@ try:
 except:
     djsettings = {}
 
-DEFAULT_SETTINGS = dict(
-
-    #  For our tests, we assume that a single client is able to
-    #  access both ends of the message queue and the email service
-    CREDENTIALS_FILENAME='spray.client',
-
-)
+DEFAULT_SETTINGS = dict()
 
 USER_SETTINGS = DEFAULT_SETTINGS.copy()
 USER_SETTINGS.update(getattr(djsettings, 'SPRAY_SETTINGS', {}))

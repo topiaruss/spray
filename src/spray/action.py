@@ -152,8 +152,7 @@ class EmailAction(Action):
 
                 # get a list of callbacks that depend on the expandable data
                 # e.g. 'project__followers_email_address'
-                related_keys = [k for k in client.CALLBACKS.keys()
-                                if k.startswith(recipient)]
+                related_keys = [k for k in client.CALLBACKS.keys() if k.startswith(recipient)]
 
                 # invoke each of those callbacks in backend mode, to expand
                 # them into ordered sets of the subject values, passing
