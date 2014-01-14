@@ -1,6 +1,6 @@
-import gspread
+# import gspread
 import os
-from spray.utils import ucsv as csv
+# from spray.utils import ucsv as csv
 from django.contrib.sites.models import Site
 
 MATRICES = {}
@@ -34,8 +34,7 @@ class Credentials(object):
 class ActionMatrix(object):
     """
     the abstract superclass to the ActionMatrix implementations,
-    providing the update mechanism and booby-trapped
-    placeholder methods.
+    providing the update mechanism and booby-trapped placeholder methods.
     """
     def __init__(self, *args, **kwargs):
         self.data = None
@@ -74,21 +73,24 @@ class ActionMatrix(object):
         # late import to reduce dependencies for use of this module in client
         self._ensure_updated()
         from spray import action
-        ACTIONS = action.ACTIONS
+        actions = action.ACTIONS
         actionrows = self.data[event.event_id]
 
         # Only keep actions that match our site name. TODO settle on either site_id or site_name
         event_site_name = Site.objects.get(id=event.data['site_id']).folder_name
         actionrows = [row for row in actionrows if row['site_name'] == event_site_name]
 
-        return [ACTIONS[row['action_type']](event=event, row=row) for row in actionrows]
+        return [actions[row['action_type']](event=event, row=row) for row in actionrows]
 
-    def get_rows_for_event(self, event_id=None):
+    def get_rows_for_event(self, event_id=None, site_id=None):
         "returns a couple of rows for one event, or all rows"
         self._ensure_updated()
         if event_id is not None:
             # this is a potentially multi-row response
-            return self.data.get(event_id, [])
+            event_rows = self.data.get(event_id, [])
+            site_name = Site.objects.get(id=site_id).folder_name
+            site_event_rows = [row for row in event_rows if row['site_name'] == site_name]
+            return site_event_rows
         # we must agglomerate the many multi-row sequences
         rows = []
         for k, v in self.data.items():
@@ -100,43 +102,43 @@ class ActionMatrix(object):
         MATRICES[klass.__name__] = klass
 
 
-class CSVActionMatrix(ActionMatrix):
-    """
-    This takes a CSV file made from the matrix tab of the
-    Google example spreadsheet.
-    """
-
-    def __init__(self, filepath, *args, **kwargs):
-        self.filepath = filepath
-        self.provenance = "Pending CSV file at: %s" % self.filepath
-        super(CSVActionMatrix, self).__init__(*args, **kwargs)
-
-    def get_rows(self):
-        self.csvfile = open(self.filepath, 'r')
-        self.provenance = "CSV file at: %s" % self.filepath
-        rdr = csv.reader(self.csvfile)
-        rows = [r for r in rdr]
-        return rows
-
-CSVActionMatrix.register()
-
-
-class GoogleActionMatrix(ActionMatrix):
-
-    def __init__(self, credentials, url, *args, **kwargs):
-        self.creds = credentials
-        self.url = url
-        self.provenance = "Pending Google SS at %s" % url
-        super(GoogleActionMatrix, self).__init__(*args, **kwargs)
-
-    def get_rows(self):
-        gc = gspread.login(self.creds.email, self.creds.password)
-        ss = gc.open_by_url(self.url)
-        self.provenance = "Google SS at %s" % self.url
-        ws = ss.get_worksheet(1)
-        return ws.get_all_values()
-
-GoogleActionMatrix.register()
+# class CSVActionMatrix(ActionMatrix):
+#     """
+#     This takes a CSV file made from the matrix tab of the
+#     Google example spreadsheet.
+#     """
+#
+#     def __init__(self, filepath, *args, **kwargs):
+#         self.filepath = filepath
+#         self.provenance = "Pending CSV file at: %s" % self.filepath
+#         super(CSVActionMatrix, self).__init__(*args, **kwargs)
+#
+#     def get_rows(self):
+#         self.csvfile = open(self.filepath, 'r')
+#         self.provenance = "CSV file at: %s" % self.filepath
+#         rdr = csv.reader(self.csvfile)
+#         rows = [r for r in rdr]
+#         return rows
+#
+# CSVActionMatrix.register()
+#
+#
+# class GoogleActionMatrix(ActionMatrix):
+#
+#     def __init__(self, credentials, url, *args, **kwargs):
+#         self.creds = credentials
+#         self.url = url
+#         self.provenance = "Pending Google SS at %s" % url
+#         super(GoogleActionMatrix, self).__init__(*args, **kwargs)
+#
+#     def get_rows(self):
+#         gc = gspread.login(self.creds.email, self.creds.password)
+#         ss = gc.open_by_url(self.url)
+#         self.provenance = "Google SS at %s" % self.url
+#         ws = ss.get_worksheet(1)
+#         return ws.get_all_values()
+#
+# GoogleActionMatrix.register()
 
 
 def matrixFactory(name, kwargs={}):

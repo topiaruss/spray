@@ -32,9 +32,6 @@ class SQSEventDecodeError(Exception):
 
 
 class SQSEvent(Message):
-    """
-    """
-
     def __init__(self, queue=None, body=None, xml_attrs=None,
                  event_id='', data={},):
         if body == None or body == '':

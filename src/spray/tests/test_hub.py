@@ -3,7 +3,6 @@ from boto.sqs import regions
 from spray import event
 from spray import hub
 from spray import interface
-from spray.settings import CREDENTIALS_FILENAME
 from spray.utils import aws_credentials
 from time import sleep
 from zope.interface import providedBy
@@ -11,7 +10,6 @@ import unittest
 
 
 class TestDummyQueue(unittest.TestCase):
-
     def test_DummyQueue_conforms_to_interface(self):
         qq = hub.DummyQueue('send')
         assert interface.IQueue in providedBy(qq)
@@ -63,7 +61,7 @@ class TestSQSQueue(unittest.TestCase):
 
     def setUp(self):
         # Ensure the queue is clear before we start, or we'll lose more hair
-        creds = aws_credentials.get_credentials(CREDENTIALS_FILENAME)
+        creds = aws_credentials.get_credentials()
         region_name = 'eu-west-1'
         region = [r for r in regions() if r.name == region_name][0]
         conn = SQSConnection(aws_access_key_id=creds[0],
