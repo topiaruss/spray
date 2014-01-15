@@ -2,20 +2,29 @@
 import logging
 import re
 from spray.utils import unescape
-
+from django.conf import settings
+from django.contrib.sites.models import Site
 LOG = logging.getLogger(__name__)
 
 # TODO: refactor to settings
-FROM_ADDRESS = 'info@sponsorcraft.com'
 BCC_ADDRESSES = set(['bcc-dump@sponsorcraft.com'])
 ADMIN_ADDRESSES = set('rf@sponsorcraft.com jm@sponsorcraft.com dk@sponsorcraft.com'.split())
+
+
+def get_from_address(data):
+    from_address_map = settings.SPRAY_SETTINGS['FROM_ADDRESSES']
+    try:
+        return from_address_map[data['site_name']]
+    except (KeyError, Exception) as e:
+        # log.error('Spray FROM_ADDRESS lookup failed: %s' % e)
+        return from_address_map[data['default']]
 
 
 def build_multipart_mail(env, ptenv, row, data, tempreg):
     params = {}
 
-    # get sender from data / row / constant
-    params['source'] = data.get('from') or row.get('from') or FROM_ADDRESS
+    # Lookup sender from our static settings map
+    params['source'] = get_from_address(data)
 
     toa = set(data.get('to', tuple()))
 
