@@ -9,11 +9,9 @@ import inspect
 import logging
 import time
 
-try:
-    from django.config import settings
-    SITE_ID = settings.SITE_ID
-except:
-    SITE_ID = 1
+from django.conf import settings
+SITE_ID = settings.SITE_ID
+
 
 # Note: some imports are deferred for conditional loading
 
