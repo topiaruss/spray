@@ -88,9 +88,11 @@ class ActionMatrix(object):
         if event_id is not None:
             # this is a potentially multi-row response
             event_rows = self.data.get(event_id, [])
-            site_name = Site.objects.get(id=site_id).folder_name
-            site_event_rows = [row for row in event_rows if row['site_name'] == site_name]
-            return site_event_rows
+            if site_id:
+                site_name = Site.objects.get(id=site_id).folder_name
+                site_event_rows = [row for row in event_rows if row['site_name'] == site_name]
+                return site_event_rows
+            return event_rows
         # we must agglomerate the many multi-row sequences
         rows = []
         for k, v in self.data.items():
