@@ -87,45 +87,6 @@ class ActionMatrix(object):
         MATRICES[klass.__name__] = klass
 
 
-# class CSVActionMatrix(ActionMatrix):
-#     """
-#     This takes a CSV file made from the matrix tab of the
-#     Google example spreadsheet.
-#     """
-#
-#     def __init__(self, filepath, *args, **kwargs):
-#         self.filepath = filepath
-#         self.provenance = "Pending CSV file at: %s" % self.filepath
-#         super(CSVActionMatrix, self).__init__(*args, **kwargs)
-#
-#     def get_rows(self):
-#         self.csvfile = open(self.filepath, 'r')
-#         self.provenance = "CSV file at: %s" % self.filepath
-#         rdr = csv.reader(self.csvfile)
-#         rows = [r for r in rdr]
-#         return rows
-#
-# CSVActionMatrix.register()
-#
-#
-# class GoogleActionMatrix(ActionMatrix):
-#
-#     def __init__(self, credentials, url, *args, **kwargs):
-#         self.creds = credentials
-#         self.url = url
-#         self.provenance = "Pending Google SS at %s" % url
-#         super(GoogleActionMatrix, self).__init__(*args, **kwargs)
-#
-#     def get_rows(self):
-#         gc = gspread.login(self.creds.email, self.creds.password)
-#         ss = gc.open_by_url(self.url)
-#         self.provenance = "Google SS at %s" % self.url
-#         ws = ss.get_worksheet(1)
-#         return ws.get_all_values()
-#
-# GoogleActionMatrix.register()
-
-
 def matrixFactory(name, kwargs={}):
     "Instantiate a class instance, and provide note in case of param err."
     try:
