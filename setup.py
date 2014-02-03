@@ -39,6 +39,7 @@ messaging or social actions""",
           'jinja2',
           'msgpack-python',
           'zope.interface',
+          'twilio>=3.6.3'
       ],
       entry_points="""
         [console_scripts]
