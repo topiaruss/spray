@@ -8,6 +8,7 @@ from spray.utils import aws_credentials
 from spray.utils import genfind
 from spray.utils import genopen
 from zope.interface import implements
+from twilio.rest import TwilioRestClient
 import boto
 import logging
 import os
@@ -133,6 +134,20 @@ class Destination(object):
     def register(klass):
         DESTINATION_REGISTRY[klass.__name__] = klass
 
+class TwilioSmsDestination(Destination):
+
+    implements(interface.IDestination)
+
+    def __init__(self, auth, client):
+        self.client = TwilioRestClient(auth, client)
+
+    def send(to, from_, message):
+        ' This sends an sms message '
+        cc = client.message.create(
+            to=number, from=from_, body=message)
+        return cc
+
+TwilioSmsDestination.register()
 
 class DummyDestination(Destination):
 
