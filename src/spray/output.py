@@ -144,7 +144,7 @@ class TwilioSmsDestination(Destination):
     def send(to, from_, message):
         ' This sends an sms message '
         cc = client.message.create(
-            to=number, from=from_, body=message)
+            to=number, from_=from_, body=message)
         return cc
 
 TwilioSmsDestination.register()
