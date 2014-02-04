@@ -110,9 +110,20 @@ class DummySMSAction(Action):
         #self._dump()
         self.notify('end-handle')
 
-
 DummySMSAction.register()
 
+
+class TwilioSmsAction(Action):
+
+    action_type = 'TwilioSmsAction'
+
+    def __init__(self, **kwargs):
+        super(TwilioSmsAction, self).__init__(**kwargs)
+
+    def handle(self):
+        pass
+
+TwilioSmsAction.register()
 
 class EmailAction(Action):
 
