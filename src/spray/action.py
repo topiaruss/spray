@@ -276,4 +276,4 @@ class Processor(object):
         BROADCASTER.notify(**kwargs)
 
 ACTIONS['email'] = AVAILABLE_ACTIONS['EmailAction']
-ACTIONS['SMS'] = AVAILABLE_ACTIONS['DummySMSAction']
+ACTIONS['SMS'] = AVAILABLE_ACTIONS['TwilioSmsAction']
