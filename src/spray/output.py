@@ -142,10 +142,9 @@ class TwilioSmsDestination(Destination):
         self.client = TwilioRestClient(auth, client)
 
     def send(to, from_, message):
-        ' This sends an sms message '
-        cc = client.message.create(
+        ' This will send an sms message '
+        cc = self.client.messages.create(
             to=number, from_=from_, body=message)
-        return cc
 
 TwilioSmsDestination.register()
 
