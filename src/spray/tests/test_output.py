@@ -295,3 +295,30 @@ class TestJinjaFeaturetextFilter(unittest.TestCase):
         expect = u'a fiver is \u00A3 5.00'
         self.assertEqual(expect, result)
 
+class TwilioSmsDestinationTest(unittest.TestCase):
+    '''
+        IMPORTANT: for this test to work, you
+        MUST set up the tokens in the python os.environ.
+        To do this: open bin/activate and add the following to the end:
+
+        export TWILIO_SID=XXXXXXXXXXXXXXXXXXXXXXXXXX
+        export TWILIO_TOKEN=YYYYYYYYYYYYYYYYY
+        export TWILIO_DEFAULT_NUMBER=+44123456789
+
+        and save the file. This will add these values into your environment.
+        Make sure to replace the values with your own
+
+    '''
+
+    def setUp(self):
+        SID = os.environ['TWILIO_SID']
+        CLI = os.environ['TWILIO_TOKEN']
+        self.client = output.TwilioSmsDestination(SID,CLI)
+
+    def test_basic_message(self):
+        ' This will send an sms to th'
+        default_from = os.environ['TWILIO_DEFAULT_NUMBER']
+        # This number *will* receive a text message, be warned
+        to ='+447943511601'
+        self.client.send(to, default_from, 'test_basic_message')
+
