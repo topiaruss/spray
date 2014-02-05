@@ -1,32 +1,15 @@
-# import gspread
-import os
-# from spray.utils import ucsv as csv
 from django.contrib.sites.models import Site
+from django.conf import settings
 
 MATRICES = {}
 
 
 class Credentials(object):
-    """
-    Holds credentials.
-    If not provided as parameters, name and password
-    will be fished out of the credentials file
-    """
+    """Holds credentials. If not provided as parameters, name and password will be taken from settings."""
 
     def __init__(self, email=None, password=None):
         if email is None:
-            try:
-                ff = open('credentials.txt', 'r')
-            except IOError:
-                home = os.getenv('USERPROFILE') or os.getenv('HOME')
-                home_cred = os.path.join(home, '.spray.credentials.txt')
-                try:
-                    ff = open(home_cred, 'r')
-                except IOError:
-                    raise IOError('you need a creds file here %s' % home_cred)
-            lines = ff.readlines()
-            lines = [l.strip() for l in lines]
-            self.email, self.password = lines[0], lines[1]
+            self.email, self.password = settings.SPRAY_SETTINGS['CREDENTIALS']
             return
         self.email, self.password = email, password
 
@@ -102,45 +85,6 @@ class ActionMatrix(object):
     @classmethod
     def register(klass):
         MATRICES[klass.__name__] = klass
-
-
-# class CSVActionMatrix(ActionMatrix):
-#     """
-#     This takes a CSV file made from the matrix tab of the
-#     Google example spreadsheet.
-#     """
-#
-#     def __init__(self, filepath, *args, **kwargs):
-#         self.filepath = filepath
-#         self.provenance = "Pending CSV file at: %s" % self.filepath
-#         super(CSVActionMatrix, self).__init__(*args, **kwargs)
-#
-#     def get_rows(self):
-#         self.csvfile = open(self.filepath, 'r')
-#         self.provenance = "CSV file at: %s" % self.filepath
-#         rdr = csv.reader(self.csvfile)
-#         rows = [r for r in rdr]
-#         return rows
-#
-# CSVActionMatrix.register()
-#
-#
-# class GoogleActionMatrix(ActionMatrix):
-#
-#     def __init__(self, credentials, url, *args, **kwargs):
-#         self.creds = credentials
-#         self.url = url
-#         self.provenance = "Pending Google SS at %s" % url
-#         super(GoogleActionMatrix, self).__init__(*args, **kwargs)
-#
-#     def get_rows(self):
-#         gc = gspread.login(self.creds.email, self.creds.password)
-#         ss = gc.open_by_url(self.url)
-#         self.provenance = "Google SS at %s" % self.url
-#         ws = ss.get_worksheet(1)
-#         return ws.get_all_values()
-#
-# GoogleActionMatrix.register()
 
 
 def matrixFactory(name, kwargs={}):

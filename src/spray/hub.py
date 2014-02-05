@@ -73,6 +73,7 @@ QUEUES['send'] = DummyQueue('send')
 QUEUES['sprayui'] = DummyQueue('sprayui')
 QUEUES['testSQS'] = SQSQueue('testSQS')
 QUEUES['testSQS-2'] = SQSQueue('testSQS-2')
+QUEUES['testSQS-3'] = SQSQueue('testSQS-3')
 QUEUES['mainSQS'] = SQSQueue('mainSQS')
 QUEUES['spray-preview'] = SQSQueue('spray-preview')
 
