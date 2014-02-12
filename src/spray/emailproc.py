@@ -4,7 +4,7 @@ import re
 from spray.utils import unescape
 from django.conf import settings
 from django.contrib.sites.models import Site
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 # TODO: refactor to settings
 BCC_ADDRESSES = set(['bcc-dump@sponsorcraft.com'])
@@ -80,6 +80,6 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
     params['text_body'] = body
     params['body'] = None  # MUST FORCE AWS TO DO MULTIPART
 
-    LOG.debug('mpart data %s' % data)
-    LOG.debug('mpart params %s' % params)
+    log.debug('mpart data %s' % data)
+    log.debug('mpart params %s' % params)
     return params

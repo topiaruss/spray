@@ -1,20 +1,20 @@
-from boto import ses
 from collections import defaultdict
+import logging
+import smtplib
+import time
+import boto
+from boto import ses
+from zope.interface import implements
+from dynamicsites.models import Site
+from django.template.loader import get_template
+from django.template import Context, TemplateDoesNotExist
+
 from spray import emailproc
 from spray import interface
 from spray import jinjaenv
-from spray import SPRAY_ROOT
 from spray.utils import aws_credentials
-from spray.utils import genfind
-from spray.utils import genopen
-from zope.interface import implements
-import boto
-import logging
-import os
-import smtplib
-import time
 
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 # TODO: retrofit a zope interface for Channel hierarchy and unify formal params
 
@@ -54,7 +54,7 @@ class SimpleTemplateRegistry(object):
         try:
             template = self.lookup(style, site)
         except KeyError:
-            LOG.exception("missing template. Fallback to default")
+            log.exception("missing template. Fallback to default")
             template = self.lookup('', site)
         return template.render(data)
 
@@ -205,7 +205,7 @@ class AmazonSESDestination(Destination):
         # clear any None values
         [overrides.pop(k) for k,v in overrides.items() if v is None]
         if any(overrides):
-            LOG.debug("overrides active. Old: %s, New: %s" % (kw, overrides))
+            log.debug("overrides active. Old: %s, New: %s" % (kw, overrides))
             hdr = """
             [[  ** JUST FOR DEBUG **
             Some of the original addresses were overridden.
