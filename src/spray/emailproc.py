@@ -25,6 +25,7 @@ def build_multipart_mail(env, ptenv, row, data, tempreg):
 
     # Lookup sender from our static settings map
     params['source'] = get_from_address(data)
+    data['from_address'] = params['source']
 
     toa = set(data.get('to', tuple()))
 
