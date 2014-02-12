@@ -59,47 +59,36 @@ class SimpleTemplateRegistry(object):
         return template.render(data)
 
 
-class FSBasedTemplateRegistry(SimpleTemplateRegistry):
-    """Any kind of file in the template directory will be included.
-    bz2 and tgz files will be decompresses before processing.
-    The filename up to the first '.' will be used as the style
-    default.html will be registered as the default file. It will be registered
-    under the name '' (an empty string).
-    """
-
+class DjangoTemplateRegistry(SimpleTemplateRegistry):
+    """ Load default.html for each site, assuming and hardcoding email for now """
     def __init__(self, **kw):
-        super(FSBasedTemplateRegistry, self).__init__(**kw)
-        try:
-            # this is becoming the directory for sites, which then
-            # contain the original templates, but the name does not change
-            # in the settings file, so I'm not going to rename it.
-            self.dirpath = kw['templates_dir']
-        except KeyError as e:
-            import sys
-            raise type(e), type(e)("Missing parameter to Constructor %s" % e),\
-               sys.exc_info()[2]
-        assert os.path.isdir(self.dirpath)
+        super(DjangoTemplateRegistry, self).__init__(**kw)
         self.update()
 
+    def _process_and_store(self, style, template, site=''):
+        self.reg[site][style] = template
+
+    def render(self, data, style='', site=None):
+        # Wrap data dict up in Context to make compatible with Django templating
+        try:
+            if 'site_id' in data:
+                data['site'] = Site.objects.get(id=data['site_id'])
+            return super(DjangoTemplateRegistry, self).render(Context(data), style, site)
+        except KeyError:
+            log.error('Could not get site with id %s.  Not rendering spray message.')
+
     def update(self):
-        names = [
-            o for o in os.listdir(self.dirpath) if
-            os.path.isdir(os.path.join(self.dirpath, o))]
-        for site_name in names:
-            site_path = os.path.join(self.dirpath, site_name)
-            templ_names = genfind.gen_find('*', site_path)
-            templ_files = genopen.gen_open(templ_names)
-            for f in templ_files:
-                style = os.path.basename(f.name).split('.')[0]
-                if style == 'default':
-                    style = ''
-                self._process_and_store(style, f.read(), site=site_name)
+        for site in Site.objects.all():
+            try:
+                t = get_template('spray/%s/email/%s' % (site.folder_name, 'default.html'))
+                self._process_and_store('', t, site=site.folder_name)
+            except TemplateDoesNotExist as e:
+                log.error('Could not load %s template: %s' % (site.folder_name, e))
 
 
 DEFAULT_TEMPLATE_REGISTRY = SimpleTemplateRegistry()
 SimpleTemplateRegistry.make_available('semail')
-templ_dir = os.path.join(SPRAY_ROOT, 'templates')
-FSBasedTemplateRegistry.make_available('email', templates_dir=templ_dir)
+DjangoTemplateRegistry.make_available('email')
 
 
 # == Destination registries == #
