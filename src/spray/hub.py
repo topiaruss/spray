@@ -5,6 +5,7 @@ from spray import interface
 from spray.utils import aws_credentials
 from zope.interface import implements
 import Queue
+import decimal
 
 
 # The singleton directory of ...
@@ -64,7 +65,14 @@ class SQSQueue(object):
     def event_factory(self, event_id, data={}):
         return event.SQSEvent(event_id=event_id, data=data)
 
+    def _expand_decimal_values(self, data):
+        """expand Decimals which otherwise cause msgpack exception"""
+        for k,v in  data.items():
+            if type(v) is decimal.Decimal:
+                data[k] = unicode(v)
+
     def create_and_send(self, event_id, data={}):
+        self._expand_decimal_values(data)
         ev = self.event_factory(event_id=event_id, data=data)
         self.put_event(ev)
 
